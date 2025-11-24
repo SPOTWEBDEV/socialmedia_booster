@@ -186,8 +186,7 @@
 }
 @media (max-width: 991.98px) {
   .app-header .horizontal-logo .header-logo img {
-    height: 1.5rem;
-    line-height: 1.5rem;
+    height: 100px
   }
 }
 [data-theme-mode=dark] .app-sidebar .main-sidebar-header .header-logo .desktop-dark {
@@ -9977,8 +9976,7 @@ caption {
 }
 .authentication .desktop-logo,
 .authentication .desktop-dark {
-  height: 1.5rem;
-  line-height: 1.5rem;
+  height: 130px
 }
 .coming-soon-main {
   position: relative;
@@ -12344,7 +12342,6 @@ h1.nft-title {
 }
 .app-header {
   max-width: 100%;
-  height: 4.25rem;
   z-index: 100;
   position: fixed;
   inset-block-start: 0;
@@ -15339,8 +15336,7 @@ code[class*=language-] {
 }
 @media (min-width: 992px) and (min-width: 992px) {
   [data-nav-layout=horizontal] .horizontal-logo .header-logo img {
-    height: 1.5rem;
-    line-height: 1.5rem;
+    height: 100px
   }
   [data-nav-layout=horizontal] .horizontal-logo .header-logo .desktop-logo {
     display: block;

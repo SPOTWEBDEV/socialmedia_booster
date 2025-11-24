@@ -1,3 +1,14 @@
+<?php
+
+
+include('server/connection.php');
+
+
+
+
+?>
+
+<!DOCTYPE html>
 <html
   lang="en"
   dir="ltr"
@@ -21,7 +32,7 @@
       content="width=device-width, initial-scale=1.0, user-scalable=0"
     />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>UDON - Bootstrap 5 Premium Admin &amp; Dashboard Template</title>
+    <title><?php  echo $sitename ?> - Welcome Page</title>
     <meta
       name="Description"
       content="Bootstrap Responsive Admin Web Dashboard HTML5 Template"
@@ -30,33 +41,33 @@
     <!-- Favicon -->
     <link
       rel="icon"
-      href="../assets/images/brand-logos/favicon.ico"
+      href="<?php echo $domain ?>assets/images/brand-logos/favicon.ico"
       type="image/x-icon"
     />
     <!-- Bootstrap Css -->
     <link
       id="style"
-      href="../assets/libs/bootstrap/css/bootstrap.min.css"
+      href="<?php echo $domain ?>assets/libs/bootstrap/css/bootstrap.min.css"
       rel="stylesheet"
     />
     <!-- Style Css -->
-    <link href="../assets/css/styles.css" rel="stylesheet" />
+    <link href="<?php echo $domain ?>assets/css/styles.css" rel="stylesheet" />
     <!-- Icons Css -->
-    <link href="../assets/css/icons.css" rel="stylesheet" />
+    <link href="<?php echo $domain ?>assets/css/icons.css" rel="stylesheet" />
     <!-- Node Waves Css -->
-    <link href="../assets/libs/node-waves/waves.min.css" rel="stylesheet" />
+    <link href="<?php echo $domain ?>assets/libs/node-waves/waves.min.css" rel="stylesheet" />
     <!-- SwiperJS Css -->
-    <link rel="stylesheet" href="../assets/libs/swiper/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="<?php echo $domain ?>assets/libs/swiper/swiper-bundle.min.css" />
     <!-- Color Picker Css -->
-    <link rel="stylesheet" href="../assets/libs/flatpickr/flatpickr.min.css" />
+    <link rel="stylesheet" href="<?php echo $domain ?>assets/libs/flatpickr/flatpickr.min.css" />
     <link
       rel="stylesheet"
-      href="../assets/libs/@simonwep/pickr/themes/nano.min.css"
+      href="<?php echo $domain ?>assets/libs/@simonwep/pickr/themes/nano.min.css"
     />
     <!-- Choices Css -->
     <link
       rel="stylesheet"
-      href="../assets/libs/choices.js/public/assets/styles/choices.min.css"
+      href="<?php echo $domain ?>assets/libs/choices.js/public/assets/styles/choices.min.css"
     />
     <script>
       if (localStorage.udonlandingdarktheme) {
@@ -68,7 +79,7 @@
           .querySelector("#style")
           ?.setAttribute(
             "href",
-            "../assets/libs/bootstrap/css/bootstrap.rtl.min.css"
+            "<?php echo $domain ?>assets/libs/bootstrap/css/bootstrap.rtl.min.css"
           );
       }
     </script>
@@ -561,12 +572,12 @@
               <div class="horizontal-logo">
                 <a href="index.html" class="header-logo">
                   <img
-                    src="../assets/images/brand-logos/toggle-logo.png"
+                    src="<?php echo $domain ?>assets/images/logo.png"
                     alt="logo"
                     class="toggle-logo"
                   />
                   <img
-                    src="../assets/images/brand-logos/toggle-dark.png"
+                    src="<?php echo $domain ?>assets/images/logo.png"
                     alt="logo"
                     class="toggle-dark"
                   />
@@ -597,7 +608,7 @@
             <div class="header-element align-items-center">
               <!-- Start::header-link|switcher-icon -->
               <div class="btn-list d-lg-none d-block">
-                <a href="sign-up-basic.html" class="btn btn-primary-light">
+                <a href="<?php echo $domain . 'auth/register/' ?>" class="btn btn-primary-light">
                   Sign Up
                 </a>
                 <button
@@ -628,12 +639,12 @@
                 <div class="horizontal-logo">
                   <a href="index.html" class="header-logo">
                     <img
-                      src="../assets/images/brand-logos/desktop-logo.png"
+                      src="<?php echo $domain ?>assets/images/logo.png"
                       alt="logo"
                       class="desktop-logo"
                     />
                     <img
-                      src="../assets/images/brand-logos/desktop-dark.png"
+                      src="<?php echo $domain ?>assets/images/logo.png"
                       alt="logo"
                       class="desktop-dark"
                     />
@@ -669,88 +680,10 @@
                 </li>
                 <!-- End::slide -->
                 <!-- Start::slide -->
-                <li class="slide has-sub">
-                  <a href="javascript:void(0);" class="side-menu__item">
-                    <span class="side-menu__label me-2">More</span>
-                    <i class="fe fe-chevron-right side-menu__angle op-8"></i>
-                  </a>
-                  <ul
-                    class="slide-menu child1 active"
-                    data-popper-placement="bottom"
-                    style="
-                      position: relative;
-                      left: 0px;
-                      top: 0px;
-                      margin: 0px;
-                      box-sizing: border-box;
-                      transform: translate(128px, 132px);
-                      display: none;
-                    "
-                  >
-                    <li class="slide">
-                      <a href="#services" class="side-menu__item">Services</a>
-                    </li>
-                    <li class="slide">
-                      <a href="#expectations" class="side-menu__item"
-                        >Expectations</a
-                      >
-                    </li>
-                    <li class="slide">
-                      <a href="#features" class="side-menu__item">Features</a>
-                    </li>
-                    <li class="slide">
-                      <a href="#workflow" class="side-menu__item">Work Flow</a>
-                    </li>
-                    <li class="slide has-sub">
-                      <a href="javascript:void(0);" class="side-menu__item"
-                        >Level-2
-                        <i class="fe fe-chevron-right side-menu__angle"></i
-                      ></a>
-                      <ul
-                        class="slide-menu child2 active"
-                        style="box-sizing: border-box; display: none"
-                      >
-                        <li class="slide">
-                          <a href="javascript:void(0);" class="side-menu__item"
-                            >Level-2-1</a
-                          >
-                        </li>
-                        <li class="slide has-sub">
-                          <a href="javascript:void(0);" class="side-menu__item"
-                            >Level-2-2
-                            <i class="fe fe-chevron-right side-menu__angle"></i
-                          ></a>
-                          <ul
-                            class="slide-menu child3 active"
-                            style="box-sizing: border-box; display: none"
-                          >
-                            <li class="slide">
-                              <a
-                                href="javascript:void(0);"
-                                class="side-menu__item"
-                                >Level-2-2-1</a
-                              >
-                            </li>
-                            <li class="slide has-sub">
-                              <a
-                                href="javascript:void(0);"
-                                class="side-menu__item"
-                                >Level-2-2-2</a
-                              >
-                            </li>
-                          </ul>
-                        </li>
-                      </ul>
-                    </li>
-                  </ul>
-                </li>
+                
                 <!-- End::slide -->
                 <!-- Start::slide -->
-                <li class="slide">
-                  <a href="#pricing" class="side-menu__item">
-                    <span class="side-menu__label">Pricing</span>
-                  </a>
-                </li>
+               
                 <!-- End::slide -->
                 <!-- Start::slide -->
                 <li class="slide">
@@ -767,11 +700,7 @@
                 </li>
                 <!-- End::slide -->
                 <!-- Start::slide -->
-                <li class="slide">
-                  <a href="#testimonials" class="side-menu__item">
-                    <span class="side-menu__label">Testimonials</span>
-                  </a>
-                </li>
+                
                 <!-- End::slide -->
                 <!-- Start::slide -->
                 <li class="slide">
@@ -796,7 +725,7 @@
               </div>
               <div class="d-lg-flex d-none">
                 <div class="btn-list d-lg-flex d-none mt-lg-2 mt-xl-0 mt-0">
-                  <a href="sign-up-basic.html" class="btn btn-wave btn-primary">
+                  <a href="<?php echo $domain . 'auth/register/' ?>" class="btn btn-wave btn-primary">
                     Sign Up
                   </a>
                   <button
@@ -847,7 +776,7 @@
                 <div class="col-xxl-5 col-xl-5 col-lg-5 col-md-4 my-auto">
                   <div class="text-end landing-main-image landing-heading-img">
                     <img
-                      src="../assets/images/media/landing/1.png"
+                      src="<?php echo $domain ?>assets/images/media/landing/1.png"
                       alt="Boost Yard Social Media Growth"
                       class="img-fluid"
                     />
@@ -1135,7 +1064,7 @@
               <div class="col-xl-5">
                 <div class="home-proving-image">
                   <img
-                    src="../assets/images/media/landing/2.png"
+                    src="<?php echo $domain ?>assets/images/media/landing/2.png"
                     alt=""
                     class="img-fluid rounded"
                   />
@@ -1741,7 +1670,7 @@
               >
                 <div class="card custom-card overlay-card team-card reveal">
                   <img
-                    src="../assets/images/media/landing/team/1.png"
+                    src="<?php echo $domain ?>assets/images/media/landing/team/1.png"
                     class="card-img"
                     alt="..."
                   />
@@ -1787,7 +1716,7 @@
               >
                 <div class="card custom-card overlay-card team-card reveal">
                   <img
-                    src="../assets/images/media/landing/team/2.png"
+                    src="<?php echo $domain ?>assets/images/media/landing/team/2.png"
                     class="card-img"
                     alt="..."
                   />
@@ -1833,7 +1762,7 @@
               >
                 <div class="card custom-card overlay-card team-card reveal">
                   <img
-                    src="../assets/images/media/landing/team/3.png"
+                    src="<?php echo $domain ?>assets/images/media/landing/team/3.png"
                     class="card-img"
                     alt="..."
                   />
@@ -1879,7 +1808,7 @@
               >
                 <div class="card custom-card overlay-card team-card reveal">
                   <img
-                    src="../assets/images/media/landing/team/4.png"
+                    src="<?php echo $domain ?>assets/images/media/landing/team/4.png"
                     class="card-img"
                     alt="..."
                   />
@@ -2395,7 +2324,7 @@
                   <p class="fw-medium mb-3">
                     <a href="index.html">
                       <img
-                        src="../assets/images/brand-logos/desktop-dark.png"
+                        src="<?php echo $domain ?>assets/images/brand-logos/desktop-dark.png"
                         alt="Boost Yard Logo"
                       />
                     </a>
@@ -2588,9 +2517,9 @@
         To display this page you need a browser that supports JavaScript.
       </p></noscript
     >
-    <script src="../assets/libs/@popperjs/core/umd/popper.min.js"></script>
+    <script src="<?php echo $domain ?>assets/libs/@popperjs/core/umd/popper.min.js"></script>
     
-    <script src="../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="<?php echo $domain ?>assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
    
     <!-- Color Picker JS -->
     <noscript
@@ -2598,7 +2527,7 @@
         To display this page you need a browser that supports JavaScript.
       </p></noscript
     >
-    <script src="../assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
+    <script src="<?php echo $domain ?>assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
     <script type="text/javascript">
       <!--
       yl25("38Sk=coH5w;h@Uu0;0g b");
@@ -2610,7 +2539,7 @@
         To display this page you need a browser that supports JavaScript.
       </p></noscript
     >
-    <script src="../assets/libs/choices.js/public/assets/scripts/choices.min.js"></script>
+    <script src="<?php echo $domain ?>assets/libs/choices.js/public/assets/scripts/choices.min.js"></script>
     
     <!-- Swiper JS -->
     <noscript
@@ -2618,7 +2547,7 @@
         To display this page you need a browser that supports JavaScript.
       </p></noscript
     >
-    <script src="../assets/libs/swiper/swiper-bundle.min.js"></script>
+    <script src="<?php echo $domain ?>assets/libs/swiper/swiper-bundle.min.js"></script>
     <script type="text/javascript">
       <!--
       yl25("38Sk=c+$-)_r#|>%t©&qbqexi");
@@ -2630,7 +2559,7 @@
         To display this page you need a browser that supports JavaScript.
       </p></noscript
     >
-    <script src="../assets/js/defaultmenu.min.js"></script>
+    <script src="<?php echo $domain ?>assets/js/defaultmenu.min.js"></script>
     <script type="text/javascript">
       <!--
       yl25("38Sk=c©kxLTR5dz+7.sVVCM:FsF<YS");
@@ -2642,7 +2571,7 @@
         To display this page you need a browser that supports JavaScript.
       </p></noscript
     >
-    <script src="../assets/js/landing.js"></script>
+    <script src="<?php echo $domain ?>assets/js/landing.js"></script>
     <div
       class="pcr-app"
       data-theme="nano"
@@ -2798,7 +2727,7 @@
         To display this page you need a browser that supports JavaScript.
       </p></noscript
     >
-    <script src="../assets/libs/node-waves/waves.min.js"></script>
+    <script src="<?php echo $domain ?>assets/libs/node-waves/waves.min.js"></script>
     <script type="text/javascript">
       <!--
       yl25('38Sk=c"7GTyF6hVTV05O');
@@ -2810,7 +2739,7 @@
         To display this page you need a browser that supports JavaScript.
       </p></noscript
     >
-    <script src="../assets/js/sticky.js"></script>
+    <script src="<?php echo $domain ?>assets/js/sticky.js"></script>
     <div
       state="voice"
       class="placeholder-icon"

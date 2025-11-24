@@ -1,3 +1,62 @@
+<?php
+
+include_once '../../server/connection.php';
+include_once '../../server/model.php';
+
+
+
+if (isset($_POST['create_account'])) {
+
+    $fullname = trim(mysqli_real_escape_string($connection, $_POST['fullname']));
+    $email = trim(mysqli_real_escape_string($connection, $_POST['email']));
+    $password = trim($_POST['password']);
+    $confirm_password = trim($_POST['confirm_password']);
+
+    // 1️⃣ Check empty fields
+    if (empty($fullname) || empty($email) || empty($password)) {
+        $toast = "Please fill all required fields.";
+    }
+    // 2️⃣ Validate password match
+    else if ($password !== $confirm_password) {
+        $toast = "Passwords do not match!";
+    }
+    // 3️⃣ Check if email exists
+    else {
+        $check = mysqli_query($connection, "SELECT * FROM users WHERE email='$email' LIMIT 1");
+
+        if (mysqli_num_rows($check) > 0) {
+            $toast = "This email is already registered!";
+        } else {
+
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+            $insert = mysqli_query($connection, "
+                INSERT INTO users (fullname, email, password)
+                VALUES ('$fullname', '$email', '$hashed_password')
+            ");
+
+            if ($insert) {
+                $toast = "Account created successfully!";
+                echo "<script>setTimeout(function(){ window.location.href = '../login'; }, 2000);</script>";
+            } else {
+                $toast = "Database error: " . mysqli_error($connection);
+            }
+        }
+    }
+
+    // 🌟 SHOW TOAST
+    if (!empty($toast)) {
+        echo showToast($toast);
+    }
+}
+
+?>
+
+
+
+
+
+
 <!DOCTYPE html>
 <html
   lang="en"
@@ -20,7 +79,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>UDON - Bootstrap 5 Premium Admin &amp; Dashboard Template</title>
+    <title><?php echo $sitename . ' - User Registeration ' ?></title>
     <meta
       name="Description"
       content="Bootstrap Responsive Admin Web Dashboard HTML5 Template"
@@ -33,158 +92,22 @@
     <!-- Favicon -->
     <link
       rel="icon"
-      href="../assets/images/brand-logos/favicon.ico"
+      href="<?php echo $domain ?>assets/images/brand-logos/favicon.ico"
       type="image/x-icon"
     />
     <!-- Main Theme Js -->
-    <script src="../assets/js/authentication-main.js"></script>
+    <script src="<?php echo $domain ?>assets/js/authentication-main.js"></script>
     <!-- Bootstrap Css -->
     <link
       id="style"
-      href="../assets/libs/bootstrap/css/bootstrap.min.css"
+      href="<?php echo $domain ?>assets/libs/bootstrap/css/bootstrap.min.css"
       rel="stylesheet"
     />
     <!-- Style Css -->
-    <link href="../assets/css/styles.css" rel="stylesheet" />
+    <link href="<?php echo $domain ?>assets/css/styles.css" rel="stylesheet" />
     <!-- Icons Css -->
-    <link href="../assets/css/icons.css" rel="stylesheet" />
-    <script type="text/javascript">
-      <!--
-      qmtz = document.all;
-      rkky = qmtz && !document.getElementById;
-      bttp = qmtz && document.getElementById;
-      aypp = !qmtz && document.getElementById;
-      rnw5 = document.layers;
-      function jwq4(vwa6) {
-        try {
-          if (rkky) alert("");
-        } catch (e) {}
-        if (vwa6 && vwa6.stopPropagation) vwa6.stopPropagation();
-        return false;
-      }
-      function aipv() {
-        if (event.button == 2 || event.button == 3) jwq4();
-      }
-      function nbdf(e) {
-        return e.which == 3 ? jwq4() : true;
-      }
-      function fhhc(ja0q) {
-        for (xigs = 0; xigs < ja0q.images.length; xigs++) {
-          ja0q.images[xigs].onmousedown = nbdf;
-        }
-        for (xigs = 0; xigs < ja0q.layers.length; xigs++) {
-          fhhc(ja0q.layers[xigs].document);
-        }
-      }
-      function aovc() {
-        if (rkky) {
-          for (xigs = 0; xigs < document.images.length; xigs++) {
-            document.images[xigs].onmousedown = aipv;
-          }
-        } else if (rnw5) {
-          fhhc(document);
-        }
-      }
-      function u4k2(e) {
-        if (
-          (bttp &&
-            event &&
-            event.srcElement &&
-            event.srcElement.tagName == "IMG") ||
-          (aypp && e && e.target && e.target.tagName == "IMG")
-        ) {
-          return jwq4();
-        }
-      }
-      if (bttp || aypp) {
-        document.oncontextmenu = u4k2;
-      } else if (rkky || rnw5) {
-        window.onload = aovc;
-      }
-      function d5ww(e) {
-        mw4f =
-          e && e.srcElement && e.srcElement != null ? e.srcElement.tagName : "";
-        if (mw4f != "INPUT" && mw4f != "TEXTAREA" && mw4f != "BUTTON") {
-          return false;
-        }
-      }
-      function wox8() {
-        return false;
-      }
-      if (qmtz) {
-        document.onselectstart = d5ww;
-        document.ondragstart = wox8;
-      }
-      if (document.addEventListener) {
-        document.addEventListener(
-          "copy",
-          function (e) {
-            mw4f = e.target.tagName;
-            if (mw4f != "INPUT" && mw4f != "TEXTAREA") {
-              e.preventDefault();
-            }
-          },
-          false
-        );
-        document.addEventListener(
-          "dragstart",
-          function (e) {
-            e.preventDefault();
-          },
-          false
-        );
-      }
-      function iu5w(evt) {
-        if (evt.preventDefault) {
-          evt.preventDefault();
-        } else {
-          evt.keyCode = 37;
-          evt.returnValue = false;
-        }
-      }
-      var fg20 = 1;
-      var v93m = 2;
-      var k0k9 = 4;
-      var qpcu = new Array();
-      qpcu.push(new Array(v93m, 65));
-      qpcu.push(new Array(v93m, 67));
-      qpcu.push(new Array(v93m, 80));
-      qpcu.push(new Array(v93m, 83));
-      qpcu.push(new Array(v93m, 85));
-      qpcu.push(new Array(fg20 | v93m, 73));
-      qpcu.push(new Array(fg20 | v93m, 74));
-      qpcu.push(new Array(fg20, 121));
-      qpcu.push(new Array(0, 123));
-      function mp8g(evt) {
-        evt = evt ? evt : event ? event : null;
-        if (evt) {
-          var zi80 = evt.keyCode;
-          if (!zi80 && evt.charCode) {
-            zi80 = String.fromCharCode(evt.charCode)
-              .toUpperCase()
-              .charCodeAt(0);
-          }
-          for (var tnjq = 0; tnjq < qpcu.length; tnjq++) {
-            if (
-              evt.shiftKey == ((qpcu[tnjq][0] & fg20) == fg20) &&
-              (evt.ctrlKey | evt.metaKey) == ((qpcu[tnjq][0] & v93m) == v93m) &&
-              evt.altKey == ((qpcu[tnjq][0] & k0k9) == k0k9) &&
-              (zi80 == qpcu[tnjq][1] || qpcu[tnjq][1] == 0)
-            ) {
-              iu5w(evt);
-              break;
-            }
-          }
-        }
-      }
-      if (document.addEventListener) {
-        document.addEventListener("keydown", mp8g, true);
-        document.addEventListener("keypress", mp8g, true);
-      } else if (document.attachEvent) {
-        document.attachEvent("onkeydown", mp8g);
-      }
-      -->
-    </script>
+    <link href="<?php echo $domain ?>assets/css/icons.css" rel="stylesheet" />
+
     <meta http-equiv="imagetoolbar" content="no" />
     <style type="text/css">
       <!-- input,textarea{-webkit-touch-callout:default;-webkit-user-select:auto;-khtml-user-select:auto;-moz-user-select:text;-ms-user-select:text;user-select:text} *{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:-moz-none;-ms-user-select:none;user-select:none} -->
@@ -1140,16 +1063,16 @@
       >
         <div class="col-xxl-4 col-xl-5 col-lg-5 col-md-6 col-sm-8 col-12">
           <div class="card custom-card my-4">
-            <div class="card-body p-5">
+            <form method="POST" class="card-body p-5">
               <div class="mb-3 d-flex justify-content-center">
-                <a href="index.html">
+                <a href="#">
                   <img
-                    src="../assets/images/brand-logos/desktop-logo.png"
+                    src="<?php echo $domain ?>assets/images/logo.png"
                     alt="logo"
                     class="desktop-logo"
                   />
                   <img
-                    src="../assets/images/brand-logos/desktop-dark.png"
+                    src="<?php echo $domain ?>assets/images/logo.png"
                     alt="logo"
                     class="desktop-dark"
                   />
@@ -1168,7 +1091,20 @@
                     type="text"
                     class="form-control form-control-lg"
                     id="signup-firstname"
+                    name="fullname"
                     placeholder="full name"
+                  />
+                </div>
+                <div class="col-xl-12">
+                  <label for="signup-firstname" class="form-label text-default"
+                    >Email<sup>*</sup></label
+                  >
+                  <input
+                    type="text"
+                    class="form-control form-control-lg"
+                    id="signup-email"
+                    name="email"
+                    placeholder="Email"
                   />
                 </div>
                 <div class="col-xl-12">
@@ -1181,6 +1117,7 @@
                       class="form-control form-control-lg"
                       id="signup-password"
                       placeholder="password"
+                       name="password"
                     />
                     <a
                       href="javascript:void(0);"
@@ -1203,6 +1140,7 @@
                       class="form-control form-control-lg"
                       id="signup-confirmpassword"
                       placeholder="confirm password"
+                      name="confirm_password"
                     />
                     <a
                       href="javascript:void(0);"
@@ -1234,15 +1172,15 @@
               </div>
               
               <div class="d-grid mt-4">
-                <button class="btn btn-lg btn-primary">Create Account</button>
+                <button name="create_account" type="submit" class="btn btn-lg btn-primary">Create Account</button>
               </div>
               <div class="text-center">
                 <p class="text-muted mt-3 mb-0">
                   Already have an account?
-                  <a href="sign-in-basic.html" class="text-primary">Sign In</a>
+                  <a href="../login/" class="text-primary">Sign In</a>
                 </p>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       </div>
@@ -1253,19 +1191,15 @@
         To display this page you need a browser that supports JavaScript.
       </p></noscript
     >
-    <script src="../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript">
-      <!--
-      v6x0("7jy/Pcyv/ux:O-er6V6N<C*0#dj");
-      -->
-    </script>
+    <script src="<?php echo $domain ?>assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <
     <!-- Show Password JS -->
     <noscript
       ><p>
         To display this page you need a browser that supports JavaScript.
       </p></noscript
     >
-    <script src="../assets/js/show-password.js"></script>
+    <script src="<?php echo $domain ?>assets/js/show-password.js"></script>
     <div
       state="voice"
       class="placeholder-icon"
