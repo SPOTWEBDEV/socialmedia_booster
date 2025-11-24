@@ -20,6 +20,8 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_id'] != "") {
         while ($row = mysqli_fetch_assoc($select)) {
             $email            = sanitize($row['email']);
             $fullname         = sanitize($row['fullname']);
+            $status           = sanitize($row['status']);
+            $status_message   = sanitize($row['status_message'], '');
         }
     } else {
         echo "<script>window.open('$url', '_self');</script>";
