@@ -1,3 +1,3 @@
 <footer class="footer mt-auto py-3 bg-white text-center">
-      <div class="container"> <span class="text-muted"> Copyright © <span id="year">2025</span> <a href="javascript:void(0);" class="text-dark fw-medium"><?php echo $sitename ?></a>. Designed and Develop <span class="bi bi-heart-fill text-danger"></span> by <a href="javascript:void(0);"> <span class="fw-medium text-primary text-decoration-underline">SPOTWEB TECH></span> </a> All rights reserved </span> </div>
+      <div class="container"> <span class="text-muted"> Copyright © <span id="year">2025</span> <a href="javascript:void(0);" class="text-dark fw-medium"><?php echo $sitename ?></a> All rights reserved . Designed and Develop  by <a href="javascript:void(0);"> <span class="fw-medium text-primary text-decoration-underline">SPOTWEB TECH</span> </a>  </span> </div>
     </footer> <!-- Footer End --> <!-- Responsive Header Search Modal Start -->

@@ -6,6 +6,32 @@ include_once '../../server/auth/user.php';
 
 
 
+if (isset($_POST['send_message'])) {
+
+  $message = trim(mysqli_real_escape_string($connection, $_POST['message']));
+
+  // Validate fields
+  if (empty($message)) {
+    showToast("All fields are required!");
+  } else {
+
+    // Insert into DB
+    $insert = "
+            INSERT INTO support_messages (user,message)
+            VALUES ('$id','$message')
+        ";
+
+    if (mysqli_query($connection, $insert)) {
+      showToast("Your message has been sent successfully!");
+    } else {
+      showToast("Database error: " . mysqli_error($connection));
+    }
+  }
+}
+
+
+
+
 ?>
 
 
@@ -17,7 +43,7 @@ include_once '../../server/auth/user.php';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>UDON - Bootstrap 5 Premium Admin &amp; Dashboard Template</title>
+  <title><?php echo $sitename . ' -- Support Page ' ?></title>
   <meta name="Description" content="Bootstrap Responsive Admin Web Dashboard HTML5 Template">
   <meta name="Author" content="Spruko Technologies Private Limited">
   <meta name="keywords" content="admin dashboard,admin template,admin panel,bootstrap admin dashboard,html template,sales dashboard,dashboard,template dashboard,admin,html and css template,admin dashboard bootstrap,personal dashboard,crypto dashboard,stocks dashboard,admin panel template"> <!-- Favicon -->
@@ -345,11 +371,11 @@ include_once '../../server/auth/user.php';
 </head>
 
 <body class="customer-dashboard" cz-shortcut-listen="true">
- 
+
   <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
   <div class="page"> <!-- app-header -->
-    <?php  include_once '../../components/client/navbar.php'  ?>
-  
+    <?php include_once '../../components/client/navbar.php'  ?>
+
     <div class="main-content app-content">
       <div class="container-fluid"> <!-- Start::page-header -->
         <div class="d-flex align-items-center justify-content-between my-4 page-header-breadcrumb flex-wrap gap-2">
@@ -357,19 +383,69 @@ include_once '../../server/auth/user.php';
             <p class="fw-medium fs-20 mb-0">Welcome, <?php echo $fullname ?></p>
             <p class="fs-13 text-muted mb-0">Let's check your today's stats!</p>
           </div>
-          <div class="btn-list"> <button class="btn btn-primary-light btn-wave waves-effect waves-light"> <i class="bx bx-crown align-middle"></i> Plan Upgrade </button> <button class="btn btn-secondary-light btn-wave waves-effect waves-light"> <i class="ri-upload-cloud-line align-middle"></i> Export Report </button> </div>
+          <div class="btn-list"> <a href="./list/">
+              <button class="btn btn-primary-light btn-wave waves-effect waves-light">
+                <i class="bx bx-ticket align-middle me-1"></i>
+                <i class="bx bx-show align-middle me-1"></i>
+                View Ticket
+              </button>
+            </a> </div>
         </div> <!-- End::page-header --> <!-- Start::row-1 -->
         <div class="row">
-           <?php  include_once '../../components/client/sidenavbar.php' ?>
+          <?php include_once '../../components/client/sidenavbar.php' ?>
           <div class="col-xl-9">
             <div class="row">
-              <div class="col-xl-12"> <div class="card custom-card"> <div class="card-header"> <div class="card-title"> Still Have Questions ? <span class="subtitle fw-normal text-muted d-block fs-12"> You can post your questions here,our support team is always active. </span> </div> </div> <div class="card-body"> <div class="row gy-3"> <div class="col-xl-6"> <label for="user-name" class="form-label">Your Name</label> <input type="text" class="form-control form-control-light" id="user-name" placeholder="Enter Your Name"> </div> <div class="col-xl-6"> <label for="user-email" class="form-label">Email Id</label> <input type="text" class="form-control form-control-light" id="user-email" placeholder="Enter Email"> </div> <div class="col-xl-12"> <label for="text-area" class="form-label">Textarea</label> <textarea class="form-control form-control-light" placeholder="Enter your question here" id="text-area" rows="2"></textarea> </div> </div> </div> <div class="card-footer"> <button class="btn btn-primary btn-wave float-end waves-effect waves-light">Send</button> </div> </div> </div>
+              <div class="col-xl-12">
+                <form method="POST" class="card custom-card">
+                  <div class="card-header">
+                    <div class="card-title">
+                      Still Have Questions ?
+                      <span class="subtitle fw-normal text-muted d-block fs-12">
+                        You can post your questions here, our support team is always active.
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="card-body">
+                    <div class="row gy-3">
+
+                      <div class="col-xl-6">
+                        <label for="user-name" class="form-label">Your Name</label>
+                        <input type="text" class="form-control form-control-light"
+                          id="user-name" name="name" value="<?php echo $fullname ?>" readonly>
+                      </div>
+
+                      <div class="col-xl-6">
+                        <label for="user-email" class="form-label">Email</label>
+                        <input type="text" class="form-control form-control-light"
+                          id="user-email" name="email" value="<?php echo $email ?>" readonly>
+                      </div>
+
+                      <div class="col-xl-12">
+                        <label for="text-area" class="form-label">Textarea</label>
+                        <textarea class="form-control form-control-light"
+                          placeholder="Enter your question here"
+                          id="text-area" name="message" rows="2"></textarea>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  <div class="card-footer">
+                    <button type="submit" name="send_message"
+                      class="btn btn-primary btn-wave float-end waves-effect waves-light">
+                      Send
+                    </button>
+                  </div>
+                </form>
+
+              </div>
             </div>
           </div>
         </div> <!-- End::row-1 -->
       </div>
     </div> <!-- End::app-content --> <!-- Footer Start -->
-    <?php  include_once '../../components/footer.php' ?>
+    <?php include_once '../../components/footer.php' ?>
     <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
