@@ -1,8 +1,8 @@
 <?php
 
-include_once '../../server/connection.php';
-include_once '../../server/model.php';
-include_once '../../server/auth/user.php';
+include_once '../../../server/connection.php';
+include_once '../../../server/model.php';
+include_once '../../../server/auth/user.php';
 
 
 
@@ -17,7 +17,7 @@ include_once '../../server/auth/user.php';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title><title><?php echo $sitename . ' -- Order Page ' ?></title></title>
+ <title><?php echo $sitename . ' -- Order Page ' ?></title>
   <meta name="Description" content="Bootstrap Responsive Admin Web Dashboard HTML5 Template">
   <meta name="Author" content="Spruko Technologies Private Limited">
   <meta name="keywords" content="admin dashboard,admin template,admin panel,bootstrap admin dashboard,html template,sales dashboard,dashboard,template dashboard,admin,html and css template,admin dashboard bootstrap,personal dashboard,crypto dashboard,stocks dashboard,admin panel template"> <!-- Favicon -->
@@ -349,7 +349,7 @@ include_once '../../server/auth/user.php';
   <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
   <div class="page"> <!-- app-header -->
    
-   <?php  include_once '../../components/client/navbar.php'  ?>
+   <?php  include_once '../../../components/client/navbar.php'  ?>
   
     <div class="main-content app-content">
       <div class="container-fluid"> <!-- Start::page-header -->
@@ -361,7 +361,7 @@ include_once '../../server/auth/user.php';
           <div class="btn-list"> <button class="btn btn-primary-light btn-wave waves-effect waves-light"> <i class="bx bx-crown align-middle"></i> Plan Upgrade </button> <button class="btn btn-secondary-light btn-wave waves-effect waves-light"> <i class="ri-upload-cloud-line align-middle"></i> Export Report </button> </div>
         </div> <!-- End::page-header --> <!-- Start::row-1 -->
         <div class="row">
-           <?php  include_once '../../components/client/sidenavbar.php' ?>
+           <?php  include_once '../../../components/client/sidenavbar.php' ?>
           <div class="col-xl-9">
             <div class="row">
               
@@ -457,7 +457,7 @@ include_once '../../server/auth/user.php';
         </div> <!-- End::row-1 -->
       </div>
     </div> <!-- End::app-content --> <!-- Footer Start -->
-    <?php  include_once '../../components/footer.php' ?>
+    <?php  include_once '../../../components/footer.php' ?>
     <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">

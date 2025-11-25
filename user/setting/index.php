@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($stmt->execute()) {
             showToast("Security settings saved successfully.");
         } else {
-            showToast("Error saving settings: " . $stmt->error);
+            showToast("Error saving settings: " . $stmt->error , "error");
         }
     }
 
@@ -46,11 +46,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $hashed_password = $row['password'] ?? '';
 
         if (!password_verify($current, $hashed_password)) {
-            showToast("Current password is incorrect.");
+            showToast("Current password is incorrect." , "error");
         } elseif ($new !== $confirm) {
             showToast("New password and confirmation do not match.");
         } elseif (!preg_match('/^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/', $new)) {
-            showToast("Password must be 8+ characters, include 1 capital and 1 special character.");
+            showToast("Password must be 8+ characters, include 1 capital and 1 special character." , "error");
         } else {
             $new_hashed = password_hash($new, PASSWORD_DEFAULT);
             $stmt = $connection->prepare("UPDATE users SET password = ? WHERE id = ?");
@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt->execute()) {
                 showToast("Password changed successfully.");
             } else {
-                showToast("Error updating password.");
+                showToast("Error updating password." , "error");
             }
         }
     }
