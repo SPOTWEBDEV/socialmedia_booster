@@ -41,11 +41,11 @@ if ($isLocalhost) {
     }
 } else {
     // Online (Live Server)
-    $domain = "http://upsnlt.com/";
+    $domain = "https://boostyard.com.yahhh44.com/";
 
-    define("USER", "bencofas_shipping");
-    define("PASSWORD", "bencofas_shipping");
-    define("DATABASE", "bencofas_shipping");
+    define("USER", "yahhhcom_boostyard");
+    define("PASSWORD", "yahhhcom_boostyard");
+    define("DATABASE", "yahhhcom_boostyard");
 
     // Database connection
     $connection = mysqli_connect(HOST, USER, PASSWORD, DATABASE);
