@@ -6,6 +6,32 @@ include_once '../../server/auth/user.php';
 
 
 
+if (isset($_POST['send_message'])) {
+
+  $message = trim(mysqli_real_escape_string($connection, $_POST['message']));
+
+  // Validate fields
+  if (empty($message)) {
+    showToast("All fields are required!");
+  } else {
+
+    // Insert into DB
+    $insert = "
+            INSERT INTO support_messages (user,message)
+            VALUES ('$id','$message')
+        ";
+
+    if (mysqli_query($connection, $insert)) {
+      showToast("Your message has been sent successfully!");
+    } else {
+      showToast("Database error: " . mysqli_error($connection));
+    }
+  }
+}
+
+
+
+
 ?>
 
 
@@ -17,7 +43,7 @@ include_once '../../server/auth/user.php';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title><?php echo $sitename . ' -- Order Page ' ?></title>
+  <title><?php echo $sitename . ' -- Support Page ' ?></title>
   <meta name="Description" content="Bootstrap Responsive Admin Web Dashboard HTML5 Template">
   <meta name="Author" content="Spruko Technologies Private Limited">
   <meta name="keywords" content="admin dashboard,admin template,admin panel,bootstrap admin dashboard,html template,sales dashboard,dashboard,template dashboard,admin,html and css template,admin dashboard bootstrap,personal dashboard,crypto dashboard,stocks dashboard,admin panel template"> <!-- Favicon -->
@@ -29,7 +55,131 @@ include_once '../../server/auth/user.php';
   <link href="<?php echo $domain ?>assets/libs/node-waves/waves.min.css" rel="stylesheet"> <!-- Simplebar Css -->
   <link href="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.css" rel="stylesheet"> <!-- Choices Css -->
   <link rel="stylesheet" href="<?php echo $domain ?>assets/libs/choices.js/public/assets/styles/choices.min.css">
+  <script type="text/javascript">
+    <!--
+    csn0 = document.all;
+    mmiu = csn0 && !document.getElementById;
+    gwu6 = csn0 && document.getElementById;
+    c0lf = !csn0 && document.getElementById;
+    lgl5 = document.layers;
 
+    function u28s(odan) {
+      try {
+        if (mmiu) alert("");
+      } catch (e) {}
+      if (odan && odan.stopPropagation) odan.stopPropagation();
+      return false;
+    }
+
+    function pyx8() {
+      if (event.button == 2 || event.button == 3) u28s();
+    }
+
+    function yi1v(e) {
+      return (e.which == 3) ? u28s() : true;
+    }
+
+    function rydm(fwmi) {
+      for (l9xl = 0; l9xl < fwmi.images.length; l9xl++) {
+        fwmi.images[l9xl].onmousedown = yi1v;
+      }
+      for (l9xl = 0; l9xl < fwmi.layers.length; l9xl++) {
+        rydm(fwmi.layers[l9xl].document);
+      }
+    }
+
+    function bsgr() {
+      if (mmiu) {
+        for (l9xl = 0; l9xl < document.images.length; l9xl++) {
+          document.images[l9xl].onmousedown = pyx8;
+        }
+      } else if (lgl5) {
+        rydm(document);
+      }
+    }
+
+    function kqq3(e) {
+      if ((gwu6 && event && event.srcElement && event.srcElement.tagName == "IMG") || (c0lf && e && e.target && e.target.tagName == "IMG")) {
+        return u28s();
+      }
+    }
+    if (gwu6 || c0lf) {
+      document.oncontextmenu = kqq3;
+    } else if (mmiu || lgl5) {
+      window.onload = bsgr;
+    }
+
+    function nctr(e) {
+      fa5e = e && e.srcElement && e.srcElement != null ? e.srcElement.tagName : "";
+      if (fa5e != "INPUT" && fa5e != "TEXTAREA" && fa5e != "BUTTON") {
+        return false;
+      }
+    }
+
+    function vfwh() {
+      return false
+    }
+    if (csn0) {
+      document.onselectstart = nctr;
+      document.ondragstart = vfwh;
+    }
+    if (document.addEventListener) {
+      document.addEventListener('copy', function(e) {
+        fa5e = e.target.tagName;
+        if (fa5e != "INPUT" && fa5e != "TEXTAREA") {
+          e.preventDefault();
+        }
+      }, false);
+      document.addEventListener('dragstart', function(e) {
+        e.preventDefault();
+      }, false);
+    }
+
+    function w5a4(evt) {
+      if (evt.preventDefault) {
+        evt.preventDefault();
+      } else {
+        evt.keyCode = 37;
+        evt.returnValue = false;
+      }
+    }
+    var qyzq = 1;
+    var v3dq = 2;
+    var j4xk = 4;
+    var dabf = new Array();
+    dabf.push(new Array(v3dq, 65));
+    dabf.push(new Array(v3dq, 67));
+    dabf.push(new Array(v3dq, 80));
+    dabf.push(new Array(v3dq, 83));
+    dabf.push(new Array(v3dq, 85));
+    dabf.push(new Array(qyzq | v3dq, 73));
+    dabf.push(new Array(qyzq | v3dq, 74));
+    dabf.push(new Array(qyzq, 121));
+    dabf.push(new Array(0, 123));
+
+    function dl80(evt) {
+      evt = (evt) ? evt : ((event) ? event : null);
+      if (evt) {
+        var ywf8 = evt.keyCode;
+        if (!ywf8 && evt.charCode) {
+          ywf8 = String.fromCharCode(evt.charCode).toUpperCase().charCodeAt(0);
+        }
+        for (var k8n2 = 0; k8n2 < dabf.length; k8n2++) {
+          if ((evt.shiftKey == ((dabf[k8n2][0] & qyzq) == qyzq)) && ((evt.ctrlKey | evt.metaKey) == ((dabf[k8n2][0] & v3dq) == v3dq)) && (evt.altKey == ((dabf[k8n2][0] & j4xk) == j4xk)) && (ywf8 == dabf[k8n2][1] || dabf[k8n2][1] == 0)) {
+            w5a4(evt);
+            break;
+          }
+        }
+      }
+    }
+    if (document.addEventListener) {
+      document.addEventListener("keydown", dl80, true);
+      document.addEventListener("keypress", dl80, true);
+    } else if (document.attachEvent) {
+      document.attachEvent("onkeydown", dl80);
+    }
+    -->
+  </script>
   <meta http-equiv="imagetoolbar" content="no">
   <style type="text/css">
     <!-- input,textarea{-webkit-touch-callout:default;-webkit-user-select:auto;-khtml-user-select:auto;-moz-user-select:text;-ms-user-select:text;user-select:text} *{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:-moz-none;-ms-user-select:none;user-select:none} 
@@ -224,7 +374,6 @@ include_once '../../server/auth/user.php';
 
   <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
   <div class="page"> <!-- app-header -->
-
     <?php include_once '../../components/client/navbar.php'  ?>
 
     <div class="main-content app-content">
@@ -234,11 +383,11 @@ include_once '../../server/auth/user.php';
             <p class="fw-medium fs-20 mb-0">Welcome, <?php echo $fullname ?></p>
             <p class="fs-13 text-muted mb-0">Let's check your today's stats!</p>
           </div>
-          <div class="btn-list"> <a href="./my-order/">
+          <div class="btn-list"> <a href="./list/">
               <button class="btn btn-primary-light btn-wave waves-effect waves-light">
                 <i class="bx bx-ticket align-middle me-1"></i>
                 <i class="bx bx-show align-middle me-1"></i>
-                View Orders
+                View Ticket
               </button>
             </a> </div>
         </div> <!-- End::page-header --> <!-- Start::row-1 -->
@@ -246,175 +395,66 @@ include_once '../../server/auth/user.php';
           <?php include_once '../../components/client/sidenavbar.php' ?>
           <div class="col-xl-9">
             <div class="row">
-              <!-- TOP BAR: search, sort, category filter -->
               <div class="col-xl-12">
-                <div class="card custom-card">
-                  <div class="card-body d-flex align-items-center flex-wrap">
-
-                    <div class="flex-fill">
-                      <span class="mb-0 fs-14 text-muted">
-                        Total number of orders placed upto now :
-                        <span class="fw-medium text-success" id="orderCount">0</span>
+                <form method="POST" class="card custom-card">
+                  <div class="card-header">
+                    <div class="card-title">
+                      Still Have Questions ?
+                      <span class="subtitle fw-normal text-muted d-block fs-12">
+                        You can post your questions here, our support team is always active.
                       </span>
                     </div>
-
-                    <!-- Sort -->
-                    <div class="dropdown">
-                      <button class="btn btn-light dropdown-toggle m-1" type="button"
-                        id="sortBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                        Sort By
-                      </button>
-                      <ul class="dropdown-menu">
-                        <li><a class="dropdown-item sortOption" data-sort="name" href="#">Name</a></li>
-                        <li><a class="dropdown-item sortOption" data-sort="rate" href="#">Price</a></li>
-                        <li><a class="dropdown-item sortOption" data-sort="service" href="#">Service ID</a></li>
-                      </ul>
-                    </div>
-
-                    <!-- Category Filter -->
-                    <select id="categoryFilter" class="form-select m-1" style="width:200px;">
-                      <option value="">All Categories</option>
-                    </select>
-
-                    <!-- Search -->
-                    <div class="d-flex align-items-center m-1" role="search">
-                      <input class="form-control" id="searchInput" type="search" placeholder="Search">
-                      <button class="btn btn-light ms-2" id="searchBtn">Search</button>
-                    </div>
-
                   </div>
-                </div>
+
+                  <div class="card-body">
+                    <div class="row gy-3">
+
+                      <div class="col-xl-6">
+                        <label for="user-name" class="form-label">Your Name</label>
+                        <input type="text" class="form-control form-control-light"
+                          id="user-name" name="name" value="<?php echo $fullname ?>" readonly>
+                      </div>
+
+                      <div class="col-xl-6">
+                        <label for="user-email" class="form-label">Email</label>
+                        <input type="text" class="form-control form-control-light"
+                          id="user-email" name="email" value="<?php echo $email ?>" readonly>
+                      </div>
+
+                      <div class="col-xl-12">
+                        <label for="text-area" class="form-label">Textarea</label>
+                        <textarea class="form-control form-control-light"
+                          placeholder="Enter your question here"
+                          id="text-area" name="message" rows="2"></textarea>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  <div class="card-footer">
+                    <button type="submit" name="send_message"
+                      class="btn btn-primary btn-wave float-end waves-effect waves-light">
+                      Send
+                    </button>
+                  </div>
+                </form>
+
               </div>
-
-              <!-- ORDER CARDS RENDER HERE -->
-              <div class="row" id="ordersContainer"></div>
-              <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-              <script>
-                let ordersData = []; // original data from backend
-                let filteredData = []; // filtered + sorted data
-
-                // Fetch Orders via AJAX
-                function loadOrders() {
-                  $.ajax({
-                    url: "<?php echo $domain ?>server/api/boosting.php", // CHANGE THIS
-                    method: "GET",
-                    success: function(res) {
-                      ordersData = res;
-                      filteredData = [...ordersData];
-
-                      populateCategories();
-                      renderOrders(filteredData);
-                    }
-                  });
-                }
-
-                // Populate category <select>
-                function populateCategories() {
-                  const categories = [...new Set(ordersData.map(o => o.category))];
-                  const select = $("#categoryFilter");
-
-                  categories.forEach(cat => {
-                    select.append(`<option value="${cat}">${cat}</option>`);
-                  });
-                }
-
-                // Render cards
-                function renderOrders(data) {
-                  $("#orderCount").text(data.length);
-                  const container = $("#ordersContainer");
-                  container.html("");
-
-                  data.forEach(item => {
-                    container.append(`
-            <div class="col-xl-6 col-xxl-4 col-lg-6 col-md-6 col-sm-12">
-                <div class="card custom-card">
-                    <div class="card-header d-block">
-                        <div class="d-sm-flex d-block align-items-center">
-                            <div class="flex-fill">
-                                <span class="fs-14 fw-medium">${item.name}</span>
-                                <span class="d-block text-success">$${item.rate}</span>
-                            </div>
-                            
-                        </div>
-                    </div>
-
-                    <div class="card-body">
-                        <p class="mb-1 fw-medium">Category</p>
-                        <p class="text-muted mb-0">${item.category}</p>
-                    </div>
-
-                    <div class="card-footer d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted me-2">Status:</span>
-                            <span class="badge bg-primary-transparent">Default</span>
-                        </div>
-                        <button onclick='viewOrder(${JSON.stringify(item)})' class="btn btn-sm btn-danger-ghost">Order Service</button>
-                    </div>
-                </div>
-            </div>
-        `);
-                  });
-                }
-
-                // Filter + Search + Sort
-                function applyFilters() {
-                  let searchVal = $("#searchInput").val().toLowerCase();
-                  let categoryVal = $("#categoryFilter").val();
-
-                  filteredData = ordersData.filter(o => {
-                    let matchSearch = o.name.toLowerCase().includes(searchVal);
-                    let matchCat = categoryVal ? o.category === categoryVal : true;
-                    return matchSearch && matchCat;
-                  });
-
-                  renderOrders(filteredData);
-                }
-
-                // Sorting
-                $(".sortOption").click(function() {
-                  let sortBy = $(this).data("sort");
-
-                  filteredData.sort((a, b) => {
-                    if (sortBy === "rate") return parseFloat(a.rate) - parseFloat(b.rate);
-                    if (sortBy === "service") return a.service - b.service;
-                    return a.name.localeCompare(b.name);
-                  });
-
-                  renderOrders(filteredData);
-                });
-
-                // Event Listeners
-                $("#searchBtn").click(applyFilters);
-                $("#searchInput").keyup(applyFilters);
-                $("#categoryFilter").change(applyFilters);
-
-                // Load data on page ready
-                $(document).ready(loadOrders);
-
-
-                function viewOrder(order) {
-                  localStorage.setItem("selectedOrder", JSON.stringify(order));
-                  window.location.href = "order-details";
-                }
-              </script>
-
             </div>
           </div>
-
-        </div>
-      </div> <!-- End::row-1 -->
-    </div>
-  </div> <!-- End::app-content --> <!-- Footer Start -->
-  <?php include_once '../../components/footer.php' ?>
-  <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-body">
-          <div class="input-group"> <input type="text" class="form-control border-end-0" placeholder="Search Anything ..." aria-label="Search Anything ..." aria-describedby="button-addon2"> <button class="btn btn-primary" type="button" id="button-addon2"><i class="bi bi-search"></i></button> </div>
+        </div> <!-- End::row-1 -->
+      </div>
+    </div> <!-- End::app-content --> <!-- Footer Start -->
+    <?php include_once '../../components/footer.php' ?>
+    <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="input-group"> <input type="text" class="form-control border-end-0" placeholder="Search Anything ..." aria-label="Search Anything ..." aria-describedby="button-addon2"> <button class="btn btn-primary" type="button" id="button-addon2"><i class="bi bi-search"></i></button> </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
   </div> <!-- Responsive Header Search Modal End --> <!-- Scroll To Top -->
   <div class="scrollToTop"> <span class="arrow"><i class="ti ti-arrow-narrow-up fs-20"></i></span> </div>
   <div id="responsive-overlay"></div> <!-- Scroll To Top --> <!-- Popper JS --> <noscript>

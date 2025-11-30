@@ -4,6 +4,82 @@ include_once '../../server/connection.php';
 include_once '../../server/model.php';
 include_once '../../server/auth/user.php';
 
+$user_id = $_SESSION['user_id']; // replace with actual logged-in user ID
+
+// ===================== HANDLE FORM SUBMISSION =====================
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // --- 1️⃣ Save Security Settings ---
+    if (isset($_POST['save_settings'])) {
+        $two_step = isset($_POST['two_step']) ? 1 : 0;
+        $auth_type = $_POST['auth_type'] ?? 'pin';
+        $recovery_email = isset($_POST['recovery_email']) ? 1 : 0;
+
+        $sql = "INSERT INTO user_security_settings (user_id, two_step, auth_type, recovery_email)
+                VALUES (?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                two_step = VALUES(two_step),
+                auth_type = VALUES(auth_type),
+                recovery_email = VALUES(recovery_email)";
+        $stmt = $connection->prepare($sql);
+        $stmt->bind_param("issi", $user_id, $two_step, $auth_type, $recovery_email);
+
+        if ($stmt->execute()) {
+            showToast("Security settings saved successfully.");
+        } else {
+            showToast("Error saving settings: " . $stmt->error , "error");
+        }
+    }
+
+    // --- 2️⃣ Change Password ---
+    if (isset($_POST['change_password'])) {
+        $current = $_POST['current_password'] ?? '';
+        $new = $_POST['new_password'] ?? '';
+        $confirm = $_POST['confirm_password'] ?? '';
+
+        // Get current hashed password
+        $stmt = $connection->prepare("SELECT password FROM users WHERE id = ?");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $hashed_password = $row['password'] ?? '';
+
+        if (!password_verify($current, $hashed_password)) {
+            showToast("Current password is incorrect." , "error");
+        } elseif ($new !== $confirm) {
+            showToast("New password and confirmation do not match.");
+        } elseif (!preg_match('/^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/', $new)) {
+            showToast("Password must be 8+ characters, include 1 capital and 1 special character." , "error");
+        } else {
+            $new_hashed = password_hash($new, PASSWORD_DEFAULT);
+            $stmt = $connection->prepare("UPDATE users SET password = ? WHERE id = ?");
+            $stmt->bind_param("si", $new_hashed, $user_id);
+            if ($stmt->execute()) {
+                showToast("Password changed successfully.");
+            } else {
+                showToast("Error updating password." , "error");
+            }
+        }
+    }
+}
+
+// ===================== FETCH CURRENT SETTINGS =====================
+$settings = [
+    'two_step' => 0,
+    'auth_type' => 'pin',
+    'recovery_email' => 1
+];
+
+$stmt = $connection->prepare("SELECT two_step, auth_type, recovery_email FROM user_security_settings WHERE user_id = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($row = $result->fetch_assoc()) {
+    $settings = $row;
+}
+
+
 
 
 ?>
@@ -17,7 +93,7 @@ include_once '../../server/auth/user.php';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title><?php echo $sitename . ' -- Order Page ' ?></title>
+  <title><?php echo $sitename . ' -- Setting ' ?></title>
   <meta name="Description" content="Bootstrap Responsive Admin Web Dashboard HTML5 Template">
   <meta name="Author" content="Spruko Technologies Private Limited">
   <meta name="keywords" content="admin dashboard,admin template,admin panel,bootstrap admin dashboard,html template,sales dashboard,dashboard,template dashboard,admin,html and css template,admin dashboard bootstrap,personal dashboard,crypto dashboard,stocks dashboard,admin panel template"> <!-- Favicon -->
@@ -218,13 +294,13 @@ include_once '../../server/auth/user.php';
       font-style: normal;
     }
   </style>
+
 </head>
 
 <body class="customer-dashboard" cz-shortcut-listen="true">
 
   <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
   <div class="page"> <!-- app-header -->
-
     <?php include_once '../../components/client/navbar.php'  ?>
 
     <div class="main-content app-content">
@@ -234,207 +310,131 @@ include_once '../../server/auth/user.php';
             <p class="fw-medium fs-20 mb-0">Welcome, <?php echo $fullname ?></p>
             <p class="fs-13 text-muted mb-0">Let's check your today's stats!</p>
           </div>
-          <div class="btn-list"> <a href="./my-order/">
-              <button class="btn btn-primary-light btn-wave waves-effect waves-light">
-                <i class="bx bx-ticket align-middle me-1"></i>
-                <i class="bx bx-show align-middle me-1"></i>
-                View Orders
-              </button>
-            </a> </div>
+          <div class="btn-list"> <button class="btn btn-primary-light btn-wave waves-effect waves-light"> <i class="bx bx-crown align-middle"></i> Plan Upgrade </button> <button class="btn btn-secondary-light btn-wave waves-effect waves-light"> <i class="ri-upload-cloud-line align-middle"></i> Export Report </button> </div>
         </div> <!-- End::page-header --> <!-- Start::row-1 -->
         <div class="row">
           <?php include_once '../../components/client/sidenavbar.php' ?>
           <div class="col-xl-9">
             <div class="row">
-              <!-- TOP BAR: search, sort, category filter -->
-              <div class="col-xl-12">
-                <div class="card custom-card">
-                  <div class="card-body d-flex align-items-center flex-wrap">
+              <div class="col-12">
+                <form method="POST">
 
-                    <div class="flex-fill">
-                      <span class="mb-0 fs-14 text-muted">
-                        Total number of orders placed upto now :
-                        <span class="fw-medium text-success" id="orderCount">0</span>
-                      </span>
-                    </div>
-
-                    <!-- Sort -->
-                    <div class="dropdown">
-                      <button class="btn btn-light dropdown-toggle m-1" type="button"
-                        id="sortBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                        Sort By
-                      </button>
-                      <ul class="dropdown-menu">
-                        <li><a class="dropdown-item sortOption" data-sort="name" href="#">Name</a></li>
-                        <li><a class="dropdown-item sortOption" data-sort="rate" href="#">Price</a></li>
-                        <li><a class="dropdown-item sortOption" data-sort="service" href="#">Service ID</a></li>
-                      </ul>
-                    </div>
-
-                    <!-- Category Filter -->
-                    <select id="categoryFilter" class="form-select m-1" style="width:200px;">
-                      <option value="">All Categories</option>
-                    </select>
-
-                    <!-- Search -->
-                    <div class="d-flex align-items-center m-1" role="search">
-                      <input class="form-control" id="searchInput" type="search" placeholder="Search">
-                      <button class="btn btn-light ms-2" id="searchBtn">Search</button>
-                    </div>
-
-                  </div>
-                </div>
-              </div>
-
-              <!-- ORDER CARDS RENDER HERE -->
-              <div class="row" id="ordersContainer"></div>
-              <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-              <script>
-                let ordersData = []; // original data from backend
-                let filteredData = []; // filtered + sorted data
-
-                // Fetch Orders via AJAX
-                function loadOrders() {
-                  $.ajax({
-                    url: "<?php echo $domain ?>server/api/boosting.php", // CHANGE THIS
-                    method: "GET",
-                    success: function(res) {
-                      ordersData = res;
-                      filteredData = [...ordersData];
-
-                      populateCategories();
-                      renderOrders(filteredData);
-                    }
-                  });
-                }
-
-                // Populate category <select>
-                function populateCategories() {
-                  const categories = [...new Set(ordersData.map(o => o.category))];
-                  const select = $("#categoryFilter");
-
-                  categories.forEach(cat => {
-                    select.append(`<option value="${cat}">${cat}</option>`);
-                  });
-                }
-
-                // Render cards
-                function renderOrders(data) {
-                  $("#orderCount").text(data.length);
-                  const container = $("#ordersContainer");
-                  container.html("");
-
-                  data.forEach(item => {
-                    container.append(`
-            <div class="col-xl-6 col-xxl-4 col-lg-6 col-md-6 col-sm-12">
-                <div class="card custom-card">
-                    <div class="card-header d-block">
-                        <div class="d-sm-flex d-block align-items-center">
-                            <div class="flex-fill">
-                                <span class="fs-14 fw-medium">${item.name}</span>
-                                <span class="d-block text-success">$${item.rate}</span>
-                            </div>
-                            
-                        </div>
-                    </div>
-
+                  <div class="card custom-card shadow-none mb-0 border">
                     <div class="card-body">
-                        <p class="mb-1 fw-medium">Category</p>
-                        <p class="text-muted mb-0">${item.category}</p>
-                    </div>
 
-                    <div class="card-footer d-flex align-items-center justify-content-between">
+                      <!-- Two Step Verification -->
+                      <div class="d-sm-flex d-block align-items-top mb-4 justify-content-between">
                         <div>
-                            <span class="text-muted me-2">Status:</span>
-                            <span class="badge bg-primary-transparent">Default</span>
+                          <p class="fs-14 mb-1 fw-medium">Two Step Verification</p>
+                          <p class="fs-12 text-muted mb-0">
+                            Two-step verification adds an extra layer of security.
+                          </p>
                         </div>
-                        <button onclick='viewOrder(${JSON.stringify(item)})' class="btn btn-sm btn-danger-ghost">Order Service</button>
+                        <div class="custom-toggle-switch ms-sm-2 ms-0">
+                          <input id="two-step" type="checkbox" name="two_step" <?= ($settings['two_step'] ?? 0) ? 'checked' : '' ?>>
+                          <label for="two-step" class="label-primary mb-1"></label>
+                        </div>
+                      </div>
+
+                      <!-- Authentication TYPE -->
+                      <div class="d-sm-flex d-block align-items-top mb-4 justify-content-between">
+                        <div class="mb-sm-0 mb-2">
+                          <p class="fs-14 mb-2 fw-medium">Authentication Method</p>
+
+                          <div class="btn-group" role="group" aria-label="Auth Type">
+                            <input type="radio" class="btn-check" name="auth_type" value="pin" id="btnPin" <?= ($settings['auth_type'] ?? 'pin') === 'pin' ? 'checked' : '' ?>>
+                            <label class="btn btn-outline-primary" for="btnPin">
+                              <i class="ri-lock-unlock-line me-1 align-middle"></i>Pin
+                            </label>
+
+                            <input type="radio" class="btn-check" name="auth_type" value="password" id="btnPass" <?= ($settings['auth_type'] ?? '') === 'password' ? 'checked' : '' ?>>
+                            <label class="btn btn-outline-primary" for="btnPass">
+                              <i class="ri-lock-password-line me-1 align-middle"></i>Password
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Recovery Email -->
+                      <div class="d-sm-flex d-block align-items-top mb-4 justify-content-between">
+                        <div>
+                          <p class="fs-14 mb-1 fw-medium">Recovery Email</p>
+                          <p class="fs-12 text-muted mb-0">
+                            If disabled, you will <b class="text-danger">NOT</b> receive recovery emails.
+                          </p>
+                        </div>
+                        <div class="custom-toggle-switch ms-sm-2 ms-0">
+                          <input id="recovery-mail" type="checkbox" name="recovery_email" <?= ($settings['recovery_email'] ?? 1) ? 'checked' : '' ?>>
+                          <label for="recovery-mail" class="label-primary mb-1"></label>
+                        </div>
+                      </div>
+
+                      <!-- Save Security Settings Button -->
+                      <button type="submit" name="save_settings" class="btn btn-primary mb-4">Save Settings</button>
+
+                      <!-- Reset Password -->
+                      <div class="d-sm-flex d-block align-items-top mb-4 justify-content-between">
+                        <div>
+                          <p class="fs-14 mb-1 fw-medium">Reset Password</p>
+                          <p class="fs-12 text-muted">
+                            Password must include: <b class="text-success">8+ characters</b>,
+                            <b class="text-success">1 capital letter</b>,
+                            <b class="text-success">1 special character</b>.
+                          </p>
+
+                          <div class="mb-2">
+                            <label class="form-label">Current Password</label>
+                            <input type="password" class="form-control" name="current_password">
+                          </div>
+
+                          <div class="mb-2">
+                            <label class="form-label">New Password</label>
+                            <input type="password" class="form-control" name="new_password">
+                          </div>
+
+                          <div class="mb-0">
+                            <label class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" name="confirm_password">
+                          </div>
+                           <!-- Change Password Button -->
+                        <button type="submit" name="change_password" class="btn btn-success mt-3">Change Password</button>
+                        </div>
+
+                       
+                      </div>
+
                     </div>
-                </div>
+                  </div>
+
+                </form>
+
+              </div>
             </div>
-        `);
-                  });
-                }
 
-                // Filter + Search + Sort
-                function applyFilters() {
-                  let searchVal = $("#searchInput").val().toLowerCase();
-                  let categoryVal = $("#categoryFilter").val();
-
-                  filteredData = ordersData.filter(o => {
-                    let matchSearch = o.name.toLowerCase().includes(searchVal);
-                    let matchCat = categoryVal ? o.category === categoryVal : true;
-                    return matchSearch && matchCat;
-                  });
-
-                  renderOrders(filteredData);
-                }
-
-                // Sorting
-                $(".sortOption").click(function() {
-                  let sortBy = $(this).data("sort");
-
-                  filteredData.sort((a, b) => {
-                    if (sortBy === "rate") return parseFloat(a.rate) - parseFloat(b.rate);
-                    if (sortBy === "service") return a.service - b.service;
-                    return a.name.localeCompare(b.name);
-                  });
-
-                  renderOrders(filteredData);
-                });
-
-                // Event Listeners
-                $("#searchBtn").click(applyFilters);
-                $("#searchInput").keyup(applyFilters);
-                $("#categoryFilter").change(applyFilters);
-
-                // Load data on page ready
-                $(document).ready(loadOrders);
-
-
-                function viewOrder(order) {
-                  localStorage.setItem("selectedOrder", JSON.stringify(order));
-                  window.location.href = "order-details";
-                }
-              </script>
-
-            </div>
           </div>
-
-        </div>
-      </div> <!-- End::row-1 -->
-    </div>
-  </div> <!-- End::app-content --> <!-- Footer Start -->
-  <?php include_once '../../components/footer.php' ?>
-  <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-body">
-          <div class="input-group"> <input type="text" class="form-control border-end-0" placeholder="Search Anything ..." aria-label="Search Anything ..." aria-describedby="button-addon2"> <button class="btn btn-primary" type="button" id="button-addon2"><i class="bi bi-search"></i></button> </div>
+        </div> <!-- End::row-1 -->
+      </div>
+    </div> <!-- End::app-content --> <!-- Footer Start -->
+    <?php include_once '../../components/footer.php' ?>
+    <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="input-group"> <input type="text" class="form-control border-end-0" placeholder="Search Anything ..." aria-label="Search Anything ..." aria-describedby="button-addon2"> <button class="btn btn-primary" type="button" id="button-addon2"><i class="bi bi-search"></i></button> </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
   </div> <!-- Responsive Header Search Modal End --> <!-- Scroll To Top -->
   <div class="scrollToTop"> <span class="arrow"><i class="ti ti-arrow-narrow-up fs-20"></i></span> </div>
   <div id="responsive-overlay"></div> <!-- Scroll To Top --> <!-- Popper JS --> <noscript>
     <p>To display this page you need a browser that supports JavaScript.</p>
   </noscript>
   <script src="<?php echo $domain ?>assets/libs/@popperjs/core/umd/popper.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#hb6|n!WYr<2:hB/z4o");
-    -->
-  </script> <!-- Bootstrap JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#h aj©l4#h(vLUaTK;YSv");
-    -->
-  </script> <!-- Defaultmenu JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
+
+  <p>To display this page you need a browser that supports JavaScript.</p>
   </noscript>
   <script src="<?php echo $domain ?>assets/js/defaultmenu.min.js"></script>
   <script type="text/javascript">
@@ -445,29 +445,11 @@ include_once '../../server/auth/user.php';
     <p>To display this page you need a browser that supports JavaScript.</p>
   </noscript>
   <script src="<?php echo $domain ?>assets/libs/node-waves/waves.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#he-ce\"R©qa2,v\"g");
-    -->
-  </script> <!-- Sticky JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/js/sticky.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#heJ:Cc-Or|2:hB/z4o");
-    -->
-  </script> <!-- Simplebar JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":");
-    -->
-  </script> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/js/simplebar.js"></script>
   <script type="text/javascript">
     <!--
@@ -477,13 +459,7 @@ include_once '../../server/auth/user.php';
     <p>To display this page you need a browser that supports JavaScript.</p>
   </noscript>
   <script src="<?php echo $domain ?>assets/libs/apexcharts/apexcharts.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#hGXPn91©qa2,v\"g");
-    -->
-  </script> <!-- Custom JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/js/customer-custom.js"></script>
   <div state="voice" class="placeholder-icon" id="tts-placeholder-icon" title="Click to show TTS button" style="background-image: url(&quot;chrome-extension://cpnomhnclohkhnikegipapofcjihldck/data/content_script/icons/voice.png&quot;);"><canvas width="36" height="36" class="loading-circle" id="text-to-speech-loader" style="display: none;"></canvas></div><svg id="SvgjsSvg1001" width="2" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev" style="overflow: hidden; top: -100%; left: -100%; position: absolute; opacity: 0;">
     <defs id="SvgjsDefs1002"></defs>

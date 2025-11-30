@@ -399,7 +399,7 @@ include_once '../../server/auth/user.php';
               <div class="col-xl-12">
                 <div class="card custom-card overflow-hidden">
                   <div class="card-header justify-content-between">
-                    <div class="card-title"> Recent Orders </div> <a href="javascript:void(0);" class="btn btn-primary-light">View All Orders<i class="ri-arrow-right-s-line ms-1 align-middle"></i></a>
+                    <div class="card-title"> Recent Orders </div> <a href="<?php echo $domain . 'user/order/my-order/' ?>" class="btn btn-primary-light">View All Orders<i class="ri-arrow-right-s-line ms-1 align-middle"></i></a>
                   </div>
                   <div class="card-body px-0 pt-2 pb-0">
                     <div class="table-responsive">

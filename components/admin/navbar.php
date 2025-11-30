@@ -112,7 +112,7 @@
           <li class="header-element"> <!-- Start::header-link|dropdown-toggle --> <a href="javascript:void(0);" class="header-link dropdown-toggle" id="mainHeaderProfile" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
               <div class="d-flex align-items-center">
                 <div class="me-sm-2 me-0"> <img src="<?php echo $domain ?>assets/images/faces/9.jpg" alt="img" class="avatar avatar-sm avatar-rounded"> </div>
-                <div class="d-xl-block d-none lh-1"> <span class="fw-medium lh-1"><?php echo $fullname ?></span> </div>
+                <div class="d-xl-block d-none lh-1"> <span class="fw-medium lh-1">Mr. Stark</span> </div>
               </div>
             </a> <!-- End::header-link|dropdown-toggle -->
             <ul class="main-header-dropdown dropdown-menu pt-0 overflow-hidden header-profile-dropdown dropdown-menu-end" aria-labelledby="mainHeaderProfile">

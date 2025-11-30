@@ -17,7 +17,7 @@ include_once '../../../server/auth/user.php';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title><?php echo $sitename . ' -- Order Page ' ?></title>
+ <title><?php echo $sitename . ' -- Order Page ' ?></title>
   <meta name="Description" content="Bootstrap Responsive Admin Web Dashboard HTML5 Template">
   <meta name="Author" content="Spruko Technologies Private Limited">
   <meta name="keywords" content="admin dashboard,admin template,admin panel,bootstrap admin dashboard,html template,sales dashboard,dashboard,template dashboard,admin,html and css template,admin dashboard bootstrap,personal dashboard,crypto dashboard,stocks dashboard,admin panel template"> <!-- Favicon -->
@@ -345,12 +345,12 @@ include_once '../../../server/auth/user.php';
 </head>
 
 <body class="customer-dashboard" cz-shortcut-listen="true">
-
+ 
   <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
   <div class="page"> <!-- app-header -->
-
-    <?php include_once '../../../components/client/navbar.php'  ?>
-
+   
+   <?php  include_once '../../../components/client/navbar.php'  ?>
+  
     <div class="main-content app-content">
       <div class="container-fluid"> <!-- Start::page-header -->
         <div class="d-flex align-items-center justify-content-between my-4 page-header-breadcrumb flex-wrap gap-2">
@@ -358,19 +358,14 @@ include_once '../../../server/auth/user.php';
             <p class="fw-medium fs-20 mb-0">Welcome, <?php echo $fullname ?></p>
             <p class="fs-13 text-muted mb-0">Let's check your today's stats!</p>
           </div>
-          <div class="btn-list"> 
-             <a href="../"><button class="btn btn-primary-light btn-wave waves-effect waves-light">
-                            <i class="bx bx-plus-circle align-middle me-1"></i>
-                            Create Order
-                        </button></a>
-          </div>
+          <div class="btn-list"> <button class="btn btn-primary-light btn-wave waves-effect waves-light"> <i class="bx bx-crown align-middle"></i> Plan Upgrade </button> <button class="btn btn-secondary-light btn-wave waves-effect waves-light"> <i class="ri-upload-cloud-line align-middle"></i> Export Report </button> </div>
         </div> <!-- End::page-header --> <!-- Start::row-1 -->
         <div class="row">
-          <?php include_once '../../../components/client/sidenavbar.php' ?>
+           <?php  include_once '../../../components/client/sidenavbar.php' ?>
           <div class="col-xl-9">
             <div class="row">
-
-
+              
+              
               <div class="col-xl-12">
                 <div class="card custom-card overflow-hidden">
                   <div class="card-header justify-content-between">
@@ -462,7 +457,7 @@ include_once '../../../server/auth/user.php';
         </div> <!-- End::row-1 -->
       </div>
     </div> <!-- End::app-content --> <!-- Footer Start -->
-    <?php include_once '../../../components/footer.php' ?>
+    <?php  include_once '../../../components/footer.php' ?>
     <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">

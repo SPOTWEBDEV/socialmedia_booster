@@ -1,8 +1,7 @@
 <?php
 
-include_once '../../../server/connection.php';
-include_once '../../../server/model.php';
-include_once '../../../server/auth/user.php';
+include_once '../../server/connection.php';
+include_once '../../server/model.php';
 
 
 
@@ -345,32 +344,57 @@ include_once '../../../server/auth/user.php';
 </head>
 
 <body class="customer-dashboard" cz-shortcut-listen="true">
-
+ 
   <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
   <div class="page"> <!-- app-header -->
-
-    <?php include_once '../../../components/client/navbar.php'  ?>
-
+     <?php  include_once '../../components/admin/navbar.php'  ?>
+  
     <div class="main-content app-content">
       <div class="container-fluid"> <!-- Start::page-header -->
         <div class="d-flex align-items-center justify-content-between my-4 page-header-breadcrumb flex-wrap gap-2">
-          <div>
-            <p class="fw-medium fs-20 mb-0">Welcome, <?php echo $fullname ?></p>
-            <p class="fs-13 text-muted mb-0">Let's check your today's stats!</p>
-          </div>
-          <div class="btn-list"> 
-             <a href="../"><button class="btn btn-primary-light btn-wave waves-effect waves-light">
-                            <i class="bx bx-plus-circle align-middle me-1"></i>
-                            Create Order
-                        </button></a>
-          </div>
+          
+         
         </div> <!-- End::page-header --> <!-- Start::row-1 -->
         <div class="row">
-          <?php include_once '../../../components/client/sidenavbar.php' ?>
+           <?php  include_once '../../components/admin/sidenavbar.php' ?>
           <div class="col-xl-9">
             <div class="row">
-
-
+              <div class="col-xl-4">
+                <div class="card custom-card"> <a href="javascript:void(0);" class="stretched-link"></a>
+                  <div class="card-body">
+                    <div class="d-flex align-items-center gap-3">
+                      <div> <span class="avatar avatar-xl bg-primary-transparent"> <i class="bi bi-bag-check fs-4"></i> </span> </div>
+                      <div> <span class="d-block text-muted mb-1">Total Orders</span>
+                        <h4 class="mb-0">32,189</h4>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-xl-4">
+                <div class="card custom-card">
+                  <div class="card-body"> <a href="javascript:void(0);" class="stretched-link"></a>
+                    <div class="d-flex align-items-center gap-3">
+                      <div> <span class="avatar avatar-xl bg-success-transparent"> <i class="bi bi-currency-dollar fs-4"></i> </span> </div>
+                      <div> <span class="d-block text-muted mb-1">Total Amount Spent</span>
+                        <h4 class="mb-0">$15,289k</h4>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-xl-4">
+                <div class="card custom-card">
+                  <div class="card-body"> <a href="javascript:void(0);" class="stretched-link"></a>
+                    <div class="d-flex align-items-center gap-3">
+                      <div> <span class="avatar avatar-xl bg-info-transparent"> <i class="bi bi-ticket-perforated fs-4"></i> </span> </div>
+                      <div> <span class="d-block text-muted mb-1">Total Tickets</span>
+                        <h4 class="mb-0">283</h4>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div class="col-xl-12">
                 <div class="card custom-card overflow-hidden">
                   <div class="card-header justify-content-between">
@@ -462,7 +486,7 @@ include_once '../../../server/auth/user.php';
         </div> <!-- End::row-1 -->
       </div>
     </div> <!-- End::app-content --> <!-- Footer Start -->
-    <?php include_once '../../../components/footer.php' ?>
+    <?php  include_once '../../components/footer.php' ?>
     <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">

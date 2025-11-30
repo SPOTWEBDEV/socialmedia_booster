@@ -1,8 +1,8 @@
 <?php
 
-include_once '../../../server/connection.php';
-include_once '../../../server/model.php';
-include_once '../../../server/auth/user.php';
+include_once '../../server/connection.php';
+include_once '../../server/model.php';
+include_once '../../server/auth/user.php';
 
 
 
@@ -349,7 +349,7 @@ include_once '../../../server/auth/user.php';
   <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
   <div class="page"> <!-- app-header -->
 
-    <?php include_once '../../../components/client/navbar.php'  ?>
+    <?php include_once '../../components/client/navbar.php'  ?>
 
     <div class="main-content app-content">
       <div class="container-fluid"> <!-- Start::page-header -->
@@ -358,111 +358,129 @@ include_once '../../../server/auth/user.php';
             <p class="fw-medium fs-20 mb-0">Welcome, <?php echo $fullname ?></p>
             <p class="fs-13 text-muted mb-0">Let's check your today's stats!</p>
           </div>
-          <div class="btn-list"> 
-             <a href="../"><button class="btn btn-primary-light btn-wave waves-effect waves-light">
-                            <i class="bx bx-plus-circle align-middle me-1"></i>
-                            Create Order
-                        </button></a>
-          </div>
+          <div class="btn-list"> <button class="btn btn-primary-light btn-wave waves-effect waves-light"> <i class="bx bx-crown align-middle"></i> Plan Upgrade </button> <button class="btn btn-secondary-light btn-wave waves-effect waves-light"> <i class="ri-upload-cloud-line align-middle"></i> Export Report </button> </div>
         </div> <!-- End::page-header --> <!-- Start::row-1 -->
         <div class="row">
-          <?php include_once '../../../components/client/sidenavbar.php' ?>
+          <?php include_once '../../components/client/sidenavbar.php' ?>
           <div class="col-xl-9">
             <div class="row">
-
-
               <div class="col-xl-12">
-                <div class="card custom-card overflow-hidden">
-                  <div class="card-header justify-content-between">
-                    <div class="card-title"> Recent Orders </div> <a href="javascript:void(0);" class="btn btn-primary-light">View All Orders<i class="ri-arrow-right-s-line ms-1 align-middle"></i></a>
-                  </div>
-                  <div class="card-body px-0 pt-2 pb-0">
-                    <div class="table-responsive">
-                      <table class="table text-nowrap">
-                        <thead>
-                          <tr>
-                            <th scope="col">Order ID</th>
-                            <th scope="col">Payment Mode</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Amount Paid</th>
-                            <th scope="col">Action</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td><a href="javascript:void(0);" class="text-primary text-decoration-underline">#ORD789ABC</a></td>
-                            <td>
-                              <div> <span class="d-block mb-1">Rupay Card ****2783</span> <span class="d-block fs-12 text-muted fw-normal">Card Payment</span> </div>
-                            </td>
-                            <td><span class="badge bg-success-transparent">Completed</span></td>
-                            <td>
-                              <div> <span class="d-block mb-1">$1,234.78</span> <span class="d-block fs-12 text-muted fw-normal">Nov 22,2023</span> </div>
-                            </td>
-                            <td> <button class="btn btn-sm btn-ghost-light text-default border btn-wave waves-effect waves-light"> <i class="fe fe-eye text-muted align-middle me-1"></i> View </button> </td>
-                          </tr>
-                          <tr>
-                            <td><a href="javascript:void(0);" class="text-primary text-decoration-underline">#ORD253SFW</a></td>
-                            <td>
-                              <div> <span class="d-block mb-1 fw-normal">Digital Wallet</span> <span class="d-block fs-12 text-muted">Online Transaction</span> </div>
-                            </td>
-                            <td><span class="badge bg-warning-transparent">Pending</span></td>
-                            <td>
-                              <div> <span class="d-block mb-1">$623.99</span> <span class="d-block fs-12 text-muted fw-normal">Nov 22,2023</span> </div>
-                            </td>
-                            <td> <button class="btn btn-sm btn-ghost-light text-default border btn-wave waves-effect waves-light"> <i class="fe fe-eye text-muted align-middle me-1"></i> View </button> </td>
-                          </tr>
-                          <tr>
-                            <td><a href="javascript:void(0);" class="text-primary text-decoration-underline">#ORD356SKF</a></td>
-                            <td>
-                              <div> <span class="d-block mb-1 fw-normal">Mastro Card ****7893</span> <span class="d-block fs-12 text-muted">Card Payment</span> </div>
-                            </td>
-                            <td><span class="badge bg-danger-transparent">Cancelled</span></td>
-                            <td>
-                              <div> <span class="d-block mb-1">$1,324</span> <span class="d-block fs-12 text-muted fw-normal">Nov 21,2023</span> </div>
-                            </td>
-                            <td> <button class="btn btn-sm btn-ghost-light text-default border btn-wave waves-effect waves-light"> <i class="fe fe-eye text-muted align-middle me-1"></i> View </button> </td>
-                          </tr>
-                          <tr>
-                            <td><a href="javascript:void(0);" class="text-primary text-decoration-underline">#ORD363ESD</a></td>
-                            <td>
-                              <div> <span class="d-block mb-1 fw-normal">Cash On Delivery</span> <span class="d-block fs-12 text-muted">Pay On Delivery</span> </div>
-                            </td>
-                            <td><span class="badge bg-success-transparent">Completed</span></td>
-                            <td>
-                              <div> <span class="d-block mb-1">$1,123.49</span> <span class="d-block fs-12 text-muted fw-normal">Nov 20,2023</span> </div>
-                            </td>
-                            <td> <button class="btn btn-sm btn-ghost-light text-default border btn-wave waves-effect waves-light"> <i class="fe fe-eye text-muted align-middle me-1"></i> View </button> </td>
-                          </tr>
-                          <tr>
-                            <td class="border-bottom-0"> <a href="javascript:void(0);" class="text-primary text-decoration-underline">#ORD253KSE</a> </td>
-                            <td class="border-bottom-0">
-                              <div> <span class="d-block mb-1 fw-normal">Visa Card ****2563</span> <span class="d-block fs-12 text-muted">Card Payment</span> </div>
-                            </td>
-                            <td class="border-bottom-0"><span class="badge bg-success-transparent">Completed</span></td>
-                            <td class="border-bottom-0">
-                              <div> <span class="d-block mb-1">$1,289</span> <span class="d-block fs-12 text-muted fw-normal">Nov 18,2023</span> </div>
-                            </td>
-                            <td class="border-bottom-0"> <button class="btn btn-sm btn-ghost-light text-default border btn-wave waves-effect waves-light"> <i class="fe fe-eye text-muted align-middle me-1"></i> View </button> </td>
-                          </tr>
-                        </tbody>
-                      </table>
+                <div class="card custom-card">
+                  <div class="card-body d-flex align-items-center flex-wrap">
+                    <div class="flex-fill"> <span class="mb-0 fs-14 text-muted">Total number of orders placed upto now : <span class="fw-medium text-success">28</span></span> </div>
+                    <div class="dropdown"> <button class="btn btn-light dropdown-toggle m-1" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"> Sort By </button>
+                      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                        <li><a class="dropdown-item" href="javascript:void(0);">Date</a></li>
+                        <li><a class="dropdown-item" href="javascript:void(0);">Price</a></li>
+                        <li><a class="dropdown-item" href="javascript:void(0);">Category</a></li>
+                      </ul>
                     </div>
+                    <div class="d-flex align-items-center m-1" role="search"> <input class="form-control" type="search" placeholder="Search" aria-label="Search"> <button class="btn btn-light ms-2" type="submit">Search</button> </div>
                   </div>
                 </div>
               </div>
-              <ul class="pagination justify-content-end">
-                <li class="page-item disabled"> <a class="page-link">Previous</a> </li>
-                <li class="page-item"><a class="page-link" href="javascript:void(0);">1</a></li>
-                <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li>
-                <li class="page-item"><a class="page-link" href="javascript:void(0);">3</a></li>
-                <li class="page-item"> <a class="page-link" href="javascript:void(0);">Next</a> </li>
-              </ul>
+              <div class="col-xl-6 col-xxl-4 col-lg-6 col-md-6 col-sm-12">
+                <div class="card custom-card">
+                  <div class="card-header d-block">
+                    <div class="d-sm-flex d-block align-items-center">
+                      <div class="me-2"> <span class="avatar bg-light avatar-md mb-1"> <img src="../assets/images/ecommerce/jpg/1.jpg" alt=""> </span> </div>
+                      <div class="flex-fill"> <a href="javascript:void(0)"> <span class="fs-14 fw-medium">Odemi A2 (Sea Green, 2GB RAM, 64GB Storage)</span> </a> <span class="d-block text-success">$1,299</span> </div>
+                      <div class="text-sm-center"> <span class="fs-14 fw-medium">Order Id :</span> <span class="d-sm-block">#SPK-1203</span> </div>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="orders-delivery-address">
+                        <p class="mb-1 fw-medium">Delivery Address</p>
+                        <p class="text-muted mb-0"> mig-1-11,monroe street,georgetown,Washington D.C </p>
+                      </div>
+                      <div class="ms-auto text-end"> <span class="text-muted fs-12">Delivered By</span> <span class="d-block text-primary fw-medium">13-12-2023</span> </div>
+                    </div>
+                  </div>
+                  <div class="card-footer d-sm-flex d-block align-items-center justify-content-between">
+                    <div><span class="text-muted me-2">Status:</span><span class="badge bg-success-transparent">Shipped</span></div>
+                    <div class="mt-sm-0 mt-2"> <button class="btn btn-sm btn-danger-ghost">Cancel Order</button> </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-xl-6 col-xxl-4 col-lg-6 col-md-6 col-sm-12">
+                <div class="card custom-card">
+                  <div class="card-header d-block">
+                    <div class="d-sm-flex d-block align-items-center ">
+                      <div class="me-2"> <span class="avatar bg-light avatar-md mb-1"> <img src="../assets/images/ecommerce/jpg/2.jpg" alt=""> </span> </div>
+                      <div class="flex-fill"> <a href="javascript:void(0)"> <span class="fs-14 fw-medium">Bluetooth Wireless Headphone (aura)</span> </a> <span class="d-block text-success">$499</span> </div>
+                      <div class="text-sm-center"> <span class="fs-14 fw-medium">Order Id :</span> <span class="d-sm-block">#SPK-2936</span> </div>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="orders-delivery-address">
+                        <p class="mb-1 fw-medium">Delivery Address</p>
+                        <p class="text-muted mb-0"> mig-1-11,monroe street,georgetown,Washington D.C </p>
+                      </div>
+                      <div class="ms-auto text-end"> <span class="text-muted fs-12">Delivered By</span> <span class="d-block text-primary fw-medium">25-11-2023</span> </div>
+                    </div>
+                  </div>
+                  <div class="card-footer d-sm-flex d-block align-items-center justify-content-between">
+                    <div> <span class="text-muted me-2">Status:</span> <span class="badge bg-primary-transparent">Confirmed</span> </div>
+                    <div class="mt-sm-0 mt-2"> <button class="btn btn-sm btn-danger-ghost">Cancel Order</button> </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-xl-6 col-xxl-4 col-lg-6 col-md-6 col-sm-12">
+                <div class="card custom-card">
+                  <div class="card-header d-block">
+                    <div class="d-sm-flex d-block align-items-center ">
+                      <div class="me-2"> <span class="avatar bg-light avatar-md mb-1"> <img src="../assets/images/ecommerce/jpg/3.jpg" alt=""> </span> </div>
+                      <div class="flex-fill"> <a href="javascript:void(0)"> <span class="fs-14 fw-medium">Theme Wall Clock (20.5 cm x 20.5 cm x 3.5 cm)</span> </a> <span class="d-block text-success">$1,899</span> </div>
+                      <div class="text-sm-center"> <span class="fs-14 fw-medium">Order Id :</span> <span class="d-sm-block">#SPK-1855</span> </div>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="orders-delivery-address">
+                        <p class="mb-1 fw-medium">Delivery Address</p>
+                        <p class="text-muted mb-0"> mig-1-11,monroe street,georgetown,Washington D.C </p>
+                      </div>
+                      <div class="ms-auto"> <span class="badge bg-success">Delivered</span> </div>
+                    </div>
+                  </div>
+                  <div class="card-footer d-sm-flex d-block justify-content-between align-items-center">
+                    <div class="fs-11"> <span>Delivered on:</span> <span class="fw-medium">29,Oct 2023 - 12:47PM</span> </div>
+                    <div class="mt-sm-0 mt-2"> <button class="btn btn-sm btn-primary-ghost">Rate Product<i class="bi bi-star-fill ms-2 fs-12 text-warning"></i></button> </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-xl-6 col-xxl-4 col-lg-6 col-md-6 col-sm-12">
+                <div class="card custom-card">
+                  <div class="card-header d-block">
+                    <div class="d-sm-flex d-block align-items-center ">
+                      <div class="me-2"> <span class="avatar bg-light avatar-md mb-1"> <img src="../assets/images/ecommerce/jpg/4.jpg" alt=""> </span> </div>
+                      <div class="flex-fill"> <a href="javascript:void(0)"> <span class="fs-14 fw-medium">xenon Instax Mini 12 Instant Camera-Orange</span> </a> <span class="d-block text-success">$2,499</span> </div>
+                      <div class="text-sm-center"> <span class="fs-14 fw-medium">Order Id :</span> <span class="d-sm-block">#SPK-1234</span> </div>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="orders-delivery-address">
+                        <p class="mb-1 fw-medium">Delivery Address</p>
+                        <p class="text-muted mb-0"> mig-1-11,monroe street,georgetown,Washington D.C </p>
+                      </div>
+                      <div class="ms-auto"> <span class="badge bg-danger">Cancelled</span> </div>
+                    </div>
+                  </div>
+                  <div class="card-footer">
+                    <div class="float-end"> <button class="btn btn-sm btn-primary">Buy Now</button> </div>
+                  </div>
+                </div>
+              </div>
+              
             </div>
           </div>
         </div> <!-- End::row-1 -->
       </div>
     </div> <!-- End::app-content --> <!-- Footer Start -->
-    <?php include_once '../../../components/footer.php' ?>
+    <?php include_once '../../components/footer.php' ?>
     <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
