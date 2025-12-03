@@ -364,7 +364,7 @@ include_once '../../server/model.php';
                   <div class="card-body">
                     <div class="d-flex align-items-center gap-3">
                       <div> <span class="avatar avatar-xl bg-primary-transparent"> <i class="bi bi-bag-check fs-4"></i> </span> </div>
-                      <div> <span class="d-block text-muted mb-1">Total Orders</span>
+                      <div> <span class="d-block text-muted mb-1">All User</span>
                         <h4 class="mb-0">32,189</h4>
                       </div>
                     </div>
@@ -376,7 +376,7 @@ include_once '../../server/model.php';
                   <div class="card-body"> <a href="javascript:void(0);" class="stretched-link"></a>
                     <div class="d-flex align-items-center gap-3">
                       <div> <span class="avatar avatar-xl bg-success-transparent"> <i class="bi bi-currency-dollar fs-4"></i> </span> </div>
-                      <div> <span class="d-block text-muted mb-1">Total Amount Spent</span>
+                      <div> <span class="d-block text-muted mb-1">Balance</span>
                         <h4 class="mb-0">$15,289k</h4>
                       </div>
                     </div>
@@ -388,7 +388,31 @@ include_once '../../server/model.php';
                   <div class="card-body"> <a href="javascript:void(0);" class="stretched-link"></a>
                     <div class="d-flex align-items-center gap-3">
                       <div> <span class="avatar avatar-xl bg-info-transparent"> <i class="bi bi-ticket-perforated fs-4"></i> </span> </div>
-                      <div> <span class="d-block text-muted mb-1">Total Tickets</span>
+                      <div> <span class="d-block text-muted mb-1">Approved Orders</span>
+                        <h4 class="mb-0">1183</h4>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+                <div class="col-xl-4">
+                <div class="card custom-card">
+                  <div class="card-body"> <a href="javascript:void(0);" class="stretched-link"></a>
+                    <div class="d-flex align-items-center gap-3">
+                      <div> <span class="avatar avatar-xl bg-info-transparent"> <i class="bi bi-ticket-perforated fs-4"></i> </span> </div>
+                      <div> <span class="d-block text-muted mb-1">Pending Orders</span>
+                        <h4 class="mb-0">283</h4>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+                <div class="col-xl-4">
+                <div class="card custom-card">
+                  <div class="card-body"> <a href="javascript:void(0);" class="stretched-link"></a>
+                    <div class="d-flex align-items-center gap-3">
+                      <div> <span class="avatar avatar-xl bg-info-transparent"> <i class="bi bi-ticket-perforated fs-4"></i> </span> </div>
+                      <div> <span class="d-block text-muted mb-1">Declined Orders</span>
                         <h4 class="mb-0">283</h4>
                       </div>
                     </div>

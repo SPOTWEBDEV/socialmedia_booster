@@ -7,7 +7,7 @@
                       <ul class="main-customer-menu active">
                         <li class="slide p-4 text-center border-bottom">
                           <div class="text-center mb-2"> <span class="avatar avatar-xxl avatar-rounded online"> <img src="<?php echo $domain ?>assets/images/avatar.svg" alt="" class="img-fluid"> </span> </div>
-                          <h5 class="fw-medium mb-1"><?php echo $fullname ?></h5> <span class="text-muted"><?php echo $email ?></span>
+                          <h5 class="fw-medium mb-1"><?php echo $sitename ?></h5> <span class="text-muted"><?php echo $siteemail ?></span>
                         </li> <!-- Start::slide -->
                         <li class="slide active"> <a href="<?php echo $domain ?>user/dashboard/" class="side-menu__item active"> <i class="bi bi-house side-menu__icon"></i> <span class="side-menu__label">Dashboard</span> </a> </li> <!-- End::slide --> <!-- Start::slide -->
                         <li class="slide"> <a href="<?php echo $domain ?>user/order" class="side-menu__item"> <i class="bi bi-bag side-menu__icon"></i> <span class="side-menu__label">Orders</span> </a> </li> <!-- End::slide --> <!-- Start::slide -->

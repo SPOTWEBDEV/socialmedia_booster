@@ -349,13 +349,13 @@ include_once '../../server/model.php';
   <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
   <div class="page"> <!-- app-header -->
 
-    <?php include_once '../../components/client/navbar.php'  ?>
+    <?php include_once '../../components/admin/navbar.php'  ?>
 
     <div class="main-content app-content">
       <div class="container-fluid"> <!-- Start::page-header -->
         <div class="d-flex align-items-center justify-content-between my-4 page-header-breadcrumb flex-wrap gap-2">
           <div>
-            <p class="fw-medium fs-20 mb-0">Welcome, <?php echo $fullname ?></p>
+            <p class="fw-medium fs-20 mb-0">Welcome, <?php echo $sitename ?></p>
             <p class="fs-13 text-muted mb-0">Let's check your today's stats!</p>
           </div>
           <div class="btn-list"> <button class="btn btn-primary-light btn-wave waves-effect waves-light"> <i class="bx bx-crown align-middle"></i> Plan Upgrade </button> <button class="btn btn-secondary-light btn-wave waves-effect waves-light"> <i class="ri-upload-cloud-line align-middle"></i> Export Report </button> </div>
