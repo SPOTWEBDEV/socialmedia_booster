@@ -4,35 +4,56 @@ include_once '../../../server/connection.php';
 include_once '../../../server/model.php';
 include_once '../../../server/auth/user.php';
 
+require_once '../../../server/controller/boosting.php';
+
+
 
 
 if (isset($_POST['send_message'])) {
     // Get form values
     $service_id     = $_POST['service'];
     $order_name     = $_POST['order_name'];
-    $order_price    = $_POST['order_price'];
+    $order_price = str_replace('$', '', $_POST['order_price']);
     $order_category = $_POST['order_category'];
     $social_url     = $_POST['order_url'];
     $message        = $_POST['message'];
+    $quanity       = $_POST['quanity'];
 
     // Insert into database (Prepared Statement)
     $stmt = $connection->prepare("
-        INSERT INTO user_orders (service_id, order_name, order_price, order_category, social_url, message)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO user_orders (service_id, order_name, order_price, order_category, social_url, message , quanity)
+        VALUES (?, ?, ?, ?, ?, ? , ?)
     ");
 
     $stmt->bind_param(
-        "isdsss",
+        "isdssss",
         $service_id,
         $order_name,
         $order_price,
         $order_category,
         $social_url,
-        $message
+        $message,
+        $quanity
     );
 
     if ($stmt->execute()) {
-        echo "<script>alert('Order saved successfully!');</script>";
+        $order = $api->order(['service' => $service_id, 'link' => $social_url , 'quantity' => $quanity]);
+
+        // Check if API returned an error
+        if (isset($order->error)) {
+
+            $msg = addslashes($order->error);
+            echo "<script>alert('API Error: $msg');</script>";
+        } elseif (isset($order->order)) {
+
+            $orderId = addslashes($order->order);
+            echo "<script>alert('Order Placed Successfully! Order ID: $orderId');</script>";
+        } else {
+
+            // Unknown response (convert object to JSON string)
+            $unknown = addslashes(json_encode($order));
+            echo "<script>alert('Unexpected API Response: $unknown');</script>";
+        }
     } else {
         echo "<script>alert('Error saving order.');</script>";
     }
@@ -307,26 +328,26 @@ if (isset($_POST['send_message'])) {
                                             <!-- Order Name -->
                                             <div class="col-xl-12">
                                                 <label class="form-label">Order Name</label>
-                                                <input type="text" id="orderName" class="form-control form-control-light" readonly>
+                                                <input type="text" id="orderName" name="order_name" class="form-control form-control-light" readonly>
                                             </div>
 
                                             <!-- Order Price -->
                                             <div class="col-xl-6">
                                                 <label class="form-label">Price</label>
-                                                <input type="text" id="orderPrice" class="form-control form-control-light" readonly>
+                                                <input type="text" id="orderPrice" name="order_price" class="form-control form-control-light" readonly>
                                             </div>
 
                                             <!-- Order Category -->
                                             <div class="col-xl-6">
                                                 <label class="form-label">Category</label>
-                                                <input type="text" id="orderCategory" class="form-control form-control-light" readonly>
+                                                <input type="text" id="orderCategory" name="order_category" class="form-control form-control-light" readonly>
                                             </div>
 
                                             <!-- Service ID -->
                                             <div class="col-xl-12">
-                                                <label class="form-label">Service ID</label>
-                                                <input type="text" id="orderService" class="form-control form-control-light" readonly>
-                                                <input type="hidden" id="selectedService" name="service">
+                                                <label class="form-label">Quantity</label>
+                                                <input type="hidden" id="orderService" name="service" class="form-control form-control-light" readonly>
+                                                <input type="text" id="quanity"   name="quanity" class="form-control form-control-light">
                                             </div>
 
                                             <!-- NEW: URL Input -->
@@ -372,6 +393,7 @@ if (isset($_POST['send_message'])) {
                                         document.getElementById("orderPrice").value = "$" + order.rate;
                                         document.getElementById("orderCategory").value = order.category;
                                         document.getElementById("orderService").value = order.service;
+                                        document.getElementById("quanity").placeholder = `Min: ${order.min} - Max: ${order.max}`;
 
                                         // Hidden field for backend
                                         document.getElementById("selectedService").value = order.service;
