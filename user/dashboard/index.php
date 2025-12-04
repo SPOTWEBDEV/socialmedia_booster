@@ -360,18 +360,7 @@ include_once '../../server/auth/user.php';
            <?php  include_once '../../components/client/sidenavbar.php' ?>
           <div class="col-xl-9">
             <div class="row">
-              <div class="col-xl-4">
-                <div class="card custom-card"> <a href="javascript:void(0);" class="stretched-link"></a>
-                  <div class="card-body">
-                    <div class="d-flex align-items-center gap-3">
-                      <div> <span class="avatar avatar-xl bg-primary-transparent"> <i class="bi bi-bag-check fs-4"></i> </span> </div>
-                      <div> <span class="d-block text-muted mb-1">All User</span>
-                        <h4 class="mb-0">32,189</h4>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+             
               <div class="col-xl-4">
                 <div class="card custom-card">
                   <div class="card-body"> <a href="javascript:void(0);" class="stretched-link"></a>

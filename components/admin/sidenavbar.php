@@ -11,7 +11,7 @@
                         <li class="slide"> <a href="<?php echo $domain ?>admin/order" class="side-menu__item"> <i class="bi bi-bag side-menu__icon"></i> <span class="side-menu__label">Orders</span> </a> </li> <!-- End::slide --> <!-- Start::slide -->
                        
                         <li class="slide"> <a href="<?php echo $domain ?>admin/support" class="side-menu__item"> <i class="bi bi-headset side-menu__icon"></i> <span class="side-menu__label">Support</span> </a> </li> <!-- End::slide -->
-                        <li class="slide"> <a href="sign-in-cover.html" class="side-menu__item"> <i class="bi bi-box-arrow-right side-menu__icon"></i> <span class="side-menu__label">Sign out</span> </a> </li> <!-- End::slide -->
+                        <li class="slide"> <a href="<?php echo $domain ?>admin/signout" class="side-menu__item"> <i class="bi bi-box-arrow-right side-menu__icon"></i> <span class="side-menu__label">Sign out</span> </a> </li> <!-- End::slide -->
                       </ul>
                     </nav> <!-- End::nav -->
                   </div> <!-- End::main-sidebar -->

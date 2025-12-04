@@ -121,7 +121,7 @@
               <li><a class="dropdown-item d-flex align-items-center" href="<?php echo $domain ?>user/order"><i class="bi bi-check-square fs-16 me-2 op-7"></i>Order</a></li>
               <li><a class="dropdown-item d-flex align-items-center" href="<?php echo $domain ?>user/setting/"><i class="bi bi-gear fs-16 me-2 op-7"></i>Settings</a></li>
               <li><a class="dropdown-item d-flex align-items-center" href="<?php echo $domain ?>user/support/"><i class="bi bi-headset fs-18 me-2 op-7"></i>Support</a></li>
-              <li><a class="dropdown-item d-flex align-items-center" href="sign-in-cover.html"><i class="bi bi-box-arrow-right fs-18 me-2 op-7"></i>Log Out</a></li>
+              <li><a class="dropdown-item d-flex align-items-center" href="<?php echo $domain ?>user/signout"><i class="bi bi-box-arrow-right fs-18 me-2 op-7"></i>Log Out</a></li>
             </ul>
           </li> <!-- End::header-element -->
         </ul> <!-- End::header-content-right -->
