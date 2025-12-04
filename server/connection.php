@@ -28,7 +28,7 @@ $isLocalhost = ($_SERVER['HTTP_HOST'] === 'localhost');
 
 if ($isLocalhost) {
     // Offline (Localhost)
-    $domain = "http://localhost/socialmedia_booster/";
+    $domain = "http://localhost/booster/";
 
     define("USER", "root");
     define("PASSWORD", "");
