@@ -295,74 +295,14 @@ include_once '../../server/model.php';
                                                 </thead>
 
                                                 <tbody>
-                                                    <tr>
-                                                        <td><a href="javascript:void(0);" class="text-primary text-decoration-underline">#ORD789ABC</a></td>
-                                                        <td>
-                                                            <div> <span class="d-block mb-1">Rupay Card ****2783</span> <span class="d-block fs-12 text-muted fw-normal">Card Payment</span> </div>
-                                                        </td>
-                                                        <td><span class="badge bg-success-transparent">Completed</span></td>
-                                                        <td>
-                                                            <div> <span class="d-block mb-1">$1,234.78</span> <span class="d-block fs-12 text-muted fw-normal">Nov 22,2023</span> </div>
-                                                        </td>
-                                                        <td> <button class="btn btn-sm btn-ghost-light text-default border btn-wave waves-effect waves-light"> <i class="fe fe-eye text-muted align-middle me-1"></i> View </button> </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><a href="javascript:void(0);" class="text-primary text-decoration-underline">#ORD253SFW</a></td>
-                                                        <td>
-                                                            <div> <span class="d-block mb-1 fw-normal">Digital Wallet</span> <span class="d-block fs-12 text-muted">Online Transaction</span> </div>
-                                                        </td>
-                                                        <td><span class="badge bg-warning-transparent">Pending</span></td>
-                                                        <td>
-                                                            <div> <span class="d-block mb-1">$623.99</span> <span class="d-block fs-12 text-muted fw-normal">Nov 22,2023</span> </div>
-                                                        </td>
-                                                        <td> <button class="btn btn-sm btn-ghost-light text-default border btn-wave waves-effect waves-light"> <i class="fe fe-eye text-muted align-middle me-1"></i> View </button> </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><a href="javascript:void(0);" class="text-primary text-decoration-underline">#ORD356SKF</a></td>
-                                                        <td>
-                                                            <div> <span class="d-block mb-1 fw-normal">Mastro Card ****7893</span> <span class="d-block fs-12 text-muted">Card Payment</span> </div>
-                                                        </td>
-                                                        <td><span class="badge bg-danger-transparent">Cancelled</span></td>
-                                                        <td>
-                                                            <div> <span class="d-block mb-1">$1,324</span> <span class="d-block fs-12 text-muted fw-normal">Nov 21,2023</span> </div>
-                                                        </td>
-                                                        <td> <button class="btn btn-sm btn-ghost-light text-default border btn-wave waves-effect waves-light"> <i class="fe fe-eye text-muted align-middle me-1"></i> View </button> </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><a href="javascript:void(0);" class="text-primary text-decoration-underline">#ORD363ESD</a></td>
-                                                        <td>
-                                                            <div> <span class="d-block mb-1 fw-normal">Cash On Delivery</span> <span class="d-block fs-12 text-muted">Pay On Delivery</span> </div>
-                                                        </td>
-                                                        <td><span class="badge bg-success-transparent">Completed</span></td>
-                                                        <td>
-                                                            <div> <span class="d-block mb-1">$1,123.49</span> <span class="d-block fs-12 text-muted fw-normal">Nov 20,2023</span> </div>
-                                                        </td>
-                                                        <td> <button class="btn btn-sm btn-ghost-light text-default border btn-wave waves-effect waves-light"> <i class="fe fe-eye text-muted align-middle me-1"></i> View </button> </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="border-bottom-0"> <a href="javascript:void(0);" class="text-primary text-decoration-underline">#ORD253KSE</a> </td>
-                                                        <td class="border-bottom-0">
-                                                            <div> <span class="d-block mb-1 fw-normal">Visa Card ****2563</span> <span class="d-block fs-12 text-muted">Card Payment</span> </div>
-                                                        </td>
-                                                        <td class="border-bottom-0"><span class="badge bg-success-transparent">Completed</span></td>
-                                                        <td class="border-bottom-0">
-                                                            <div> <span class="d-block mb-1">$1,289</span> <span class="d-block fs-12 text-muted fw-normal">Nov 18,2023</span> </div>
-                                                        </td>
-                                                        <td class="border-bottom-0"> <button class="btn btn-sm btn-ghost-light text-default border btn-wave waves-effect waves-light"> <i class="fe fe-eye text-muted align-middle me-1"></i> View </button> </td>
-                                                    </tr>
+                                                    
                                                 </tbody>
                                             </table>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <ul class="pagination justify-content-end">
-                                <li class="page-item disabled"> <a class="page-link">Previous</a> </li>
-                                <li class="page-item"><a class="page-link" href="javascript:void(0);">1</a></li>
-                                <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li>
-                                <li class="page-item"><a class="page-link" href="javascript:void(0);">3</a></li>
-                                <li class="page-item"> <a class="page-link" href="javascript:void(0);">Next</a> </li>
-                            </ul>
+                            
                         </div>
                         <script>
                             let users = [];

@@ -325,6 +325,7 @@ include_once '../../server/auth/user.php';
                   container.html("");
 
                   data.forEach(item => {
+                    
                     container.append(`
             <div class="col-xl-6 col-xxl-4 col-lg-6 col-md-6 col-sm-12">
                 <div class="card custom-card">
@@ -332,7 +333,7 @@ include_once '../../server/auth/user.php';
                         <div class="d-sm-flex d-block align-items-center">
                             <div class="flex-fill">
                                 <span class="fs-14 fw-medium">${item.name}</span>
-                                <span class="d-block text-success">$${item.rate}</span>
+                                <span class="d-block text-success">Rate Per 1000: ${item.rate}</span>
                             </div>
                             
                         </div>

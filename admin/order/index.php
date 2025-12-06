@@ -355,126 +355,238 @@ include_once '../../server/model.php';
       <div class="container-fluid"> <!-- Start::page-header -->
         <div class="d-flex align-items-center justify-content-between my-4 page-header-breadcrumb flex-wrap gap-2">
           <div>
-            <p class="fw-medium fs-20 mb-0">Welcome, <?php echo $sitename ?></p>
+            <p class="fw-medium fs-20 mb-0">Welcome</p>
             <p class="fs-13 text-muted mb-0">Let's check your today's stats!</p>
           </div>
           <div class="btn-list"> <button class="btn btn-primary-light btn-wave waves-effect waves-light"> <i class="bx bx-crown align-middle"></i> Plan Upgrade </button> <button class="btn btn-secondary-light btn-wave waves-effect waves-light"> <i class="ri-upload-cloud-line align-middle"></i> Export Report </button> </div>
         </div> <!-- End::page-header --> <!-- Start::row-1 -->
         <div class="row">
-          <?php include_once '../../components/client/sidenavbar.php' ?>
+          <?php include_once '../../components/admin/sidenavbar.php' ?>
           <div class="col-xl-9">
             <div class="row">
+
+
               <div class="col-xl-12">
-                <div class="card custom-card">
-                  <div class="card-body d-flex align-items-center flex-wrap">
-                    <div class="flex-fill"> <span class="mb-0 fs-14 text-muted">Total number of orders placed upto now : <span class="fw-medium text-success">28</span></span> </div>
-                    <div class="dropdown"> <button class="btn btn-light dropdown-toggle m-1" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"> Sort By </button>
-                      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                        <li><a class="dropdown-item" href="javascript:void(0);">Date</a></li>
-                        <li><a class="dropdown-item" href="javascript:void(0);">Price</a></li>
-                        <li><a class="dropdown-item" href="javascript:void(0);">Category</a></li>
-                      </ul>
-                    </div>
-                    <div class="d-flex align-items-center m-1" role="search"> <input class="form-control" type="search" placeholder="Search" aria-label="Search"> <button class="btn btn-light ms-2" type="submit">Search</button> </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-xl-6 col-xxl-4 col-lg-6 col-md-6 col-sm-12">
-                <div class="card custom-card">
-                  <div class="card-header d-block">
-                    <div class="d-sm-flex d-block align-items-center">
-                      <div class="me-2"> <span class="avatar bg-light avatar-md mb-1"> <img src="../assets/images/ecommerce/jpg/1.jpg" alt=""> </span> </div>
-                      <div class="flex-fill"> <a href="javascript:void(0)"> <span class="fs-14 fw-medium">Odemi A2 (Sea Green, 2GB RAM, 64GB Storage)</span> </a> <span class="d-block text-success">$1,299</span> </div>
-                      <div class="text-sm-center"> <span class="fs-14 fw-medium">Order Id :</span> <span class="d-sm-block">#SPK-1203</span> </div>
-                    </div>
-                  </div>
-                  <div class="card-body">
-                    <div class="d-flex align-items-center">
-                      <div class="orders-delivery-address">
-                        <p class="mb-1 fw-medium">Delivery Address</p>
-                        <p class="text-muted mb-0"> mig-1-11,monroe street,georgetown,Washington D.C </p>
+                <div class="card custom-card overflow-hidden">
+                  <div class="card-header justify-content-between">
+                    <div class="card-body d-flex align-items-center flex-wrap">
+
+                      <div class="flex-fill">
+                        <span class="mb-0 fs-14 text-muted">
+                          Total number of orders placed upto now :
+                          <span class="fw-medium text-success" id="orderCount">0</span>
+                        </span>
                       </div>
-                      <div class="ms-auto text-end"> <span class="text-muted fs-12">Delivered By</span> <span class="d-block text-primary fw-medium">13-12-2023</span> </div>
-                    </div>
-                  </div>
-                  <div class="card-footer d-sm-flex d-block align-items-center justify-content-between">
-                    <div><span class="text-muted me-2">Status:</span><span class="badge bg-success-transparent">Shipped</span></div>
-                    <div class="mt-sm-0 mt-2"> <button class="btn btn-sm btn-danger-ghost">Cancel Order</button> </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-xl-6 col-xxl-4 col-lg-6 col-md-6 col-sm-12">
-                <div class="card custom-card">
-                  <div class="card-header d-block">
-                    <div class="d-sm-flex d-block align-items-center ">
-                      <div class="me-2"> <span class="avatar bg-light avatar-md mb-1"> <img src="../assets/images/ecommerce/jpg/2.jpg" alt=""> </span> </div>
-                      <div class="flex-fill"> <a href="javascript:void(0)"> <span class="fs-14 fw-medium">Bluetooth Wireless Headphone (aura)</span> </a> <span class="d-block text-success">$499</span> </div>
-                      <div class="text-sm-center"> <span class="fs-14 fw-medium">Order Id :</span> <span class="d-sm-block">#SPK-2936</span> </div>
-                    </div>
-                  </div>
-                  <div class="card-body">
-                    <div class="d-flex align-items-center">
-                      <div class="orders-delivery-address">
-                        <p class="mb-1 fw-medium">Delivery Address</p>
-                        <p class="text-muted mb-0"> mig-1-11,monroe street,georgetown,Washington D.C </p>
+
+                      <!-- Sort -->
+                      <div class="dropdown">
+                        <button class="btn btn-light dropdown-toggle m-1" type="button"
+                          id="sortBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                          Sort By
+                        </button>
+                        <ul class="dropdown-menu">
+                          <li><a class="dropdown-item sortOption" data-sort="order_id" href="#">ID</a></li>
+                          <li><a class="dropdown-item sortOption" data-sort="price" href="#">Name</a></li>
+                          <li><a class="dropdown-item sortOption" data-sort="date" href="#">Date</a></li>
+
+                        </ul>
                       </div>
-                      <div class="ms-auto text-end"> <span class="text-muted fs-12">Delivered By</span> <span class="d-block text-primary fw-medium">25-11-2023</span> </div>
-                    </div>
-                  </div>
-                  <div class="card-footer d-sm-flex d-block align-items-center justify-content-between">
-                    <div> <span class="text-muted me-2">Status:</span> <span class="badge bg-primary-transparent">Confirmed</span> </div>
-                    <div class="mt-sm-0 mt-2"> <button class="btn btn-sm btn-danger-ghost">Cancel Order</button> </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-xl-6 col-xxl-4 col-lg-6 col-md-6 col-sm-12">
-                <div class="card custom-card">
-                  <div class="card-header d-block">
-                    <div class="d-sm-flex d-block align-items-center ">
-                      <div class="me-2"> <span class="avatar bg-light avatar-md mb-1"> <img src="../assets/images/ecommerce/jpg/3.jpg" alt=""> </span> </div>
-                      <div class="flex-fill"> <a href="javascript:void(0)"> <span class="fs-14 fw-medium">Theme Wall Clock (20.5 cm x 20.5 cm x 3.5 cm)</span> </a> <span class="d-block text-success">$1,899</span> </div>
-                      <div class="text-sm-center"> <span class="fs-14 fw-medium">Order Id :</span> <span class="d-sm-block">#SPK-1855</span> </div>
-                    </div>
-                  </div>
-                  <div class="card-body">
-                    <div class="d-flex align-items-center">
-                      <div class="orders-delivery-address">
-                        <p class="mb-1 fw-medium">Delivery Address</p>
-                        <p class="text-muted mb-0"> mig-1-11,monroe street,georgetown,Washington D.C </p>
+
+                      <!-- Category Filter -->
+                      <select id="categoryFilter" class="form-select m-1" style="width:200px;">
+                        <option value="">All Categories</option>
+                      </select>
+
+                      <!-- Search -->
+                      <div class="d-flex align-items-center m-1" role="search">
+                        <input class="form-control" id="searchInput" type="search" placeholder="Search">
+                        <button class="btn btn-light ms-2" id="searchBtn">Search</button>
                       </div>
-                      <div class="ms-auto"> <span class="badge bg-success">Delivered</span> </div>
+
                     </div>
                   </div>
-                  <div class="card-footer d-sm-flex d-block justify-content-between align-items-center">
-                    <div class="fs-11"> <span>Delivered on:</span> <span class="fw-medium">29,Oct 2023 - 12:47PM</span> </div>
-                    <div class="mt-sm-0 mt-2"> <button class="btn btn-sm btn-primary-ghost">Rate Product<i class="bi bi-star-fill ms-2 fs-12 text-warning"></i></button> </div>
+                  <div class="card-body px-0 pt-2 pb-0">
+                    <div class="table-responsive">
+                      <table class="table text-nowrap">
+                        <thead>
+                          <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Order ID</th>
+                            <th scope="col">Link / User Name</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Amount Paid</th>
+                            <th scope="col">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
+                <script>
+                  let orders = [];
+                  let filteredOrders = [];
+
+                  // =============================
+                  //  FETCH ORDERS FROM PHP
+                  // =============================
+                  function loadOrders() {
+                    let formData = new FormData();
+                    formData.append("action", "fetchAllOrders");
+
+                    fetch("<?php echo $domain ?>server/api/orders.php", {
+                        method: "POST",
+                        body: formData
+                      })
+                      .then(res => res.json())
+                      .then(data => {
+                        if (data.success) {
+                          orders = data.data;
+                          filteredOrders = orders;
+                          updateOrderCount();
+                          populateStatusCategory();
+                          renderTable();
+                        }
+                      })
+                      .catch(err => console.error("API ERROR:", err));
+                  }
+
+                  // =============================
+                  // UPDATE COUNT
+                  // =============================
+                  function updateOrderCount() {
+                    document.getElementById("orderCount").textContent = orders.length;
+                  }
+
+                  // =============================
+                  // POPULATE STATUS DROPDOWN
+                  // =============================
+                  function populateStatusCategory() {
+                    const statuses = ["completed", "processing", "pending", "canceled"];
+                    let select = document.getElementById("categoryFilter");
+
+                    statuses.forEach(status => {
+                      let opt = document.createElement("option");
+                      opt.value = status;
+                      opt.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+                      select.appendChild(opt);
+                    });
+                  }
+
+                  // =============================
+                  // RENDER TABLE
+                  // =============================
+                  function renderTable() {
+                    let tbody = document.querySelector("table tbody");
+                    tbody.innerHTML = "";
+
+                    filteredOrders.forEach((order, index) => {
+                      tbody.innerHTML += `
+      <tr>
+        <td>#${index + 1}</td>
+        <td>${order.order_id}</td>
+
+        <td>
+          <span class="d-block">${order.social_url}</span>
+           <span class="d-block fs-12 text-muted fw-normal">${order.fullname}</span>
+        </td>
+
+        <td>
+          <span class="badge capitalize bg-${getStatusColor(order.status)}-transparent">
+              ${order.status}
+          </span>
+        </td>
+
+        <td>
+          <span class="d-block mb-1">$${order.order_price}</span>
+          <span class="d-block fs-12 text-muted">${order.created_at}</span>
+        </td>
+
+        <td>
+          <button class="btn btn-sm btn-ghost-light border">
+              <i class="fe fe-eye text-muted me-1"></i> View
+          </button>
+        </td>
+      </tr>
+    `;
+                    });
+                  }
+
+                  // =============================
+                  // GET BADGE COLOR
+                  // =============================
+                  function getStatusColor(status) {
+                    switch (status.toLowerCase()) {
+                      case "completed":
+                        return "success";
+                      case "processing":
+                        return "warning";
+                      case "pending":
+                        return "primary";
+                      case "canceled":
+                        return "danger";
+                      default:
+                        return "secondary";
+                    }
+                  }
+
+                  // =============================
+                  // SORTING
+                  // =============================
+                  document.querySelectorAll(".sortOption").forEach(btn => {
+                    btn.addEventListener("click", function() {
+                      let field = this.getAttribute("data-sort");
+
+                      filteredOrders.sort((a, b) => {
+                        if (field === "order_id") return Number(a.id) - Number(b.id);
+                        if (field === "date") return new Date(a.created_at) - new Date(b.created_at);
+                        if (field === "price") return Number(a.order_price) - Number(b.order_price);
+                        return 0;
+                      });
+
+                      renderTable();
+                    });
+                  });
+
+                  // =============================
+                  // SEARCH (user + social_url)
+                  // =============================
+                  document.getElementById("searchBtn").addEventListener("click", () => {
+                    let search = document.getElementById("searchInput").value.toLowerCase();
+
+                    filteredOrders = orders.filter(o =>
+                      o.user.toLowerCase().includes(search) ||
+                      o.social_url.toLowerCase().includes(search) ||
+                      o.order_id.toLowerCase().includes(search) ||
+                      o.status.toLowerCase().includes(search) 
+                    );
+
+                    renderTable();
+                  });
+
+                  // =============================
+                  // CATEGORY FILTER (status)
+                  // =============================
+                  document.getElementById("categoryFilter").addEventListener("change", function() {
+                    if (this.value === "") {
+                      filteredOrders = orders;
+                    } else {
+                      filteredOrders = orders.filter(o =>
+                        o.status.toLowerCase() === this.value.toLowerCase()
+                      );
+                    }
+                    renderTable();
+                  });
+
+                  // Start
+                  loadOrders();
+                </script>
+
+
               </div>
-              <div class="col-xl-6 col-xxl-4 col-lg-6 col-md-6 col-sm-12">
-                <div class="card custom-card">
-                  <div class="card-header d-block">
-                    <div class="d-sm-flex d-block align-items-center ">
-                      <div class="me-2"> <span class="avatar bg-light avatar-md mb-1"> <img src="../assets/images/ecommerce/jpg/4.jpg" alt=""> </span> </div>
-                      <div class="flex-fill"> <a href="javascript:void(0)"> <span class="fs-14 fw-medium">xenon Instax Mini 12 Instant Camera-Orange</span> </a> <span class="d-block text-success">$2,499</span> </div>
-                      <div class="text-sm-center"> <span class="fs-14 fw-medium">Order Id :</span> <span class="d-sm-block">#SPK-1234</span> </div>
-                    </div>
-                  </div>
-                  <div class="card-body">
-                    <div class="d-flex align-items-center">
-                      <div class="orders-delivery-address">
-                        <p class="mb-1 fw-medium">Delivery Address</p>
-                        <p class="text-muted mb-0"> mig-1-11,monroe street,georgetown,Washington D.C </p>
-                      </div>
-                      <div class="ms-auto"> <span class="badge bg-danger">Cancelled</span> </div>
-                    </div>
-                  </div>
-                  <div class="card-footer">
-                    <div class="float-end"> <button class="btn btn-sm btn-primary">Buy Now</button> </div>
-                  </div>
-                </div>
-              </div>
-              
+
             </div>
           </div>
         </div> <!-- End::row-1 -->

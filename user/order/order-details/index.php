@@ -13,53 +13,66 @@ if (isset($_POST['send_message'])) {
     // Get form values
     $service_id     = $_POST['service'];
     $order_name     = $_POST['order_name'];
-    $order_price = str_replace('$', '', $_POST['order_price']);
+    $order_rate = str_replace('$', '', $_POST['orderRate']);
     $order_category = $_POST['order_category'];
     $social_url     = $_POST['order_url'];
     $message        = $_POST['message'];
     $quanity       = $_POST['quanity'];
 
-    // Insert into database (Prepared Statement)
-    $stmt = $connection->prepare("
-        INSERT INTO user_orders (service_id, order_name, order_price, order_category, social_url, message , quanity)
-        VALUES (?, ?, ?, ?, ?, ? , ?)
-    ");
 
-    $stmt->bind_param(
-        "isdssss",
-        $service_id,
-        $order_name,
-        $order_price,
-        $order_category,
-        $social_url,
-        $message,
-        $quanity
-    );
+    $order_price = ($quanity / 1000) * $order_rate;
 
-    if ($stmt->execute()) {
-        $order = $api->order(['service' => $service_id, 'link' => $social_url , 'quantity' => $quanity]);
 
-        // Check if API returned an error
-        if (isset($order->error)) {
 
-            $msg = addslashes($order->error);
-            echo "<script>alert('API Error: $msg');</script>";
-        } elseif (isset($order->order)) {
 
-            $orderId = addslashes($order->order);
-            echo "<script>alert('Order Placed Successfully! Order ID: $orderId');</script>";
+    $order = $api->order(['service' => $service_id, 'link' => $social_url, 'quantity' => $quanity]);
+
+    // Check if API returned an error
+    if (isset($order->error)) {
+
+        $msg = addslashes($order->error);
+        echo "<script>alert('API Error: $msg');</script>";
+    } elseif (isset($order->order)) {
+
+        $orderId = addslashes($order->order);
+        // Insert into database (Prepared Statement)
+        echo "<script>alert('$orderId');</script>";
+        $stmt = $connection->prepare("
+        INSERT INTO user_orders (user,service_id, order_name, order_price, order_category, social_url, message , quanity , order_id)
+        VALUES (?,?, ?, ?, ?, ?, ? , ? , ?)");
+
+        $stmt->bind_param(
+            "sisdssssi",
+            $id,
+            $service_id,
+            $order_name,
+            $order_price,
+            $order_category,
+            $social_url,
+            $message,
+            $quanity,
+            $orderId
+        );
+
+
+
+        if ($stmt->execute()) {
         } else {
-
-            // Unknown response (convert object to JSON string)
-            $unknown = addslashes(json_encode($order));
-            echo "<script>alert('Unexpected API Response: $unknown');</script>";
+            echo "<script>alert('Error saving order.');</script>";
         }
+
+        echo "<script>
+          alert('Order Placed Successfully! Order ID: $orderId')
+          setTimeout(function(){ window.location.href = '../my-order/'; }, 1000)
+        ;</script>";
     } else {
-        echo "<script>alert('Error saving order.');</script>";
+
+        // Unknown response (convert object to JSON string)
+        $unknown = addslashes(json_encode($order));
+        echo "<script>alert('Unexpected API Response: $unknown');</script>";
     }
 
-    $stmt->close();
-    $connection->close();
+
 }
 
 
@@ -332,9 +345,9 @@ if (isset($_POST['send_message'])) {
                                             </div>
 
                                             <!-- Order Price -->
-                                            <div class="col-xl-6">
-                                                <label class="form-label">Price</label>
-                                                <input type="text" id="orderPrice" name="order_price" class="form-control form-control-light" readonly>
+                                            <div class="col-xl-6 hidden">
+                                                <label class="form-label">Order Rate</label>
+                                                <input type="text" id="orderRate" name="orderRate" class="form-control orderRate form-control-light" readonly>
                                             </div>
 
                                             <!-- Order Category -->
@@ -344,11 +357,19 @@ if (isset($_POST['send_message'])) {
                                             </div>
 
                                             <!-- Service ID -->
-                                            <div class="col-xl-12">
+                                            <div class="col-xl-6">
                                                 <label class="form-label">Quantity</label>
-                                                <input type="hidden" id="orderService" name="service" class="form-control form-control-light" readonly>
-                                                <input type="text" id="quanity"   name="quanity" class="form-control form-control-light">
+                                                <input type="text" id="orderService" name="service" class="form-control form-control-light" readonly>
+                                                <input type="text" id="quanity" name="quanity" class="form-control form-control-light">
                                             </div>
+
+                                            <!-- Order Price -->
+                                            <div class="col-xl-12">
+                                                <label class="form-label">Total Price</label>
+                                                <input type="text" id="totalPrice" name="totalprice" class="form-control form-control-light" readonly>
+                                            </div>
+
+
 
                                             <!-- NEW: URL Input -->
                                             <div class="col-xl-12">
@@ -368,6 +389,7 @@ if (isset($_POST['send_message'])) {
 
                                         </div>
                                     </div>
+
 
                                     <div class="card-footer">
                                         <button type="submit" name="send_message"
@@ -390,13 +412,25 @@ if (isset($_POST['send_message'])) {
 
                                         // Fill inputs
                                         document.getElementById("orderName").value = order.name;
-                                        document.getElementById("orderPrice").value = "$" + order.rate;
+                                        document.getElementById("orderRate").value =  order.rate;
                                         document.getElementById("orderCategory").value = order.category;
-                                        document.getElementById("orderService").value = order.service;
                                         document.getElementById("quanity").placeholder = `Min: ${order.min} - Max: ${order.max}`;
+                                        document.getElementById("orderService").value = order.service;
 
-                                        // Hidden field for backend
-                                        document.getElementById("selectedService").value = order.service;
+                                        
+                                    });
+
+                                    document.getElementById("quanity").addEventListener("input", function() {
+
+                                        let quantity = parseFloat(document.getElementById("quanity").value);
+                                        let rate = parseFloat(document.getElementById("orderRate").value); // rate from API
+
+                                        if (!isNaN(quantity) && !isNaN(rate)) {
+                                            let price = (quantity / 1000) * rate;
+                                            document.getElementById("totalPrice").value = price.toFixed(6);
+                                        } else {
+                                            document.getElementById("totalPrice").value = "";
+                                        }
                                     });
                                 </script>
 
