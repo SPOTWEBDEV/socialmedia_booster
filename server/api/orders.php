@@ -4,33 +4,72 @@ require '../controller/boosting.php'; // Include your API class
  require '../connection.php';
 
 
-
 if (isset($_POST['action'])) {
+
     $action = $_POST['action'];
-
-
     $api = new Api();
 
     switch ($action) {
+
+        /* =============================
+            FETCH ALL ORDERS (ADMIN)
+        ==============================*/
         case 'fetchAllOrders':
             $orders = fetchAllOrders($connection);
             $ordersArray = [];
+
             while ($row = $orders->fetch_assoc()) {
+
+                // Fetch LIVE API STATUS
+                $apiStatus = $api->status($row['order_id']);
+                $apiStatus = json_decode(json_encode($apiStatus), true);
+
+                // Attach LIVE status to array
+                $row['status']      = $apiStatus['status'] ?? "Unknown";
+                $row['charge_api']      = $apiStatus['charge'] ?? "N/A";
+                $row['start_count_api'] = $apiStatus['start_count'] ?? "N/A";
+                $row['remains_api']     = $apiStatus['remains'] ?? "N/A";
+                $row['currency_api']    = $apiStatus['currency'] ?? $row['currency'];
+
                 $ordersArray[] = $row;
             }
+
             echo json_encode(["success" => true, "data" => $ordersArray]);
             break;
 
+
+        /* =============================
+            FETCH USER ORDERS (ONE USER)
+        ==============================*/
         case 'fetchUserOrders':
             $userId = $_POST['userId'];
             $orders = fetchUserOrders($connection, $userId);
+
             $ordersArray = [];
+
             while ($row = $orders->fetch_assoc()) {
+
+                // Fetch LIVE API STATUS
+                $apiStatus = $api->status($row['order_id']);
+                $apiStatus = json_decode(json_encode($apiStatus), true);
+
+                // Attach LIVE status to row
+                $row['status']      = $apiStatus['status'] ?? "Unknown";
+                $row['charge_api']      = $apiStatus['charge'] ?? "N/A";
+                $row['start_count_api'] = $apiStatus['start_count'] ?? "N/A";
+                $row['remains_api']     = $apiStatus['remains'] ?? "N/A";
+                $row['currency_api']    = $apiStatus['currency'] ?? $row['currency'];
+
                 $ordersArray[] = $row;
             }
+
             echo json_encode(["success" => true, "data" => $ordersArray]);
             break;
 
+
+        /* =============================
+            OTHER ACTIONS
+        ==============================*/
         case 'fetchSingleOrder':
             $id = $_POST['id'];
             $order = fetchSingleOrder($connection, $id);
@@ -54,9 +93,12 @@ if (isset($_POST['action'])) {
         default:
             echo json_encode(["success" => false, "message" => "Invalid action"]);
     }
+
 } else {
     echo json_encode(["success" => false, "message" => "No action specified"]);
 }
+
+/* SQL FUNCTIONS BELOW — unchanged */
 
 
 

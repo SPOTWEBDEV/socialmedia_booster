@@ -345,22 +345,22 @@ include_once '../../server/auth/user.php';
 </head>
 
 <body class="customer-dashboard" cz-shortcut-listen="true">
- 
+
   <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
   <div class="page"> <!-- app-header -->
-     <?php  include_once '../../components/client/navbar.php'  ?>
-  
+    <?php include_once '../../components/client/navbar.php'  ?>
+
     <div class="main-content app-content">
       <div class="container-fluid"> <!-- Start::page-header -->
         <div class="d-flex align-items-center justify-content-between my-4 page-header-breadcrumb flex-wrap gap-2">
-          
-         
+
+
         </div> <!-- End::page-header --> <!-- Start::row-1 -->
         <div class="row">
-           <?php  include_once '../../components/client/sidenavbar.php' ?>
+          <?php include_once '../../components/client/sidenavbar.php' ?>
           <div class="col-xl-9">
             <div class="row">
-             
+
               <div class="col-xl-4">
                 <div class="card custom-card">
                   <div class="card-body"> <a href="javascript:void(0);" class="stretched-link"></a>
@@ -385,7 +385,7 @@ include_once '../../server/auth/user.php';
                   </div>
                 </div>
               </div>
-                <div class="col-xl-4">
+              <div class="col-xl-4">
                 <div class="card custom-card">
                   <div class="card-body"> <a href="javascript:void(0);" class="stretched-link"></a>
                     <div class="d-flex align-items-center gap-3">
@@ -397,7 +397,7 @@ include_once '../../server/auth/user.php';
                   </div>
                 </div>
               </div>
-                <div class="col-xl-4">
+              <div class="col-xl-4">
                 <div class="card custom-card">
                   <div class="card-body"> <a href="javascript:void(0);" class="stretched-link"></a>
                     <div class="d-flex align-items-center gap-3">
@@ -412,95 +412,233 @@ include_once '../../server/auth/user.php';
               <div class="col-xl-12">
                 <div class="card custom-card overflow-hidden">
                   <div class="card-header justify-content-between">
-                    <div class="card-title"> Recent Orders </div> <a href="<?php echo $domain . 'user/order/my-order/' ?>" class="btn btn-primary-light">View All Orders<i class="ri-arrow-right-s-line ms-1 align-middle"></i></a>
+                    <div class="card-body d-flex align-items-center flex-wrap">
+
+                      <div class="flex-fill">
+                        <span class="mb-0 fs-14 text-muted">
+                          Total number of orders placed upto now :
+                          <span class="fw-medium text-success" id="orderCount">0</span>
+                        </span>
+                      </div>
+
+                      <!-- Sort -->
+                      <div class="dropdown">
+                        <button class="btn btn-light dropdown-toggle m-1" type="button"
+                          id="sortBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                          Sort By
+                        </button>
+                        <ul class="dropdown-menu">
+                          <li><a class="dropdown-item sortOption" data-sort="order_id" href="#">ID</a></li>
+                          <li><a class="dropdown-item sortOption" data-sort="price" href="#">Name</a></li>
+                          <li><a class="dropdown-item sortOption" data-sort="date" href="#">Date</a></li>
+
+                        </ul>
+                      </div>
+
+                      <!-- Category Filter -->
+                      <select id="categoryFilter" class="form-select m-1" style="width:200px;">
+                        <option value="">All Categories</option>
+                      </select>
+
+                      <!-- Search -->
+                      <div class="d-flex align-items-center m-1" role="search">
+                        <input class="form-control" id="searchInput" type="search" placeholder="Search">
+                        <button class="btn btn-light ms-2" id="searchBtn">Search</button>
+                      </div>
+
+                    </div>
                   </div>
                   <div class="card-body px-0 pt-2 pb-0">
                     <div class="table-responsive">
                       <table class="table text-nowrap">
                         <thead>
                           <tr>
+                            <th scope="col">ID</th>
                             <th scope="col">Order ID</th>
-                            <th scope="col">Payment Mode</th>
+                            <th scope="col">Link</th>
                             <th scope="col">Status</th>
                             <th scope="col">Amount Paid</th>
                             <th scope="col">Action</th>
                           </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <td><a href="javascript:void(0);" class="text-primary text-decoration-underline">#ORD789ABC</a></td>
-                            <td>
-                              <div> <span class="d-block mb-1">Rupay Card ****2783</span> <span class="d-block fs-12 text-muted fw-normal">Card Payment</span> </div>
-                            </td>
-                            <td><span class="badge bg-success-transparent">Completed</span></td>
-                            <td>
-                              <div> <span class="d-block mb-1">$1,234.78</span> <span class="d-block fs-12 text-muted fw-normal">Nov 22,2023</span> </div>
-                            </td>
-                            <td> <button class="btn btn-sm btn-ghost-light text-default border btn-wave waves-effect waves-light"> <i class="fe fe-eye text-muted align-middle me-1"></i> View </button> </td>
-                          </tr>
-                          <tr>
-                            <td><a href="javascript:void(0);" class="text-primary text-decoration-underline">#ORD253SFW</a></td>
-                            <td>
-                              <div> <span class="d-block mb-1 fw-normal">Digital Wallet</span> <span class="d-block fs-12 text-muted">Online Transaction</span> </div>
-                            </td>
-                            <td><span class="badge bg-warning-transparent">Pending</span></td>
-                            <td>
-                              <div> <span class="d-block mb-1">$623.99</span> <span class="d-block fs-12 text-muted fw-normal">Nov 22,2023</span> </div>
-                            </td>
-                            <td> <button class="btn btn-sm btn-ghost-light text-default border btn-wave waves-effect waves-light"> <i class="fe fe-eye text-muted align-middle me-1"></i> View </button> </td>
-                          </tr>
-                          <tr>
-                            <td><a href="javascript:void(0);" class="text-primary text-decoration-underline">#ORD356SKF</a></td>
-                            <td>
-                              <div> <span class="d-block mb-1 fw-normal">Mastro Card ****7893</span> <span class="d-block fs-12 text-muted">Card Payment</span> </div>
-                            </td>
-                            <td><span class="badge bg-danger-transparent">Cancelled</span></td>
-                            <td>
-                              <div> <span class="d-block mb-1">$1,324</span> <span class="d-block fs-12 text-muted fw-normal">Nov 21,2023</span> </div>
-                            </td>
-                            <td> <button class="btn btn-sm btn-ghost-light text-default border btn-wave waves-effect waves-light"> <i class="fe fe-eye text-muted align-middle me-1"></i> View </button> </td>
-                          </tr>
-                          <tr>
-                            <td><a href="javascript:void(0);" class="text-primary text-decoration-underline">#ORD363ESD</a></td>
-                            <td>
-                              <div> <span class="d-block mb-1 fw-normal">Cash On Delivery</span> <span class="d-block fs-12 text-muted">Pay On Delivery</span> </div>
-                            </td>
-                            <td><span class="badge bg-success-transparent">Completed</span></td>
-                            <td>
-                              <div> <span class="d-block mb-1">$1,123.49</span> <span class="d-block fs-12 text-muted fw-normal">Nov 20,2023</span> </div>
-                            </td>
-                            <td> <button class="btn btn-sm btn-ghost-light text-default border btn-wave waves-effect waves-light"> <i class="fe fe-eye text-muted align-middle me-1"></i> View </button> </td>
-                          </tr>
-                          <tr>
-                            <td class="border-bottom-0"> <a href="javascript:void(0);" class="text-primary text-decoration-underline">#ORD253KSE</a> </td>
-                            <td class="border-bottom-0">
-                              <div> <span class="d-block mb-1 fw-normal">Visa Card ****2563</span> <span class="d-block fs-12 text-muted">Card Payment</span> </div>
-                            </td>
-                            <td class="border-bottom-0"><span class="badge bg-success-transparent">Completed</span></td>
-                            <td class="border-bottom-0">
-                              <div> <span class="d-block mb-1">$1,289</span> <span class="d-block fs-12 text-muted fw-normal">Nov 18,2023</span> </div>
-                            </td>
-                            <td class="border-bottom-0"> <button class="btn btn-sm btn-ghost-light text-default border btn-wave waves-effect waves-light"> <i class="fe fe-eye text-muted align-middle me-1"></i> View </button> </td>
-                          </tr>
+
                         </tbody>
                       </table>
                     </div>
                   </div>
                 </div>
+                <script>
+                  let orders = [];
+                  let filteredOrders = [];
+
+                  // =============================
+                  //  FETCH ORDERS FROM PHP
+                  // =============================
+                  function loadOrders() {
+                    let formData = new FormData();
+                    formData.append("action", "fetchUserOrders");
+                    formData.append("userId", "<?php echo $id ?>");
+
+                    fetch("<?php echo $domain ?>server/api/orders.php", {
+                        method: "POST",
+                        body: formData
+                      })
+                      .then(res => res.json())
+                      .then(data => {
+                        console.log("API RESPONSE:", data);
+                        if (data.success) {
+                          orders = data.data;
+                          filteredOrders = orders;
+                          updateOrderCount();
+                          populateStatusCategory();
+                          renderTable();
+                        }
+                      })
+                      .catch(err => console.error("API ERROR:", err));
+                  }
+
+                  // =============================
+                  // UPDATE COUNT
+                  // =============================
+                  function updateOrderCount() {
+                    document.getElementById("orderCount").textContent = orders.length;
+                  }
+
+                  // =============================
+                  // POPULATE STATUS DROPDOWN
+                  // =============================
+                  function populateStatusCategory() {
+                    const statuses = ["completed", "processing", "pending", "canceled"];
+                    let select = document.getElementById("categoryFilter");
+
+                    statuses.forEach(status => {
+                      let opt = document.createElement("option");
+                      opt.value = status;
+                      opt.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+                      select.appendChild(opt);
+                    });
+                  }
+
+                  // =============================
+                  // RENDER TABLE
+                  // =============================
+                  function renderTable() {
+                    let tbody = document.querySelector("table tbody");
+                    tbody.innerHTML = "";
+
+                    let rowsToShow = filteredOrders.slice(0, 3);
+
+                    rowsToShow.forEach((order, index) => {
+                      tbody.innerHTML += `
+                          <tr>
+                            <td>#${index + 1}</td>
+                            <td>${order.order_id}</td>
+
+                            <td>
+                              <span class="d-block">${order.social_url}</span>
+                              
+                            </td>
+
+                            <td>
+                              <span class="badge capitalize bg-${getStatusColor(order.status)}-transparent">
+                                  ${order.status}
+                              </span>
+                            </td>
+
+                            <td>
+                              <span class="d-block mb-1">$${order.order_price}</span>
+                              <span class="d-block fs-12 text-muted">${order.created_at}</span>
+                            </td>
+
+                            <td>
+                              <button onclick="window.location.href='./details.php?order_id=${order.order_id}'" class="btn btn-sm btn-ghost-light border">
+                                  <i class="fe fe-eye text-muted me-1"></i> View
+                              </button>
+                            </td>
+                          </tr>
+                        `;
+                    });
+                  }
+
+                  // =============================
+                  // GET BADGE COLOR
+                  // =============================
+                  function getStatusColor(status) {
+                    switch (status.toLowerCase()) {
+                      case "completed":
+                        return "success";
+                      case "processing":
+                        return "warning";
+                      case "pending":
+                        return "primary";
+                      case "canceled":
+                        return "danger";
+                      default:
+                        return "secondary";
+                    }
+                  }
+
+                  // =============================
+                  // SORTING
+                  // =============================
+                  document.querySelectorAll(".sortOption").forEach(btn => {
+                    btn.addEventListener("click", function() {
+                      let field = this.getAttribute("data-sort");
+
+                      filteredOrders.sort((a, b) => {
+                        if (field === "order_id") return Number(a.id) - Number(b.id);
+                        if (field === "date") return new Date(a.created_at) - new Date(b.created_at);
+                        if (field === "price") return Number(a.order_price) - Number(b.order_price);
+                        return 0;
+                      });
+
+                      renderTable();
+                    });
+                  });
+
+                  // =============================
+                  // SEARCH (user + social_url)
+                  // =============================
+                  document.getElementById("searchBtn").addEventListener("click", () => {
+                    let search = document.getElementById("searchInput").value.toLowerCase();
+
+                    filteredOrders = orders.filter(o =>
+                      o.user.toLowerCase().includes(search) ||
+                      o.social_url.toLowerCase().includes(search) ||
+                      o.order_id.toLowerCase().includes(search) ||
+                      o.status.toLowerCase().includes(search)
+                    );
+
+                    renderTable();
+                  });
+
+                  // =============================
+                  // CATEGORY FILTER (status)
+                  // =============================
+                  document.getElementById("categoryFilter").addEventListener("change", function() {
+                    if (this.value === "") {
+                      filteredOrders = orders;
+                    } else {
+                      filteredOrders = orders.filter(o =>
+                        o.status.toLowerCase() === this.value.toLowerCase()
+                      );
+                    }
+                    renderTable();
+                  });
+
+                  // Start
+                  loadOrders();
+                </script>
+
+
               </div>
-              <ul class="pagination justify-content-end">
-                <li class="page-item disabled"> <a class="page-link">Previous</a> </li>
-                <li class="page-item"><a class="page-link" href="javascript:void(0);">1</a></li>
-                <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li>
-                <li class="page-item"><a class="page-link" href="javascript:void(0);">3</a></li>
-                <li class="page-item"> <a class="page-link" href="javascript:void(0);">Next</a> </li>
-              </ul>
             </div>
           </div>
         </div> <!-- End::row-1 -->
       </div>
     </div> <!-- End::app-content --> <!-- Footer Start -->
-    <?php  include_once '../../components/footer.php' ?>
+    <?php include_once '../../components/footer.php' ?>
     <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">

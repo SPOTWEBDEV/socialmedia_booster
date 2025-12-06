@@ -6,29 +6,48 @@ include_once '../../../server/model.php';
 
 
 
-if (isset($_POST['send_message'])) {
+// Fetch all messages
+function fetchSupportMessages($connection)
+{
+  $sql = "SELECT support_messages.*, users.fullname, users.email 
+            FROM support_messages 
+            LEFT JOIN users ON support_messages.user = users.id
+            ORDER BY support_messages.id DESC";
 
-  $message = trim(mysqli_real_escape_string($connection, $_POST['message']));
+  return $connection->query($sql);
+}
 
-  // Validate fields
-  if (empty($message)) {
-    showToast("All fields are required!");
-  } else {
 
-    // Insert into DB
-    $insert = "
-            INSERT INTO support_messages (user,message)
-            VALUES ('$id','$message')
-        ";
+if (!isset($_GET['id'])) {
 
-    if (mysqli_query($connection, $insert)) {
-      showToast("Your message has been sent successfully!");
-    } else {
-      showToast("Database error: " . mysqli_error($connection));
-    }
+  echo "<script>alert('No message ID provided'); window.location.href='../';</script>";
+}
+
+$msg_id = $_GET['id'];
+
+
+if (isset($_POST['save_reply'])) {
+  $reply  = $_POST['reply'];
+
+  $stmt = $connection->prepare("UPDATE support_messages SET reply = ? AND status = ? WHERE id = ?");
+  $stmt->bind_param("sis", $reply, $msg_id , 'Replied');
+
+  if ($stmt->execute()) {
+    echo "<script>alert('Reply saved successfully'); window.location.href='./?id=$msg_id';</script>";
   }
 }
 
+
+if (isset($_POST['delete_reply'])) {
+
+
+  $stmt = $connection->prepare("UPDATE support_messages SET reply = '' WHERE id = ?");
+  $stmt->bind_param("i", $msg_id);
+
+  if ($stmt->execute()) {
+    echo "<script>alert('Reply deleted successfully'): window.location.href='./?id=$msg_id';</script>";
+  }
+}
 
 
 
@@ -383,7 +402,7 @@ if (isset($_POST['send_message'])) {
             <p class="fw-medium fs-20 mb-0">Support Details Page</p>
             <p class="fs-13 text-muted mb-0">Let's check your today's stats!</p>
           </div>
-          <div class="btn-list"> <a href="./list/">
+          <div class="btn-list"> <a href="../">
               <button class="btn btn-primary-light btn-wave waves-effect waves-light">
                 <i class="bx bx-ticket align-middle me-1"></i>
                 <i class="bx bx-show align-middle me-1"></i>
@@ -395,51 +414,75 @@ if (isset($_POST['send_message'])) {
           <?php include_once '../../../components/admin/sidenavbar.php' ?>
           <div class="col-xl-9">
             <div class="row">
+              <?php
+              $messages = fetchSupportMessages($connection);
+              ?>
+
               <div class="col-xl-12">
-                <form method="POST" class="card custom-card">
+                <div class="card custom-card">
                   <div class="card-header">
-                    <div class="card-title">
-                      Still Have Questions ?
-                      <span class="subtitle fw-normal text-muted d-block fs-12">
-                        You can post your questions here, our support team is always active.
-                      </span>
-                    </div>
+                    <h4 class="card-title">User Support Messages</h4>
                   </div>
 
                   <div class="card-body">
-                    <div class="row gy-3">
 
-                      <div class="col-xl-6">
-                        <label for="user-name" class="form-label">Your Name</label>
-                        <input type="text" class="form-control form-control-light"
-                          id="user-name" name="name" value="<?php echo $fullname ?>" readonly>
+                    <?php while ($row = $messages->fetch_assoc()) { ?>
+                      <div class=" rounded p-3 mb-3">
+
+                        <!-- User Info -->
+                        <h6 class="fw-bold mb-1"><?php echo $row['fullname']; ?>
+                          <span class="text-muted"> (<?php echo $row['email']; ?>)</span>
+                        </h6>
+                        <small class="text-muted"><?php echo $row['created_at']; ?></small>
+
+                        <!-- User Message -->
+                        <p class="mt-2">
+                          <strong>Message:</strong><br>
+                          <?php echo nl2br($row['message']); ?>
+                        </p>
+
+                        <p class="mt-2">
+                          <strong>Admin Reply:</strong><br>
+                          <div class="d-flex g-3 align-items-center">
+                            <?php echo ($row['reply'] != '') ? $row['reply'] : 'No Reply Yet' ?>
+                          <?php if (!empty($row['reply'])) { ?>
+                            <form method="POST" class="ml-5" style="margin-left: 30px;">
+                              <button type="submit" name="delete_reply"
+                                class="btn btn-danger btn-sm mt-2 ml-3">
+                                <i class="fe fe-trash"></i> Delete Reply
+                              </button>
+                            </form>
+                          <?php } ?>
+                          </div>
+                      </p>
+
+
+
+
+                      <!-- Admin Reply Section -->
+                      <form method="POST" class="mt-3">
+                        <input type="hidden" name="msg_id" value="<?php echo $row['id']; ?>">
+
+
+
+                        <textarea name="reply" class="form-control" rows="2"><?php echo $row['reply']; ?></textarea>
+
+                        <button type="submit" name="save_reply"
+                          class="btn btn-primary btn-sm mt-2">
+                          Save Reply
+                        </button>
+
+                        <!-- DELETE REPLY ICON -->
+
+                      </form>
+
                       </div>
+                    <?php } ?>
 
-                      <div class="col-xl-6">
-                        <label for="user-email" class="form-label">Email</label>
-                        <input type="text" class="form-control form-control-light"
-                          id="user-email" name="email" value="<?php echo $email ?>" readonly>
-                      </div>
-
-                      <div class="col-xl-12">
-                        <label for="text-area" class="form-label">Textarea</label>
-                        <textarea class="form-control form-control-light"
-                          placeholder="Enter your question here"
-                          id="text-area" name="message" rows="2"></textarea>
-                      </div>
-
-                    </div>
                   </div>
-
-                  <div class="card-footer">
-                    <button type="submit" name="send_message"
-                      class="btn btn-primary btn-wave float-end waves-effect waves-light">
-                      Send
-                    </button>
-                  </div>
-                </form>
-
+                </div>
               </div>
+
             </div>
           </div>
         </div> <!-- End::row-1 -->
@@ -461,69 +504,21 @@ if (isset($_POST['send_message'])) {
     <p>To display this page you need a browser that supports JavaScript.</p>
   </noscript>
   <script src="<?php echo $domain ?>assets/libs/@popperjs/core/umd/popper.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#hb6|n!WYr<2:hB/z4o");
-    -->
-  </script> <!-- Bootstrap JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#h aj©l4#h(vLUaTK;YSv");
-    -->
-  </script> <!-- Defaultmenu JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/js/defaultmenu.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#hC6.xWo2O(4rw-/z4o");
-    -->
-  </script> <!-- Node Waves JS--> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/libs/node-waves/waves.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#he-ce\"R©qa2,v\"g");
-    -->
-  </script> <!-- Sticky JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/js/sticky.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#heJ:Cc-Or|2:hB/z4o");
-    -->
-  </script> <!-- Simplebar JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":");
-    -->
-  </script> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/js/simplebar.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#h<A1IWkBr|I?UaTK;YSv");
-    -->
-  </script> <!-- Apex Charts JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/libs/apexcharts/apexcharts.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#hGXPn91©qa2,v\"g");
-    -->
-  </script> <!-- Custom JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/js/customer-custom.js"></script>
   <div state="voice" class="placeholder-icon" id="tts-placeholder-icon" title="Click to show TTS button" style="background-image: url(&quot;chrome-extension://cpnomhnclohkhnikegipapofcjihldck/data/content_script/icons/voice.png&quot;);"><canvas width="36" height="36" class="loading-circle" id="text-to-speech-loader" style="display: none;"></canvas></div><svg id="SvgjsSvg1001" width="2" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev" style="overflow: hidden; top: -100%; left: -100%; position: absolute; opacity: 0;">
     <defs id="SvgjsDefs1002"></defs>

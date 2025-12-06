@@ -491,33 +491,33 @@ include_once '../../../server/auth/user.php';
 
                     filteredOrders.forEach((order, index) => {
                       tbody.innerHTML += `
-      <tr>
-        <td>#${index + 1}</td>
-        <td>${order.order_id}</td>
+                          <tr>
+                            <td>#${index + 1}</td>
+                            <td>${order.order_id}</td>
 
-        <td>
-          <span class="d-block">${order.social_url}</span>
-          
-        </td>
+                            <td>
+                              <span class="d-block">${order.social_url}</span>
+                              
+                            </td>
 
-        <td>
-          <span class="badge capitalize bg-${getStatusColor(order.status)}-transparent">
-              ${order.status}
-          </span>
-        </td>
+                            <td>
+                              <span class="badge capitalize bg-${getStatusColor(order.status)}-transparent">
+                                  ${order.status}
+                              </span>
+                            </td>
 
-        <td>
-          <span class="d-block mb-1">$${order.order_price}</span>
-          <span class="d-block fs-12 text-muted">${order.created_at}</span>
-        </td>
+                            <td>
+                              <span class="d-block mb-1">$${order.order_price}</span>
+                              <span class="d-block fs-12 text-muted">${order.created_at}</span>
+                            </td>
 
-        <td>
-          <button onclick="window.location.href='./details.php?order_id=${order.order_id}'" class="btn btn-sm btn-ghost-light border">
-              <i class="fe fe-eye text-muted me-1"></i> View
-          </button>
-        </td>
-      </tr>
-    `;
+                            <td>
+                              <button onclick="window.location.href='./details.php?order_id=${order.order_id}'" class="btn btn-sm btn-ghost-light border">
+                                  <i class="fe fe-eye text-muted me-1"></i> View
+                              </button>
+                            </td>
+                          </tr>
+                        `;
                     });
                   }
 

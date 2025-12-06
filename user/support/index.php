@@ -23,6 +23,11 @@ if (isset($_POST['send_message'])) {
 
     if (mysqli_query($connection, $insert)) {
       showToast("Your message has been sent successfully!");
+      echo "<script>
+              setTimeout(function() {
+                window.location.href='./list/';
+              }, 2000);
+            </script>";
     } else {
       showToast("Database error: " . mysqli_error($connection));
     }

@@ -387,12 +387,13 @@ include_once '../../../server/auth/user.php';
 
                                                 <tbody>
                                                     <?php
-                                                    $query = mysqli_query($connection, "SELECT * FROM support_messages WHERE id = $id ORDER BY id DESC");
+                                                    $query = mysqli_query($connection, "SELECT * FROM support_messages WHERE user = $id ORDER BY id DESC");
                                                     while ($row = mysqli_fetch_assoc($query)) {
                                                         $id = $row['id'];
                                                         $message = htmlspecialchars($row['message']); // safe
                                                         $status = $row['status'];
                                                         $date = $row['created_at'];
+                                                        $reply = htmlspecialchars($row['reply']); //
 
                                                         // MESSAGE PREVIEW — first 30 characters
                                                         $preview = substr($message, 0, 30);
@@ -402,12 +403,15 @@ include_once '../../../server/auth/user.php';
 
                                                         // STATUS COLORS
                                                         if ($status == "pending") {
-                                                            $badge = '<span class="badge bg-warning text-dark py-2 px-2 text-white " style="font-size:15px">Pending</span>';
+                                                            $badge = '<span class="badge bg-danger text-dark py-2 px-2 text-white " style="font-size:15px">Pending</span>';
                                                         } elseif ($status == "inprogress") {
                                                             $badge = '<span class="badge bg-info text-dark py-2 px-2 text-white " style="font-size:15px">In Progress</span>';
                                                         } elseif ($status == "resolved") {
                                                             $badge = '<span class="badge bg-success py-2 px-2 text-white " style="font-size:15px">Resolved</span>';
-                                                        } else {
+                                                        }elseif ($status == "replied") {
+                                                            $badge = '<span class="badge bg-warning py-2 px-2 text-white " style="font-size:15px">Resolved</span>';
+                                                        }
+                                                         else {
                                                             $badge = '<span class="badge bg-secondary py-2 px-2 text-white " style="font-size:15px">Unknown</span>';
                                                         }
                                                     ?>
@@ -430,8 +434,13 @@ include_once '../../../server/auth/user.php';
                                                             <td colspan="5" class="bg-light">
                                                                 <strong>Message:</strong>
                                                                 <p class="mt-2"><?= nl2br($message) ?></p>
+                                                                <strong>Support Reply:</strong>
+                                                                <p class="mt-2"><?php echo ($reply != '') ? $reply : 'No Comment Yet' ?></p>
+
                                                             </td>
+                                                            
                                                         </tr>
+                                                        
 
                                                     <?php } ?>
                                                 </tbody>

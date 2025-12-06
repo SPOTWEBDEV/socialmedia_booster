@@ -361,9 +361,9 @@ include_once '../../server/model.php';
                         <p class="fs-13 text-muted mb-0">Let's check your today's stats!</p>
                     </div>
                     <div class="btn-list"> <a href="../"><button class="btn btn-primary-light btn-wave waves-effect waves-light">
-                            <i class="bx bx-plus-circle align-middle me-1"></i>
-                            Create Ticket
-                        </button></a> </div>
+                                <i class="bx bx-plus-circle align-middle me-1"></i>
+                                Create Ticket
+                            </button></a> </div>
                 </div> <!-- End::page-header --> <!-- Start::row-1 -->
                 <div class="row">
                     <?php include_once '../../components/admin/sidenavbar.php' ?>
@@ -378,21 +378,27 @@ include_once '../../server/model.php';
                                                 <thead>
                                                     <tr>
                                                         <th>Ticket ID</th>
-                                                        <th>Preview</th>
+                                                        <th>Name / Email</th>
+                                                        <th>Preview Message / Date</th>
                                                         <th>Status</th>
-                                                        <th>Date</th>
+                                                        
                                                         <th>Action</th>
                                                     </tr>
                                                 </thead>
 
                                                 <tbody>
                                                     <?php
-                                                    $query = mysqli_query($connection, "SELECT * FROM support_messages ORDER BY id DESC");
+                                                    $query = mysqli_query($connection, "SELECT support_messages.* , users.fullname , users.email FROM support_messages , users WHERE users.id =support_messages.user ORDER BY support_messages.id DESC");
                                                     while ($row = mysqli_fetch_assoc($query)) {
-                                                        $id = $row['id'];
+                                                        $support_id = $row['id'];
                                                         $message = htmlspecialchars($row['message']); // safe
                                                         $status = $row['status'];
                                                         $date = $row['created_at'];
+                                                        $reply = htmlspecialchars($row['reply']); //
+
+                                                        $fullname = $row['fullname'];
+                                                        $email = $row['email'];
+                                                        
 
                                                         // MESSAGE PREVIEW — first 30 characters
                                                         $preview = substr($message, 0, 30);
@@ -402,38 +408,50 @@ include_once '../../server/model.php';
 
                                                         // STATUS COLORS
                                                         if ($status == "pending") {
-                                                            $badge = '<span class="badge bg-warning text-dark py-2 px-2 text-white " style="font-size:15px">Pending</span>';
+                                                            $badge = '<span class="badge bg-danger text-dark py-2 px-2 text-white" style="font-size:15px">Pending</span>';
                                                         } elseif ($status == "inprogress") {
                                                             $badge = '<span class="badge bg-info text-dark py-2 px-2 text-white " style="font-size:15px">In Progress</span>';
                                                         } elseif ($status == "resolved") {
                                                             $badge = '<span class="badge bg-success py-2 px-2 text-white " style="font-size:15px">Resolved</span>';
-                                                        } else {
+                                                        } elseif ($status == "replied") {
+                                                            $badge = '<span class="badge bg-warning py-2 px-2 text-white " style="font-size:15px">Resolved</span>';
+                                                        }
+                                                         else {
                                                             $badge = '<span class="badge bg-secondary py-2 px-2 text-white " style="font-size:15px">Unknown</span>';
                                                         }
                                                     ?>
                                                         <!-- NORMAL ROW -->
                                                         <tr>
-                                                            <td>#<?= $id ?></td>
-                                                            <td><?= $preview ?></td>
-                                                            <td><?= $badge ?></td>
-                                                            <td><?= $date ?></td>
+                                                            <td>#<?= $support_id ?></td>
                                                             <td>
-                                                                <button id="btn-<?= $id ?>" class="btn btn-sm btn-outline-primary"
-                                                                    onclick="toggleMessage(<?= $id ?>)">
+                                                                <p><?php echo $fullname  ?></p>
+                                                                <p><?php echo $email  ?></p>
+                                                            </td>
+                                                            <td>
+                                                                <p><?= $preview . '...' ?></p>
+                                                                <p><?= $date ?></p>
+                                                            </td>
+                                                            <td><?= $badge ?></td>
+                                                           
+                                                            <td>
+                                                                <button id="btn-<?= $support_id ?>" class="btn btn-sm btn-outline-primary"
+                                                                    onclick="toggleMessage(<?= $support_id ?>)">
                                                                     View
                                                                 </button>
-                                                                <button id="btn-<?= $id ?>" class="btn btn-sm btn-outline-primary"
-                                                                    onclick="window.location.href='./reply/id=<?= $id ?>'">
+                                                                <button id="btn-<?= $support_id ?>" class="btn btn-sm btn-outline-primary"
+                                                                    onclick="window.location.href='./reply/?id=<?= $support_id ?>'">
                                                                     Reply
                                                                 </button>
                                                             </td>
                                                         </tr>
 
                                                         <!-- HIDDEN MESSAGE ROW -->
-                                                        <tr id="msg-<?= $id ?>" style="display: none;">
+                                                        <tr id="msg-<?= $support_id ?>" style="display: none;">
                                                             <td colspan="5" class="bg-light">
                                                                 <strong>Message:</strong>
                                                                 <p class="mt-2"><?= nl2br($message) ?></p>
+                                                                <strong>Support Reply:</strong>
+                                                                <p class="mt-2"><?php echo ($reply != '') ? $reply : 'No Comment Yet' ?></p>
                                                             </td>
                                                         </tr>
 
@@ -443,8 +461,10 @@ include_once '../../server/model.php';
 
                                             <script>
                                                 function toggleMessage(id) {
+                                                    console.log("Toggling message for ID:", id);
                                                     let row = document.getElementById("msg-" + id);
                                                     let btn = document.getElementById("btn-" + id);
+                                                    console.log("Current display style:", row, btn);
 
                                                     if (row.style.display === "none") {
                                                         row.style.display = "table-row";
