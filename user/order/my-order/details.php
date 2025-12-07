@@ -519,6 +519,9 @@ $order_id = $_GET['order_id'];
                                                                                 <p class="text-muted mb-1">
                                                                                     <strong>Remains:</strong> <?= htmlspecialchars($api_remains); ?>
                                                                                 </p>
+                                                                                 <p class="text-muted mb-1">
+                                                                                    <strong>Total Cost:</strong> <?= htmlspecialchars($row['order_price']); ?> <?= htmlspecialchars($api_currency); ?>
+                                                                                </p>
 
                                                                             </div>
 
