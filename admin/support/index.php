@@ -414,7 +414,7 @@ include_once '../../server/model.php';
                                                         } elseif ($status == "resolved") {
                                                             $badge = '<span class="badge bg-success py-2 px-2 text-white " style="font-size:15px">Resolved</span>';
                                                         } elseif ($status == "replied") {
-                                                            $badge = '<span class="badge bg-warning py-2 px-2 text-white " style="font-size:15px">Resolved</span>';
+                                                            $badge = '<span class="badge bg-warning py-2 px-2 text-white " style="font-size:15px">Replied</span>';
                                                         }
                                                          else {
                                                             $badge = '<span class="badge bg-secondary py-2 px-2 text-white " style="font-size:15px">Unknown</span>';

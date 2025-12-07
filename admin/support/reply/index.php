@@ -27,15 +27,28 @@ $msg_id = $_GET['id'];
 
 
 if (isset($_POST['save_reply'])) {
-  $reply  = $_POST['reply'];
+    $reply  = $_POST['reply'];
+    $status = "replied"; // must be in a variable
+    $msg_id = $_POST['msg_id']; // make sure you're passing this
 
-  $stmt = $connection->prepare("UPDATE support_messages SET reply = ? AND status = ? WHERE id = ?");
-  $stmt->bind_param("sis", $reply, $msg_id , 'Replied');
+    $stmt = $connection->prepare("
+        UPDATE support_messages 
+        SET reply = ?, status = ?
+        WHERE id = ?
+    ");
 
-  if ($stmt->execute()) {
-    echo "<script>alert('Reply saved successfully'); window.location.href='./?id=$msg_id';</script>";
-  }
+    $stmt->bind_param("ssi", $reply, $status, $msg_id);
+
+    if ($stmt->execute()) {
+        echo "<script>
+                alert('Reply saved successfully');
+                window.location.href='./?id=$msg_id';
+              </script>";
+    } else {
+        echo "<script>alert('Failed to save reply');</script>";
+    }
 }
+
 
 
 if (isset($_POST['delete_reply'])) {

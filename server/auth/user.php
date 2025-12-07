@@ -22,6 +22,7 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_id'] != "") {
             $fullname         = sanitize($row['fullname']);
             $status           = sanitize($row['status']);
             $status_message   = sanitize($row['status_message'], '');
+            $balance = $row['balance'];
         }
     } else {
         echo "<script>window.open('$url', '_self');</script>";
