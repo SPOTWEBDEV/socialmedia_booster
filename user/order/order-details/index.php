@@ -7,7 +7,9 @@ include_once '../../../server/auth/user.php';
 require_once '../../../server/controller/boosting.php';
 
 
-
+$get = mysqli_query($connection, "SELECT sitePrice FROM admin WHERE id = 1");
+$data = mysqli_fetch_assoc($get);
+$site_price = $data['sitePrice'] ?? 0;
 
 if (isset($_POST['send_message'])) {
     // Get form values
@@ -20,7 +22,10 @@ if (isset($_POST['send_message'])) {
     $quanity       = $_POST['quanity'];
 
 
-    $order_price = ($quanity / 1000) * $order_rate;
+    $sub_price = ($quanity / 1000) * $order_rate;
+    $sub_price = $sub_price + $site_price;
+
+    $order_price = $sub_price + $site_price;
 
 
 
@@ -38,14 +43,15 @@ if (isset($_POST['send_message'])) {
         // Insert into database (Prepared Statement)
         echo "<script>alert('$orderId');</script>";
         $stmt = $connection->prepare("
-        INSERT INTO user_orders (user,service_id, order_name, order_price, order_category, social_url, message , quanity , order_id)
-        VALUES (?,?, ?, ?, ?, ?, ? , ? , ?)");
+        INSERT INTO user_orders (user,service_id, order_name , sub_price , order_price , order_category, social_url, message , quanity , order_id)
+        VALUES (?,?, ?, ?, ?, ?, ? , ? , ? , ?)");
 
         $stmt->bind_param(
-            "sisdssssi",
+            "sissdssssi",
             $id,
             $service_id,
             $order_name,
+            $sub_price,
             $order_price,
             $order_category,
             $social_url,
@@ -77,9 +83,7 @@ if (isset($_POST['send_message'])) {
 
 
 
-$get = mysqli_query($connection, "SELECT sitePrice FROM admin WHERE id = 1");
-$data = mysqli_fetch_assoc($get);
-$site_price = $data['sitePrice'] ?? 0;
+
 
 
 ?>
