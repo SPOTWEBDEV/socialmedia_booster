@@ -7,6 +7,7 @@
                       <ul class="main-customer-menu active mt-4">
                         
                         <li class="slide active"> <a href="<?php echo $domain ?>admin/dashboard/" class="side-menu__item active"> <i class="bi bi-house side-menu__icon"></i> <span class="side-menu__label">Dashboard</span> </a> </li> <!-- End::slide --> <!-- Start::slide -->
+                         <li class="slide"> <a href="<?php echo $domain ?>admin/deposit" class="side-menu__item"> <i class="bi bi-people side-menu__icon"></i> <span class="side-menu__label">Deposit</span> </a> </li> <!-- End::slide --> <!-- Start::slide -->
                          <li class="slide"> <a href="<?php echo $domain ?>admin/user" class="side-menu__item"> <i class="bi bi-people side-menu__icon"></i> <span class="side-menu__label">User</span> </a> </li> <!-- End::slide --> <!-- Start::slide -->
                         <li class="slide"> <a href="<?php echo $domain ?>admin/order" class="side-menu__item"> <i class="bi bi-bag side-menu__icon"></i> <span class="side-menu__label">Orders</span> </a> </li> <!-- End::slide --> <!-- Start::slide -->
                        
