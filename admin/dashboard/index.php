@@ -2,6 +2,11 @@
 
 include_once '../../server/connection.php';
 include_once '../../server/model.php';
+include_once '../../server/controller/boosting.php';
+
+$balance = $api->balance();
+
+
 
 
 
@@ -406,6 +411,26 @@ if (isset($_POST['update_price'])) {
           <div class="col-xl-9">
             <div class="row">
               <div class="row">
+
+              <!-- Total Balance From Third Party -->
+                <div class="col-xl-4">
+                  <div class="card custom-card">
+                    <div class="card-body">
+                      <a href="#" class="stretched-link"></a>
+                      <div class="d-flex align-items-center gap-3">
+                        <div>
+                          <span class="avatar avatar-xl bg-primary-transparent">
+                            <i class="bi bi-wallet2 fs-4"></i>
+                          </span>
+                        </div>
+                        <div>
+                          <span class="d-block text-muted mb-1">Total Balance From Third Party</span>
+                          <h4 class="mb-0">₦<?php echo $balance->balance; ?></h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
                 <!-- Total Users -->
                 <div class="col-xl-4">

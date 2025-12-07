@@ -376,7 +376,8 @@ if (isset($_POST['send_message'])) {
                                             <div class="col-xl-12">
                                                 <label class="form-label">Total Price</label>
                                                 <input type="hidden" id="totalPrice" name="totalprice" class="form-control form-control-light" readonly>
-                                                <input type="text" id="totalPrice1" name="totalprice1" class="form-control form-control-light" readonly>
+                                                <!-- <input type="text" id="totalPrice1" name="totalprice1" class="form-control form-control-light" readonly> -->
+                                                 <div class="totalPrice1"></div>
                                             </div>
 
 
@@ -438,7 +439,7 @@ if (isset($_POST['send_message'])) {
                                         if (!isNaN(quantity) && !isNaN(rate)) {
                                             let price = (quantity / 1000) * rate;
                                             document.getElementById("totalPrice").value = price.toFixed(6);
-                                            document.getElementById("totalPrice1").value = `third party fee : ${price} and site fee : ${Number(<?php echo $site_price; ?>)} total : ${price + Number(<?php echo $site_price; ?>)}`;
+                                            document.getElementById("totalPrice1").innerHTML = `third party fee : ${price} and site fee : ${Number(<?php echo $site_price; ?>)} total : ${price + Number(<?php echo $site_price; ?>)}`;
                                         } else {
                                             document.getElementById("totalPrice").value = "";
                                             document.getElementById("totalPrice1").value = "";
