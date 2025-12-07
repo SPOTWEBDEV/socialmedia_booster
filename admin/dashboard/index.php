@@ -5,6 +5,52 @@ include_once '../../server/model.php';
 
 
 
+// TOTAL USERS
+$totalUsers = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM users"));
+
+// TOTAL ORDERS
+$totalOrders = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM user_orders"));
+
+// SUPPORT MESSAGES
+$totalSupport = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM support_messages"));
+
+// DEPOSITS
+$pendingDeposit = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM deposits WHERE status='pending'"));
+$approvedDeposit = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM deposits WHERE status='approved'"));
+$declinedDeposit = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM deposits WHERE status='declined'"));
+
+// TOTAL APPROVED DEPOSIT AMOUNT
+$getAmount = mysqli_query($connection, "SELECT SUM(amount) AS total FROM deposits WHERE status='approved'");
+$totalDepositAmount = mysqli_fetch_assoc($getAmount)['total'] ?? 0;
+
+
+
+
+
+
+// Fetch current price
+$get = mysqli_query($connection, "SELECT sitePrice FROM admin WHERE id = 1");
+$data = mysqli_fetch_assoc($get);
+$price = $data['sitePrice'] ?? 0;
+
+// Update price
+if (isset($_POST['update_price'])) {
+    $new_price = $_POST['price'];
+
+    is_numeric($new_price) or die("<script>alert('Invalid price value'); </script>");
+
+    $stmt = $connection->prepare("UPDATE admin SET sitePrice = ? WHERE id = 1");
+    $stmt->bind_param("s", $new_price);
+
+    if ($stmt->execute()) {
+        echo "<script>alert('Price updated successfully'); window.location.href='./';</script>";
+    }
+}
+
+
+
+
+
 ?>
 
 
@@ -344,173 +390,205 @@ include_once '../../server/model.php';
 </head>
 
 <body class="customer-dashboard" cz-shortcut-listen="true">
- 
+
   <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
   <div class="page"> <!-- app-header -->
-     <?php  include_once '../../components/admin/navbar.php'  ?>
-  
+    <?php include_once '../../components/admin/navbar.php'  ?>
+
     <div class="main-content app-content">
       <div class="container-fluid"> <!-- Start::page-header -->
         <div class="d-flex align-items-center justify-content-between my-4 page-header-breadcrumb flex-wrap gap-2">
-          
-         
+
+
         </div> <!-- End::page-header --> <!-- Start::row-1 -->
         <div class="row">
-           <?php  include_once '../../components/admin/sidenavbar.php' ?>
+          <?php include_once '../../components/admin/sidenavbar.php' ?>
           <div class="col-xl-9">
             <div class="row">
-              <div class="col-xl-4">
-                <div class="card custom-card"> <a href="javascript:void(0);" class="stretched-link"></a>
-                  <div class="card-body">
-                    <div class="d-flex align-items-center gap-3">
-                      <div> <span class="avatar avatar-xl bg-primary-transparent"> <i class="bi bi-bag-check fs-4"></i> </span> </div>
-                      <div> <span class="d-block text-muted mb-1">All User</span>
-                        <h4 class="mb-0">32,189</h4>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-xl-4">
-                <div class="card custom-card">
-                  <div class="card-body"> <a href="javascript:void(0);" class="stretched-link"></a>
-                    <div class="d-flex align-items-center gap-3">
-                      <div> <span class="avatar avatar-xl bg-success-transparent"> <i class="bi bi-currency-dollar fs-4"></i> </span> </div>
-                      <div> <span class="d-block text-muted mb-1">Balance</span>
-                        <h4 class="mb-0">$15,289k</h4>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-xl-4">
-                <div class="card custom-card">
-                  <div class="card-body"> <a href="javascript:void(0);" class="stretched-link"></a>
-                    <div class="d-flex align-items-center gap-3">
-                      <div> <span class="avatar avatar-xl bg-info-transparent"> <i class="bi bi-ticket-perforated fs-4"></i> </span> </div>
-                      <div> <span class="d-block text-muted mb-1">Approved Orders</span>
-                        <h4 class="mb-0">1183</h4>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <div class="row">
+
+                <!-- Total Users -->
                 <div class="col-xl-4">
-                <div class="card custom-card">
-                  <div class="card-body"> <a href="javascript:void(0);" class="stretched-link"></a>
-                    <div class="d-flex align-items-center gap-3">
-                      <div> <span class="avatar avatar-xl bg-info-transparent"> <i class="bi bi-ticket-perforated fs-4"></i> </span> </div>
-                      <div> <span class="d-block text-muted mb-1">Pending Orders</span>
-                        <h4 class="mb-0">283</h4>
+                  <div class="card custom-card">
+                    <div class="card-body">
+                      <a href="#" class="stretched-link"></a>
+                      <div class="d-flex align-items-center gap-3">
+                        <div>
+                          <span class="avatar avatar-xl bg-primary-transparent">
+                            <i class="bi bi-people fs-4"></i>
+                          </span>
+                        </div>
+                        <div>
+                          <span class="d-block text-muted mb-1">Total Users</span>
+                          <h4 class="mb-0"><?php echo $totalUsers; ?></h4>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+
+                <!-- Total Orders -->
                 <div class="col-xl-4">
-                <div class="card custom-card">
-                  <div class="card-body"> <a href="javascript:void(0);" class="stretched-link"></a>
-                    <div class="d-flex align-items-center gap-3">
-                      <div> <span class="avatar avatar-xl bg-info-transparent"> <i class="bi bi-ticket-perforated fs-4"></i> </span> </div>
-                      <div> <span class="d-block text-muted mb-1">Declined Orders</span>
-                        <h4 class="mb-0">283</h4>
+                  <div class="card custom-card">
+                    <div class="card-body">
+                      <a href="#" class="stretched-link"></a>
+                      <div class="d-flex align-items-center gap-3">
+                        <div>
+                          <span class="avatar avatar-xl bg-success-transparent">
+                            <i class="bi bi-bag-check fs-4"></i>
+                          </span>
+                        </div>
+                        <div>
+                          <span class="d-block text-muted mb-1">Total Orders</span>
+                          <h4 class="mb-0"><?php echo $totalOrders; ?></h4>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
+
+                <!-- Support Messages -->
+                <div class="col-xl-4">
+                  <div class="card custom-card">
+                    <div class="card-body">
+                      <a href="#" class="stretched-link"></a>
+                      <div class="d-flex align-items-center gap-3">
+                        <div>
+                          <span class="avatar avatar-xl bg-info-transparent">
+                            <i class="bi bi-chat-dots fs-4"></i>
+                          </span>
+                        </div>
+                        <div>
+                          <span class="d-block text-muted mb-1">Support Messages</span>
+                          <h4 class="mb-0"><?php echo $totalSupport; ?></h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Pending Deposits -->
+                <div class="col-xl-4">
+                  <div class="card custom-card">
+                    <div class="card-body">
+                      <a href="#" class="stretched-link"></a>
+                      <div class="d-flex align-items-center gap-3">
+                        <div>
+                          <span class="avatar avatar-xl bg-warning-transparent">
+                            <i class="bi bi-hourglass-split fs-4"></i>
+                          </span>
+                        </div>
+                        <div>
+                          <span class="d-block text-muted mb-1">Pending Deposits</span>
+                          <h4 class="mb-0"><?php echo $pendingDeposit; ?></h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Approved Deposits -->
+                <div class="col-xl-4">
+                  <div class="card custom-card">
+                    <div class="card-body">
+                      <a href="#" class="stretched-link"></a>
+                      <div class="d-flex align-items-center gap-3">
+                        <div>
+                          <span class="avatar avatar-xl bg-success-transparent">
+                            <i class="bi bi-check-circle fs-4"></i>
+                          </span>
+                        </div>
+                        <div>
+                          <span class="d-block text-muted mb-1">Approved Deposits</span>
+                          <h4 class="mb-0"><?php echo $approvedDeposit; ?></h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Declined Deposits -->
+                <div class="col-xl-4">
+                  <div class="card custom-card">
+                    <div class="card-body">
+                      <a href="#" class="stretched-link"></a>
+                      <div class="d-flex align-items-center gap-3">
+                        <div>
+                          <span class="avatar avatar-xl bg-danger-transparent">
+                            <i class="bi bi-x-circle fs-4"></i>
+                          </span>
+                        </div>
+                        <div>
+                          <span class="d-block text-muted mb-1">Declined Deposits</span>
+                          <h4 class="mb-0"><?php echo $declinedDeposit; ?></h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Total Deposit Amount -->
+                <div class="col-xl-4">
+                  <div class="card custom-card">
+                    <div class="card-body">
+                      <a href="#" class="stretched-link"></a>
+                      <div class="d-flex align-items-center gap-3">
+                        <div>
+                          <span class="avatar avatar-xl bg-primary-transparent">
+                            <i class="bi bi-wallet2 fs-4"></i>
+                          </span>
+                        </div>
+                        <div>
+                          <span class="d-block text-muted mb-1">Total Deposit Amount</span>
+                          <h4 class="mb-0">₦<?php echo number_format($totalDepositAmount); ?></h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
               </div>
+
               <div class="col-xl-12">
-                <div class="card custom-card overflow-hidden">
-                  <div class="card-header justify-content-between">
-                    <div class="card-title"> Recent Orders </div> <a href="javascript:void(0);" class="btn btn-primary-light">View All Orders<i class="ri-arrow-right-s-line ms-1 align-middle"></i></a>
-                  </div>
-                  <div class="card-body px-0 pt-2 pb-0">
-                    <div class="table-responsive">
-                      <table class="table text-nowrap">
-                        <thead>
-                          <tr>
-                            <th scope="col">Order ID</th>
-                            <th scope="col">Payment Mode</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Amount Paid</th>
-                            <th scope="col">Action</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td><a href="javascript:void(0);" class="text-primary text-decoration-underline">#ORD789ABC</a></td>
-                            <td>
-                              <div> <span class="d-block mb-1">Rupay Card ****2783</span> <span class="d-block fs-12 text-muted fw-normal">Card Payment</span> </div>
-                            </td>
-                            <td><span class="badge bg-success-transparent">Completed</span></td>
-                            <td>
-                              <div> <span class="d-block mb-1">$1,234.78</span> <span class="d-block fs-12 text-muted fw-normal">Nov 22,2023</span> </div>
-                            </td>
-                            <td> <button class="btn btn-sm btn-ghost-light text-default border btn-wave waves-effect waves-light"> <i class="fe fe-eye text-muted align-middle me-1"></i> View </button> </td>
-                          </tr>
-                          <tr>
-                            <td><a href="javascript:void(0);" class="text-primary text-decoration-underline">#ORD253SFW</a></td>
-                            <td>
-                              <div> <span class="d-block mb-1 fw-normal">Digital Wallet</span> <span class="d-block fs-12 text-muted">Online Transaction</span> </div>
-                            </td>
-                            <td><span class="badge bg-warning-transparent">Pending</span></td>
-                            <td>
-                              <div> <span class="d-block mb-1">$623.99</span> <span class="d-block fs-12 text-muted fw-normal">Nov 22,2023</span> </div>
-                            </td>
-                            <td> <button class="btn btn-sm btn-ghost-light text-default border btn-wave waves-effect waves-light"> <i class="fe fe-eye text-muted align-middle me-1"></i> View </button> </td>
-                          </tr>
-                          <tr>
-                            <td><a href="javascript:void(0);" class="text-primary text-decoration-underline">#ORD356SKF</a></td>
-                            <td>
-                              <div> <span class="d-block mb-1 fw-normal">Mastro Card ****7893</span> <span class="d-block fs-12 text-muted">Card Payment</span> </div>
-                            </td>
-                            <td><span class="badge bg-danger-transparent">Cancelled</span></td>
-                            <td>
-                              <div> <span class="d-block mb-1">$1,324</span> <span class="d-block fs-12 text-muted fw-normal">Nov 21,2023</span> </div>
-                            </td>
-                            <td> <button class="btn btn-sm btn-ghost-light text-default border btn-wave waves-effect waves-light"> <i class="fe fe-eye text-muted align-middle me-1"></i> View </button> </td>
-                          </tr>
-                          <tr>
-                            <td><a href="javascript:void(0);" class="text-primary text-decoration-underline">#ORD363ESD</a></td>
-                            <td>
-                              <div> <span class="d-block mb-1 fw-normal">Cash On Delivery</span> <span class="d-block fs-12 text-muted">Pay On Delivery</span> </div>
-                            </td>
-                            <td><span class="badge bg-success-transparent">Completed</span></td>
-                            <td>
-                              <div> <span class="d-block mb-1">$1,123.49</span> <span class="d-block fs-12 text-muted fw-normal">Nov 20,2023</span> </div>
-                            </td>
-                            <td> <button class="btn btn-sm btn-ghost-light text-default border btn-wave waves-effect waves-light"> <i class="fe fe-eye text-muted align-middle me-1"></i> View </button> </td>
-                          </tr>
-                          <tr>
-                            <td class="border-bottom-0"> <a href="javascript:void(0);" class="text-primary text-decoration-underline">#ORD253KSE</a> </td>
-                            <td class="border-bottom-0">
-                              <div> <span class="d-block mb-1 fw-normal">Visa Card ****2563</span> <span class="d-block fs-12 text-muted">Card Payment</span> </div>
-                            </td>
-                            <td class="border-bottom-0"><span class="badge bg-success-transparent">Completed</span></td>
-                            <td class="border-bottom-0">
-                              <div> <span class="d-block mb-1">$1,289</span> <span class="d-block fs-12 text-muted fw-normal">Nov 18,2023</span> </div>
-                            </td>
-                            <td class="border-bottom-0"> <button class="btn btn-sm btn-ghost-light text-default border btn-wave waves-effect waves-light"> <i class="fe fe-eye text-muted align-middle me-1"></i> View </button> </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
+    <form method="POST" class="card custom-card">
+        <div class="card-header">
+            <div class="card-title">
+                Site Edit
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row gy-3">
+
+                <div class="col-xl-6">
+                    <label class="form-label">Price</label>
+                    <input 
+                        type="text" 
+                        class="form-control form-control-light"
+                        name="price" 
+                        value="<?php echo $price; ?>"
+                    >
                 </div>
-              </div>
-              <ul class="pagination justify-content-end">
-                <li class="page-item disabled"> <a class="page-link">Previous</a> </li>
-                <li class="page-item"><a class="page-link" href="javascript:void(0);">1</a></li>
-                <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li>
-                <li class="page-item"><a class="page-link" href="javascript:void(0);">3</a></li>
-                <li class="page-item"> <a class="page-link" href="javascript:void(0);">Next</a> </li>
-              </ul>
+
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <button type="submit" name="update_price"
+                class="btn btn-primary btn-wave float-end waves-effect waves-light">
+                Set
+            </button>
+        </div>
+    </form>
+</div>
+
+
             </div>
           </div>
         </div> <!-- End::row-1 -->
       </div>
     </div> <!-- End::app-content --> <!-- Footer Start -->
-    <?php  include_once '../../components/footer.php' ?>
+    <?php include_once '../../components/footer.php' ?>
     <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -526,69 +604,21 @@ include_once '../../server/model.php';
     <p>To display this page you need a browser that supports JavaScript.</p>
   </noscript>
   <script src="<?php echo $domain ?>assets/libs/@popperjs/core/umd/popper.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#hb6|n!WYr<2:hB/z4o");
-    -->
-  </script> <!-- Bootstrap JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#h aj©l4#h(vLUaTK;YSv");
-    -->
-  </script> <!-- Defaultmenu JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/js/defaultmenu.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#hC6.xWo2O(4rw-/z4o");
-    -->
-  </script> <!-- Node Waves JS--> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/libs/node-waves/waves.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#he-ce\"R©qa2,v\"g");
-    -->
-  </script> <!-- Sticky JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/js/sticky.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#heJ:Cc-Or|2:hB/z4o");
-    -->
-  </script> <!-- Simplebar JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":");
-    -->
-  </script> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/js/simplebar.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#h<A1IWkBr|I?UaTK;YSv");
-    -->
-  </script> <!-- Apex Charts JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/libs/apexcharts/apexcharts.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#hGXPn91©qa2,v\"g");
-    -->
-  </script> <!-- Custom JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/js/customer-custom.js"></script>
   <div state="voice" class="placeholder-icon" id="tts-placeholder-icon" title="Click to show TTS button" style="background-image: url(&quot;chrome-extension://cpnomhnclohkhnikegipapofcjihldck/data/content_script/icons/voice.png&quot;);"><canvas width="36" height="36" class="loading-circle" id="text-to-speech-loader" style="display: none;"></canvas></div><svg id="SvgjsSvg1001" width="2" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev" style="overflow: hidden; top: -100%; left: -100%; position: absolute; opacity: 0;">
     <defs id="SvgjsDefs1002"></defs>

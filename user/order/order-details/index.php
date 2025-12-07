@@ -77,6 +77,11 @@ if (isset($_POST['send_message'])) {
 
 
 
+$get = mysqli_query($connection, "SELECT sitePrice FROM admin WHERE id = 1");
+$data = mysqli_fetch_assoc($get);
+$site_price = $data['sitePrice'] ?? 0;
+
+
 ?>
 
 
@@ -359,14 +364,15 @@ if (isset($_POST['send_message'])) {
                                             <!-- Service ID -->
                                             <div class="col-xl-6">
                                                 <label class="form-label">Quantity</label>
-                                                <input type="text" id="orderService" name="service" class="form-control form-control-light" readonly>
+                                                <input type="hidden" id="orderService" name="service" class="form-control form-control-light" readonly>
                                                 <input type="text" id="quanity" name="quanity" class="form-control form-control-light">
                                             </div>
 
                                             <!-- Order Price -->
                                             <div class="col-xl-12">
                                                 <label class="form-label">Total Price</label>
-                                                <input type="text" id="totalPrice" name="totalprice" class="form-control form-control-light" readonly>
+                                                <input type="hidden" id="totalPrice" name="totalprice" class="form-control form-control-light" readonly>
+                                                <input type="text" id="totalPrice1" name="totalprice1" class="form-control form-control-light" readonly>
                                             </div>
 
 
@@ -428,8 +434,10 @@ if (isset($_POST['send_message'])) {
                                         if (!isNaN(quantity) && !isNaN(rate)) {
                                             let price = (quantity / 1000) * rate;
                                             document.getElementById("totalPrice").value = price.toFixed(6);
+                                            document.getElementById("totalPrice1").value = `third party fee : ${price} and site fee : ${Number(<?php echo $site_price; ?>)} total : ${price + Number(<?php echo $site_price; ?>)}`;
                                         } else {
                                             document.getElementById("totalPrice").value = "";
+                                            document.getElementById("totalPrice1").value = "";
                                         }
                                     });
                                 </script>

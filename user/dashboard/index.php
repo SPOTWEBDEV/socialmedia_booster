@@ -7,7 +7,6 @@ include_once '../../server/auth/user.php';
 
 
 $totalOrder = mysqli_num_rows(mysqli_query($connection, "SELECT `id` FROM user_orders WHERE user='$id'"));
-
 $totalSupport = mysqli_num_rows(mysqli_query($connection, "SELECT `id` FROM support_messages WHERE user='$id'"));
 
 ?>

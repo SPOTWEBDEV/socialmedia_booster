@@ -37,7 +37,7 @@ if (isset($_POST['create_account'])) {
 
             if ($insert) {
                 $toast = "Account created successfully!";
-                echo "<script>setTimeout(function(){ window.location.href = '../login'; }, 2000);</script>";
+                echo "<script>setTimeout(function(){ window.location.href = '../login/'}, 2000);</script>";
             } else {
                 $toast = "Database error: " . mysqli_error($connection);
             }

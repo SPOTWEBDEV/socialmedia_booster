@@ -2,7 +2,7 @@
    <div class="main-header-container container-fluid"> <!-- Start::header-content-left -->
      <div class="header-content-left"> <!-- Start::header-element -->
        <div class="header-element">
-         <div class="horizontal-logo"> <a href="index.html" class="header-logo"> <img src="<?php echo $domain ?>assets/images/logo.png" alt="logo" class="desktop-logo"> <img src="<?php echo $domain ?>assets/images/logo.png" alt="logo" class="toggle-logo"> <img src="<?php echo $domain ?>assets/images/logo.png" alt="logo" class="desktop-dark"> <img src="<?php echo $domain ?>assets/images/logo.png" alt="logo" class="toggle-dark"> </a> </div>
+         <div class="horizontal-logo"> <a href="#" class="header-logo"> <img src="<?php echo $domain ?>assets/images/logo.png" alt="logo" class="desktop-logo"> <img src="<?php echo $domain ?>assets/images/logo.png" alt="logo" class="toggle-logo"> <img src="<?php echo $domain ?>assets/images/logo.png" alt="logo" class="desktop-dark"> <img src="<?php echo $domain ?>assets/images/logo.png" alt="logo" class="toggle-dark"> </a> </div>
        </div> <!-- End::header-element --> <!-- Start::header-element -->
 
        <div class="header-element mt-4 header-search d-md-block d-none"> <!-- Start::header-link --> <input type="text" class="header-search-bar form-control border-0 bg-body" placeholder="Search for Results..."> <a href="javascript:void(0);" class="header-search-icon border-0"> <i class="bi bi-search"></i> </a> <!-- End::header-link --> </div> <!-- End::header-element --> <!-- Start::header-element -->
