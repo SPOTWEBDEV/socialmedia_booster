@@ -423,7 +423,7 @@ $order_id = $_GET['order_id'];
                                             $sql = "
                                                 SELECT `id`, `user`, `service_id`, `order_name`, `order_price`, `order_category`, 
                                                     `social_url`, `message`, `created_at`, `order_id`, `charge`, `start_count`, 
-                                                    `status`, `remains`, `currency`, `quanity`
+                                                     `remains`, `currency`, `quanity`
                                                 FROM `user_orders` 
                                                 WHERE user_orders.user = '$id' 
                                                 AND user_orders.order_id = '$order_id'
@@ -440,9 +440,7 @@ $order_id = $_GET['order_id'];
 
                                                             // SELECT BADGE COLORS
                                                             $statusColor = "secondary";
-                                                            if ($row['status'] == "Completed") $statusColor = "success";
-                                                            if ($row['status'] == "Processing") $statusColor = "warning";
-                                                            if ($row['status'] == "Cancelled") $statusColor = "danger";
+                                                            
 
                                                             // --------------------------------------------
                                                             // FETCH LIVE ORDER STATUS FROM API
@@ -452,12 +450,12 @@ $order_id = $_GET['order_id'];
                                                             // Convert object → array
                                                             $apiStatus = json_decode(json_encode($apiStatus), true);
 
-                                                            print_R($apiStatus);
+                                                            
 
                                                             // Safe extraction
                                                             $api_charge      = $apiStatus['charge']      ?? "N/A";
                                                             $api_start_count = $apiStatus['start_count'] ?? "N/A";
-                                                            $api_status      = $apiStatus['status']       ?? $row['status'];
+                                                            $api_status      = $apiStatus['status'] ;
                                                             $api_remains     = $apiStatus['remains']     ?? "N/A";
                                                             $api_currency    = $apiStatus['currency']    ?? $row['currency'];
                                                     ?>
@@ -530,7 +528,7 @@ $order_id = $_GET['order_id'];
                                                                             <div class="d-flex gap-2">
 
                                                                                 <!-- Cancel Order Button -->
-                                                                                <?php if ($row['status'] !== "Cancelled" && $row['status'] !== "Completed") { ?>
+                                                                                <?php if ($api_status !== "Cancelled" && $api_status !== "Completed") { ?>
                                                                                     <form method="POST">
                                                                                         <input type="hidden" name="order_id" value="<?= $row['order_id']; ?>">
                                                                                         <button type="submit" name="cancel_order" class="btn btn-danger btn-sm">
