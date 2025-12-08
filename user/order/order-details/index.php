@@ -37,8 +37,6 @@ if (isset($_POST['send_message'])) {
     $order_price = round($order_price, 4); // Round to 4 decimal places
 
 
-    echo "<script>alert('$order_price');</script>";
-    return;
 
     // ===============================
     // 📡 Send order to API
