@@ -7,44 +7,66 @@ include_once '../../../server/auth/user.php';
 require_once '../../../server/controller/boosting.php';
 
 
+// Fetch site price
 $get = mysqli_query($connection, "SELECT sitePrice FROM admin WHERE id = 1");
 $data = mysqli_fetch_assoc($get);
-$site_price = $data['sitePrice'] ?? 0;
+$site_price = floatval($data['sitePrice'] ?? 0);
 
 if (isset($_POST['send_message'])) {
+
     // Get form values
     $service_id     = $_POST['service'];
     $order_name     = $_POST['order_name'];
-    $order_rate = str_replace('$', '', $_POST['orderRate']);
+    $order_rate     = floatval(str_replace('$', '', $_POST['orderRate']));
     $order_category = $_POST['order_category'];
     $social_url     = $_POST['order_url'];
     $message        = $_POST['message'];
-    $quanity       = $_POST['quanity'];
+    $quantity       = floatval($_POST['quanity']);
+
+    // ===============================
+    // 🔥 Correct Price Calculation
+    // Matches exactly with JavaScript
+    // ===============================
+
+    $thirdPartyPrice = ($quantity / 1000) * $order_rate;
+    $siteFee         = ($quantity / 1000) * $site_price;
+
+    $sub_price   = $thirdPartyPrice;                  // For database if needed
+    $order_price = $thirdPartyPrice + $siteFee;       // Final price to deduct
+
+    $order_price = round($order_price, 4); // Round to 4 decimal places
 
 
-    $sub_price = ($quanity / 1000) * $order_rate;
-    $sub_price = $sub_price + $site_price;
+    echo "<script>alert('$order_price');</script>";
+    return;
 
-    $order_price = $sub_price + $site_price;
+    // ===============================
+    // 📡 Send order to API
+    // ===============================
 
+    $order = $api->order([
+        'service'  => $service_id,
+        'link'     => $social_url,
+        'quantity' => $quantity
+    ]);
 
-
-
-    $order = $api->order(['service' => $service_id, 'link' => $social_url, 'quantity' => $quanity]);
-
-    // Check if API returned an error
+    // Check API for errors
     if (isset($order->error)) {
 
         $msg = addslashes($order->error);
         echo "<script>alert('API Error: $msg');</script>";
+
     } elseif (isset($order->order)) {
 
         $orderId = addslashes($order->order);
-        // Insert into database (Prepared Statement)
-        echo "<script>alert('$orderId');</script>";
+
+        // Save order into database
         $stmt = $connection->prepare("
-        INSERT INTO user_orders (user,service_id, order_name , sub_price , order_price , order_category, social_url, message , quanity , order_id)
-        VALUES (?,?, ?, ?, ?, ?, ? , ? , ? , ?)");
+            INSERT INTO user_orders (
+                user, service_id, order_name, sub_price, order_price, 
+                order_category, social_url, message, quanity, order_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
 
         $stmt->bind_param(
             "sissdssssi",
@@ -56,11 +78,9 @@ if (isset($_POST['send_message'])) {
             $order_category,
             $social_url,
             $message,
-            $quanity,
+            $quantity,
             $orderId
         );
-
-
 
         if ($stmt->execute()) {
 
@@ -68,18 +88,20 @@ if (isset($_POST['send_message'])) {
             $deduct = $connection->prepare("UPDATE users SET balance = balance - ? WHERE id = ?");
             $deduct->bind_param("ds", $order_price, $id);
             $deduct->execute();
+
         } else {
             echo "<script>alert('Error saving order.');</script>";
         }
 
-
+        // Success message
         echo "<script>
-          alert('Order Placed Successfully! Order ID: $orderId')
-          setTimeout(function(){ window.location.href = '../my-order/'; }, 1000)
-        ;</script>";
+            alert('Order Placed Successfully! Order ID: $orderId');
+            setTimeout(function(){ window.location.href = '../my-order/'; }, 1000);
+        </script>";
+
     } else {
 
-        // Unknown response (convert object to JSON string)
+        // Unknown API response
         $unknown = addslashes(json_encode($order));
         echo "<script>alert('Unexpected API Response: $unknown');</script>";
     }
@@ -448,13 +470,13 @@ if (isset($_POST['send_message'])) {
 
                                             let total = thirdPartyPrice + siteFee;
 
-                                            document.getElementById("totalPrice").value = total.toFixed(3);
+                                            document.getElementById("totalPrice").value = total.toFixed(4);
 
                                             document.getElementById("totalPrice1").innerHTML = `
-            Third-party fee: $${thirdPartyPrice.toFixed(3)} <br>
-            Site fee: $${siteFee.toFixed(3)} <br>
-            <strong>Total: $${total.toFixed(3)}</strong>
-        `;
+                                                Third-party fee: $${thirdPartyPrice.toFixed(4)} <br>
+                                                Site fee: $${siteFee.toFixed(4)} <br>
+                                                <strong>Total: $${total.toFixed(4)}</strong>
+                                            `;
                                         } else {
                                             document.getElementById("totalPrice").value = "";
                                             document.getElementById("totalPrice1").innerHTML = "";
