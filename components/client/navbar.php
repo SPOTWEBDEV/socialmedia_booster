@@ -198,7 +198,7 @@
    <div class="support-tooltip" id="tooltip-text">Join WhatsApp Community</div>
 
    <!-- WhatsApp Button -->
-   <a href="https://wa.me/234XXXXXXXXXX"
+   <a href="https://wa.me/+12103304771"
      target="_blank"
      class="support-btn whatsapp"
      onmouseover="showTooltip('Send us a message on WhatsApp')"
@@ -207,7 +207,7 @@
    </a>
 
    <!-- Telegram Button -->
-   <a href="https://t.me/YourTelegramUsername"
+   <a href="https://t.me/https://t.me/Boostyard01"
      target="_blank"
      class="support-btn telegram"
      onmouseover="showTooltip('Join Telegram Community')"

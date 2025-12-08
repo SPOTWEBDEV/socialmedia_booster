@@ -63,9 +63,15 @@ if (isset($_POST['send_message'])) {
 
 
         if ($stmt->execute()) {
+
+            // Deduct user balance
+            $deduct = $connection->prepare("UPDATE users SET balance = balance - ? WHERE id = ?");
+            $deduct->bind_param("ds", $order_price, $id);
+            $deduct->execute();
         } else {
             echo "<script>alert('Error saving order.');</script>";
         }
+
 
         echo "<script>
           alert('Order Placed Successfully! Order ID: $orderId')
@@ -77,8 +83,6 @@ if (isset($_POST['send_message'])) {
         $unknown = addslashes(json_encode($order));
         echo "<script>alert('Unexpected API Response: $unknown');</script>";
     }
-
-
 }
 
 
@@ -377,7 +381,7 @@ if (isset($_POST['send_message'])) {
                                                 <label class="form-label">Total Price</label>
                                                 <input type="hidden" id="totalPrice" name="totalprice" class="form-control form-control-light" readonly>
                                                 <!-- <input type="text" id="totalPrice1" name="totalprice1" class="form-control form-control-light" readonly> -->
-                                                 <div id="totalPrice1" class="totalPrice1"></div>
+                                                <div id="totalPrice1" class="totalPrice1"></div>
                                             </div>
 
 
@@ -423,26 +427,37 @@ if (isset($_POST['send_message'])) {
 
                                         // Fill inputs
                                         document.getElementById("orderName").value = order.name;
-                                        document.getElementById("orderRate").value =  order.rate;
+                                        document.getElementById("orderRate").value = order.rate;
                                         document.getElementById("orderCategory").value = order.category;
                                         document.getElementById("quanity").placeholder = `Min: ${order.min} - Max: ${order.max}`;
                                         document.getElementById("orderService").value = order.service;
 
-                                        
+
                                     });
 
                                     document.getElementById("quanity").addEventListener("input", function() {
 
                                         let quantity = parseFloat(document.getElementById("quanity").value);
-                                        let rate = parseFloat(document.getElementById("orderRate").value); // rate from API
+                                        let rate = parseFloat(document.getElementById("orderRate").value);
+                                        let sitePrice = Number(<?php echo $site_price; ?>);
 
                                         if (!isNaN(quantity) && !isNaN(rate)) {
-                                            let price = (quantity / 1000) * rate;
-                                            document.getElementById("totalPrice").value = price.toFixed(6);
-                                            document.getElementById("totalPrice1").innerHTML = `third party fee : ${price} and site fee : ${Number(<?php echo $site_price; ?>)} total : ${price + Number(<?php echo $site_price; ?>)}`;
+
+                                            let thirdPartyPrice = (quantity / 1000) * rate;
+                                            let siteFee = (quantity / 1000) * sitePrice;
+
+                                            let total = thirdPartyPrice + siteFee;
+
+                                            document.getElementById("totalPrice").value = total.toFixed(3);
+
+                                            document.getElementById("totalPrice1").innerHTML = `
+            Third-party fee: $${thirdPartyPrice.toFixed(3)} <br>
+            Site fee: $${siteFee.toFixed(3)} <br>
+            <strong>Total: $${total.toFixed(3)}</strong>
+        `;
                                         } else {
                                             document.getElementById("totalPrice").value = "";
-                                            document.getElementById("totalPrice1").value = "";
+                                            document.getElementById("totalPrice1").innerHTML = "";
                                         }
                                     });
                                 </script>

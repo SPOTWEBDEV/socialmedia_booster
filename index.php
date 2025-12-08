@@ -767,7 +767,7 @@ include('server/connection.php');
                       engagement, and overall visibility across all major social
                       media platforms — fast, reliable, and secure.
                     </div>
-                    <a href="index.html" class="m-1 btn btn-lg btn-secondary">
+                    <a href="<?php  echo $domain ?>auth/login/" class="m-1 btn btn-lg btn-secondary">
                       Explore Services
                       <i class="ri-eye-line ms-2 align-middle"></i>
                     </a>
