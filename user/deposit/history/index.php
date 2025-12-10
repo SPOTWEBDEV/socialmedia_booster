@@ -498,7 +498,7 @@ include_once '../../../server/auth/user.php';
                             <td>${deposit.reference}</td>
 
                             <td>
-                              <span class="d-block">${deposit.method}</span>
+                              <span class="d-block">${deposit.method == 'manual' ? 'Manual Bank Transfer' : deposit.method == 'paystack' ? 'Online Bank Transfer' : deposit.method  }</span>
                               
                             </td>
                             <td>

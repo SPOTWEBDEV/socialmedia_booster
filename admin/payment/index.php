@@ -6,69 +6,41 @@ include_once '../../server/auth/user.php';
 
 
 
-if (isset($_POST['deposit'])) {
-    $amount = $_POST['amount'];
-    $method = $_POST['method'];
-    $reference = uniqid("dep_"); // unique transaction reference
 
-    // Save deposit record
-    $stmt = $connection->prepare("
-        INSERT INTO deposits (user, method, amount, reference, status)
-        VALUES (?, ?, ?, ?, 'pending')
-    ");
-    $stmt->bind_param("isds", $id, $method, $amount, $reference);
-    $stmt->execute();
+if (isset($_POST['add_account'])) {
+    $type = $_POST['type'];
+    $status = 'active'; // default status
 
-    // If Paystack
-    if ($method === "paystack") {
+    if ($type == 'manual') {
+        $bank_name = mysqli_real_escape_string($connection, $_POST['bank_name']);
+        $account_name = mysqli_real_escape_string($connection, $_POST['account_name']);
+        $account_number = mysqli_real_escape_string($connection, $_POST['account_number']);
 
-        $curl = curl_init();
-        $callback_url =  $domain . "user/deposit/status/";
+        $insertQuery = "INSERT INTO payment_account 
+            (type, bank_name, account_name, account_number, status) 
+            VALUES ('$type', '$bank_name', '$account_name', '$account_number', '$status')";
+    } elseif ($type == 'crypto') {
+        $wallet_name = mysqli_real_escape_string($connection, $_POST['wallet_name']);
+        $wallet_network = mysqli_real_escape_string($connection, $_POST['wallet_network']);
+        $wallet_address = mysqli_real_escape_string($connection, $_POST['wallet_address']);
 
-        curl_setopt_array($curl, [
-            CURLOPT_URL => "https://api.paystack.co/transaction/initialize",
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CUSTOMREQUEST => "POST",
-            CURLOPT_POSTFIELDS => json_encode([
-                "email" => $email,
-                "amount" => $amount * 100,  // Convert to kobo
-                "reference" => $reference,
-                "callback_url" => $callback_url
-            ]),
-            CURLOPT_HTTPHEADER => [
-                "authorization: Bearer $paystack_secret",
-                "content-type: application/json",
-                "cache-control: no-cache"
-            ],
-        ]);
-
-        $response = curl_exec($curl);
-        curl_close($curl);
-
-        $res = json_decode($response);
-
-        if ($res->status === true) {
-            header("Location: " . $res->data->authorization_url);
-            exit;
-        } else {
-            echo "<script>alert('Could not initialize Paystack payment');</script>";
-        }
+        $insertQuery = "INSERT INTO payment_account 
+            (type, wallet_name, wallet_network, wallet_address, status) 
+            VALUES ('$type', '$wallet_name', '$wallet_network', '$wallet_address', '$status')";
     }
 
-    // If Crypto
-    if ($method === "crypto") {
-        echo "<script>
-            window.location.href = './manual/?ref=$reference&amt=$amount';
-        </script>";
-    }
+    if (mysqli_query($connection, $insertQuery)) {
 
-    if($method === "manual"){
+        showToast("Payment account added successfully", 'success');
         echo "<script>
-            window.location.href = './manual/?ref=$reference&amt=$amount';
+            setTimeout(function() {
+                window.location.href = './list/';
+            }, 1500);
         </script>";
+    } else {
+        showToast("Error adding payment account", 'error');
     }
 }
-
 
 
 
@@ -416,34 +388,34 @@ if (isset($_POST['deposit'])) {
 
     <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
     <div class="page"> <!-- app-header -->
-        <?php include_once '../../components/client/navbar.php'  ?>
+        <?php include_once '../../components/admin/navbar.php'  ?>
 
         <div class="main-content app-content">
             <div class="container-fluid"> <!-- Start::page-header -->
                 <div class="d-flex align-items-center justify-content-between my-4 page-header-breadcrumb flex-wrap gap-2">
                     <div>
-                        <p class="fw-medium fs-20 mb-0">Welcome, <?php echo $fullname ?></p>
+                        <p class="fw-medium fs-20 mb-0">Payment Account</p>
                         <p class="fs-13 text-muted mb-0">Let's check your today's stats!</p>
                     </div>
-                    <div class="btn-list"> <a href="./history/">
+                    <div class="btn-list"> <a href="./list/">
                             <button class="btn btn-primary-light btn-wave waves-effect waves-light">
                                 <i class="bx bx-ticket align-middle me-1"></i>
                                 <i class="bx bx-show align-middle me-1"></i>
-                               Deposit History
+                                View Payment Methods
                             </button>
                         </a> </div>
                 </div> <!-- End::page-header --> <!-- Start::row-1 -->
                 <div class="row">
-                    <?php include_once '../../components/client/sidenavbar.php' ?>
+                    <?php include_once '../../components/admin/sidenavbar.php' ?>
                     <div class="col-xl-9">
                         <div class="row">
                             <div class="col-xl-12">
-                                <form method="POST" class="card custom-card">
+                                <form method="POST" class="card custom-card" id="paymentAccountForm">
                                     <div class="card-header">
                                         <div class="card-title">
-                                            Make a Deposit
+                                            Add Payment Account
                                             <span class="subtitle fw-normal text-muted d-block fs-12">
-                                                Choose a payment method and enter the amount you want to deposit.
+                                                Choose the account type and fill in the details.
                                             </span>
                                         </div>
                                     </div>
@@ -452,34 +424,77 @@ if (isset($_POST['deposit'])) {
                                         <div class="row gy-3">
 
                                             <div class="col-xl-6">
-                                                <label class="form-label">Amount (₦)</label>
-                                                <input type="number" class="form-control form-control-light"
-                                                    name="amount" required min="100">
+                                                <label class="form-label">Account Type</label>
+                                                <select name="type" id="accountType" class="form-control" required>
+                                                    <option value="" selected disabled>Select Type</option>
+                                                    <option value="manual">Bank</option>
+                                                    <option value="crypto">Crypto</option>
+                                                </select>
                                             </div>
 
-                                            <div class="col-xl-6">
-                                                <label class="form-label">Payment Method</label>
-                                                <select class="form-select form-control-light" name="method" required>
-                                                    <option value="">Select Method</option>
-                                                    <option value="paystack">Bank Transfer (Paystack)</option>
-                                                    <option value="crypto">Crypto (USDT)</option>
-                                                    <option value="manual">Manual Bank Payment</option>
-                                                </select>
+                                            <!-- Bank fields -->
+                                            <div id="bankFields" style="display:none;">
+                                                <div class="row g-3">
+                                                    <div class="col-xl-12">
+                                                        <label class="form-label">Bank Name</label>
+                                                        <input type="text" name="bank_name" class="form-control" placeholder="Bank Name">
+                                                    </div>
+
+                                                    <div class="col-xl-12">
+                                                        <label class="form-label">Account Name</label>
+                                                        <input type="text" name="account_name" class="form-control" placeholder="Account Name">
+                                                    </div>
+
+                                                    <div class="col-xl-12">
+                                                        <label class="form-label">Account Number</label>
+                                                        <input type="text" name="account_number" class="form-control" placeholder="Account Number">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Crypto fields -->
+                                            <div id="cryptoFields" style="display:none;">
+                                                <div class="row g-3">
+                                                    <div class="col-xl-12">
+                                                        <label class="form-label">Wallet Name</label>
+                                                        <input type="text" name="wallet_name" class="form-control" placeholder="Wallet Name">
+                                                    </div>
+
+                                                    <div class="col-xl-12">
+                                                        <label class="form-label">Wallet Network</label>
+                                                        <input type="text" name="wallet_network" class="form-control" placeholder="Wallet Network">
+                                                    </div>
+
+                                                    <div class="col-xl-12">
+                                                        <label class="form-label">Wallet Address</label>
+                                                        <input type="text" name="wallet_address" class="form-control" placeholder="Wallet Address">
+                                                    </div>
+                                                </div>
                                             </div>
 
                                         </div>
                                     </div>
 
                                     <div class="card-footer">
-                                        <button type="submit" name="deposit"
-                                            class="btn btn-primary btn-wave float-end waves-effect waves-light">
-                                            Proceed
-                                        </button>
+                                        <button type="submit" name="add_account" class="btn btn-primary float-end">Add Account</button>
                                     </div>
-
                                 </form>
-                            </div>
 
+                                <script>
+                                    document.getElementById('accountType').addEventListener('change', function() {
+                                        let type = this.value;
+                                        if (type === 'manual') {
+                                            document.getElementById('bankFields').style.display = 'flex';
+                                            document.getElementById('cryptoFields').style.display = 'none';
+                                        } else if (type === 'crypto') {
+                                            document.getElementById('bankFields').style.display = 'none';
+                                            document.getElementById('cryptoFields').style.display = 'flex';
+                                        }
+                                    });
+                                </script>
+
+
+                            </div>
                         </div>
                     </div>
                 </div> <!-- End::row-1 -->
@@ -509,61 +524,19 @@ if (isset($_POST['deposit'])) {
         <p>To display this page you need a browser that supports JavaScript.</p>
     </noscript>
     <script src="<?php echo $domain ?>assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#h aj©l4#h(vLUaTK;YSv");
-        -->
-    </script> <!-- Defaultmenu JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/js/defaultmenu.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#hC6.xWo2O(4rw-/z4o");
-        -->
-    </script> <!-- Node Waves JS--> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/libs/node-waves/waves.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#he-ce\"R©qa2,v\"g");
-        -->
-    </script> <!-- Sticky JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/js/sticky.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#heJ:Cc-Or|2:hB/z4o");
-        -->
-    </script> <!-- Simplebar JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":");
-        -->
-    </script> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/js/simplebar.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#h<A1IWkBr|I?UaTK;YSv");
-        -->
-    </script> <!-- Apex Charts JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/libs/apexcharts/apexcharts.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#hGXPn91©qa2,v\"g");
-        -->
-    </script> <!-- Custom JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/js/customer-custom.js"></script>
     <div state="voice" class="placeholder-icon" id="tts-placeholder-icon" title="Click to show TTS button" style="background-image: url(&quot;chrome-extension://cpnomhnclohkhnikegipapofcjihldck/data/content_script/icons/voice.png&quot;);"><canvas width="36" height="36" class="loading-circle" id="text-to-speech-loader" style="display: none;"></canvas></div><svg id="SvgjsSvg1001" width="2" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev" style="overflow: hidden; top: -100%; left: -100%; position: absolute; opacity: 0;">
         <defs id="SvgjsDefs1002"></defs>

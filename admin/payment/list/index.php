@@ -1,74 +1,8 @@
 <?php
 
-include_once '../../server/connection.php';
-include_once '../../server/model.php';
-include_once '../../server/auth/user.php';
-
-
-
-if (isset($_POST['deposit'])) {
-    $amount = $_POST['amount'];
-    $method = $_POST['method'];
-    $reference = uniqid("dep_"); // unique transaction reference
-
-    // Save deposit record
-    $stmt = $connection->prepare("
-        INSERT INTO deposits (user, method, amount, reference, status)
-        VALUES (?, ?, ?, ?, 'pending')
-    ");
-    $stmt->bind_param("isds", $id, $method, $amount, $reference);
-    $stmt->execute();
-
-    // If Paystack
-    if ($method === "paystack") {
-
-        $curl = curl_init();
-        $callback_url =  $domain . "user/deposit/status/";
-
-        curl_setopt_array($curl, [
-            CURLOPT_URL => "https://api.paystack.co/transaction/initialize",
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CUSTOMREQUEST => "POST",
-            CURLOPT_POSTFIELDS => json_encode([
-                "email" => $email,
-                "amount" => $amount * 100,  // Convert to kobo
-                "reference" => $reference,
-                "callback_url" => $callback_url
-            ]),
-            CURLOPT_HTTPHEADER => [
-                "authorization: Bearer $paystack_secret",
-                "content-type: application/json",
-                "cache-control: no-cache"
-            ],
-        ]);
-
-        $response = curl_exec($curl);
-        curl_close($curl);
-
-        $res = json_decode($response);
-
-        if ($res->status === true) {
-            header("Location: " . $res->data->authorization_url);
-            exit;
-        } else {
-            echo "<script>alert('Could not initialize Paystack payment');</script>";
-        }
-    }
-
-    // If Crypto
-    if ($method === "crypto") {
-        echo "<script>
-            window.location.href = './manual/?ref=$reference&amt=$amount';
-        </script>";
-    }
-
-    if($method === "manual"){
-        echo "<script>
-            window.location.href = './manual/?ref=$reference&amt=$amount';
-        </script>";
-    }
-}
-
+include_once '../../../server/connection.php';
+include_once '../../../server/model.php';
+include_once '../../../server/auth/user.php';
 
 
 
@@ -85,7 +19,7 @@ if (isset($_POST['deposit'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title><?php echo $sitename . ' -- Support Page ' ?></title>
+    <title><?php echo $sitename . ' -- Order Page ' ?></title>
     <meta name="Description" content="Bootstrap Responsive Admin Web Dashboard HTML5 Template">
     <meta name="Author" content="Spruko Technologies Private Limited">
     <meta name="keywords" content="admin dashboard,admin template,admin panel,bootstrap admin dashboard,html template,sales dashboard,dashboard,template dashboard,admin,html and css template,admin dashboard bootstrap,personal dashboard,crypto dashboard,stocks dashboard,admin panel template"> <!-- Favicon -->
@@ -416,68 +350,272 @@ if (isset($_POST['deposit'])) {
 
     <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
     <div class="page"> <!-- app-header -->
-        <?php include_once '../../components/client/navbar.php'  ?>
+
+        <?php include_once '../../../components/client/navbar.php'  ?>
 
         <div class="main-content app-content">
             <div class="container-fluid"> <!-- Start::page-header -->
                 <div class="d-flex align-items-center justify-content-between my-4 page-header-breadcrumb flex-wrap gap-2">
                     <div>
-                        <p class="fw-medium fs-20 mb-0">Welcome, <?php echo $fullname ?></p>
+                        <p class="fw-medium fs-20 mb-0">Deposit History</p>
                         <p class="fs-13 text-muted mb-0">Let's check your today's stats!</p>
                     </div>
-                    <div class="btn-list"> <a href="./history/">
-                            <button class="btn btn-primary-light btn-wave waves-effect waves-light">
-                                <i class="bx bx-ticket align-middle me-1"></i>
-                                <i class="bx bx-show align-middle me-1"></i>
-                               Deposit History
-                            </button>
-                        </a> </div>
+                    <div class="btn-list">
+                        <a href="../"><button class="btn btn-primary-light btn-wave waves-effect waves-light">
+                                <i class="bx bx-plus-circle align-middle me-1"></i>
+                                Fund Account
+                            </button></a>
+                    </div>
                 </div> <!-- End::page-header --> <!-- Start::row-1 -->
                 <div class="row">
-                    <?php include_once '../../components/client/sidenavbar.php' ?>
+                    <?php include_once '../../../components/client/sidenavbar.php' ?>
                     <div class="col-xl-9">
                         <div class="row">
                             <div class="col-xl-12">
-                                <form method="POST" class="card custom-card">
-                                    <div class="card-header">
-                                        <div class="card-title">
-                                            Make a Deposit
-                                            <span class="subtitle fw-normal text-muted d-block fs-12">
-                                                Choose a payment method and enter the amount you want to deposit.
-                                            </span>
+                                <div class="card custom-card overflow-hidden">
+                                    <div class="card-header justify-content-between">
+                                        <div class="card-body d-flex align-items-center flex-wrap">
+
+                                            <div class="flex-fill">
+                                                <span class="mb-0 fs-14 text-muted">
+                                                    Total Accounts :
+                                                    <span class="fw-medium text-success" id="orderCount">0</span>
+                                                </span>
+                                            </div>
+
+                                            <!-- Sort -->
+                                            <div class="dropdown">
+                                                <button class="btn btn-light dropdown-toggle m-1" type="button"
+                                                    id="sortBtn" data-bs-toggle="dropdown">
+                                                    Sort By
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item sortOption" data-sort="id" href="#">ID</a></li>
+                                                    <li><a class="dropdown-item sortOption" data-sort="type" href="#">Type</a></li>
+                                                    <li><a class="dropdown-item sortOption" data-sort="status" href="#">Status</a></li>
+                                                </ul>
+                                            </div>
+
+                                            <!-- Status Filter -->
+                                            <select id="categoryFilter" class="form-select m-1" style="width:200px;">
+                                                <option value="">All Status</option>
+                                               
+                                            </select>
+
+                                            <!-- Search -->
+                                            <div class="d-flex align-items-center m-1">
+                                                <input class="form-control" id="searchInput" type="search" placeholder="Search">
+                                                <button class="btn btn-light ms-2" id="searchBtn">Search</button>
+                                            </div>
+
                                         </div>
                                     </div>
 
-                                    <div class="card-body">
-                                        <div class="row gy-3">
-
-                                            <div class="col-xl-6">
-                                                <label class="form-label">Amount (₦)</label>
-                                                <input type="number" class="form-control form-control-light"
-                                                    name="amount" required min="100">
-                                            </div>
-
-                                            <div class="col-xl-6">
-                                                <label class="form-label">Payment Method</label>
-                                                <select class="form-select form-control-light" name="method" required>
-                                                    <option value="">Select Method</option>
-                                                    <option value="paystack">Bank Transfer (Paystack)</option>
-                                                    <option value="crypto">Crypto (USDT)</option>
-                                                    <option value="manual">Manual Bank Payment</option>
-                                                </select>
-                                            </div>
-
+                                    <div class="card-body px-0 pt-2 pb-0">
+                                        <div class="table-responsive">
+                                            <table class="table text-nowrap">
+                                                <thead>
+                                                    <tr>
+                                                        <th>ID</th>
+                                                        <th>Type</th>
+                                                        <th>Bank / Wallet</th>
+                                                        <th>Account Name</th>
+                                                        <th>Account Number / Wallet Address</th>
+                                                        <th>Network</th>
+                                                        
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <div class="card-footer">
-                                        <button type="submit" name="deposit"
-                                            class="btn btn-primary btn-wave float-end waves-effect waves-light">
-                                            Proceed
-                                        </button>
-                                    </div>
+                                <script>
+                                    let orders = [];
+                                    let filteredOrders = [];
 
-                                </form>
+                                    // =============================
+                                    // FETCH API DATA
+                                    // =============================
+                                    function loadOrders() {
+                                        let formData = new FormData();
+                                        formData.append("action", "admin");
+                                        formData.append("userId", "<?php echo $id ?>");
+
+                                        fetch("<?php echo $domain ?>server/api/payment_account.php", {
+                                                method: "POST",
+                                                body: formData
+                                            })
+                                            .then(res => res.json())
+                                            .then(data => {
+                                                console.log("API RESPONSE:", data);
+                                                if (data.success) {
+                                                    orders = data.data;
+                                                    filteredOrders = orders;
+                                                    updateOrderCount();
+                                                    populateStatusCategory();
+                                                    renderTable();
+                                                }
+                                            })
+                                            .catch(err => console.error("API ERROR:", err));
+                                    }
+
+                                    // =============================
+                                    // UPDATE COUNT
+                                    // =============================
+                                    function updateOrderCount() {
+                                        document.getElementById("orderCount").textContent = orders.length;
+                                    }
+
+                                    // =============================
+                                    // POPULATE STATUS DROPDOWN
+                                    // =============================
+                                    function populateStatusCategory() {
+                                        const statuses = ["crypto", "manual"];
+                                        let select = document.getElementById("categoryFilter");
+
+                                        statuses.forEach(status => {
+                                            let opt = document.createElement("option");
+                                            opt.value = status;
+                                            opt.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+                                            select.appendChild(opt);
+                                        });
+                                    }
+
+                                    // =============================
+                                    // DELETE ACCOUNT
+                                    // =============================
+                                    function deleteAccount(id) {
+
+                                        if (!confirm("Are you sure you want to delete this account?")) return;
+
+                                        let formData = new FormData();
+                                        formData.append("delete", "1");
+                                        formData.append("id", id);
+
+                                        fetch("<?php echo $domain ?>server/api/delete_payment_account.php", {
+                                                method: "POST",
+                                                body: formData
+                                            })
+                                            .then(res => res.json())
+                                            .then(data => {
+
+                                                if (data.success) {
+                                                    // Remove from array
+                                                    orders = orders.filter(item => item.id != id);
+                                                    filteredOrders = filteredOrders.filter(item => item.id != id);
+
+                                                    updateOrderCount();
+                                                    renderTable();
+                                                    alert("Account deleted successfully!");
+                                                } else {
+                                                    alert("Failed to delete account!");
+                                                }
+
+                                            })
+                                            .catch(err => {
+                                                console.error("Delete Error:", err);
+                                                alert("Error deleting account!");
+                                            });
+                                    }
+
+                                    // =============================
+                                    // RENDER TABLE
+                                    // =============================
+                                    function renderTable() {
+                                        let tbody = document.querySelector("table tbody");
+                                        tbody.innerHTML = "";
+
+                                        filteredOrders.forEach((acc,index) => {
+                                            tbody.innerHTML += `
+            <tr>
+                <td>${index + 1}</td>
+
+                <td>${acc.type.toUpperCase()}</td>
+
+                <td>${acc.bank_name ?? acc.wallet_name ?? "---"}</td>
+
+                <td>${acc.account_name ?? "---"}</td>
+
+                <td>${acc.account_number ?? acc.wallet_address ?? "---"}</td>
+
+                <td>${acc.wallet_network ?? "---"}</td>
+
+                
+
+                <td>
+                    
+
+                    <button class="btn btn-sm btn-danger ms-2"
+                        onclick="deleteAccount(${acc.id})">
+                        <i class="fe fe-trash me-1"></i> Delete
+                    </button>
+                </td>
+            </tr>
+        `;
+                                        });
+                                    }
+
+                                    // =============================
+                                    // BADGE COLOR
+                                    // =============================
+                                    function getStatusColor(status) {
+                                        return status === "active" ? "success" : "danger";
+                                    }
+
+                                    // =============================
+                                    // SORTING
+                                    // =============================
+                                    document.querySelectorAll(".sortOption").forEach(btn => {
+                                        btn.addEventListener("click", function() {
+                                            let field = this.getAttribute("data-sort");
+
+                                            filteredOrders.sort((a, b) => {
+                                                if (field === "id") return Number(a.id) - Number(b.id);
+                                                if (field === "type") return a.type.localeCompare(b.type);
+                                                if (field === "status") return a.status.localeCompare(b.status);
+                                            });
+
+                                            renderTable();
+                                        });
+                                    });
+
+                                    // =============================
+                                    // SEARCH
+                                    // =============================
+                                    document.getElementById("searchBtn").addEventListener("click", () => {
+                                        let search = document.getElementById("searchInput").value.toLowerCase();
+
+                                        filteredOrders = orders.filter(o =>
+                                            o.type.toLowerCase().includes(search) ||
+                                            (o.bank_name && o.bank_name.toLowerCase().includes(search)) ||
+                                            (o.wallet_name && o.wallet_name.toLowerCase().includes(search)) ||
+                                            (o.account_name && o.account_name.toLowerCase().includes(search)) ||
+                                            (o.account_number && o.account_number.toLowerCase().includes(search)) ||
+                                            (o.wallet_address && o.wallet_address.toLowerCase().includes(search)) ||
+                                            o.status.toLowerCase().includes(search)
+                                        );
+
+                                        renderTable();
+                                    });
+
+                                    // =============================
+                                    // FILTER BY STATUS
+                                    // =============================
+                                    document.getElementById("categoryFilter").addEventListener("change", function() {
+                                        filteredOrders = this.value === "" ?
+                                            orders :
+                                            orders.filter(o => o.type.toLowerCase() === this.value.toLowerCase());
+
+                                        renderTable();
+                                    });
+
+                                    // Start
+                                    loadOrders();
+                                </script>
+
                             </div>
 
                         </div>
@@ -485,7 +623,7 @@ if (isset($_POST['deposit'])) {
                 </div> <!-- End::row-1 -->
             </div>
         </div> <!-- End::app-content --> <!-- Footer Start -->
-        <?php include_once '../../components/footer.php' ?>
+        <?php include_once '../../../components/footer.php' ?>
         <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -497,73 +635,22 @@ if (isset($_POST['deposit'])) {
         </div>
     </div> <!-- Responsive Header Search Modal End --> <!-- Scroll To Top -->
     <div class="scrollToTop"> <span class="arrow"><i class="ti ti-arrow-narrow-up fs-20"></i></span> </div>
-    <div id="responsive-overlay"></div> <!-- Scroll To Top --> <!-- Popper JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+    <div id="responsive-overlay"></div>
     <script src="<?php echo $domain ?>assets/libs/@popperjs/core/umd/popper.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#hb6|n!WYr<2:hB/z4o");
-        -->
-    </script> <!-- Bootstrap JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#h aj©l4#h(vLUaTK;YSv");
-        -->
-    </script> <!-- Defaultmenu JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/js/defaultmenu.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#hC6.xWo2O(4rw-/z4o");
-        -->
-    </script> <!-- Node Waves JS--> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/libs/node-waves/waves.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#he-ce\"R©qa2,v\"g");
-        -->
-    </script> <!-- Sticky JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/js/sticky.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#heJ:Cc-Or|2:hB/z4o");
-        -->
-    </script> <!-- Simplebar JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":");
-        -->
-    </script> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/js/simplebar.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#h<A1IWkBr|I?UaTK;YSv");
-        -->
-    </script> <!-- Apex Charts JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
     <script src="<?php echo $domain ?>assets/libs/apexcharts/apexcharts.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#hGXPn91©qa2,v\"g");
-        -->
-    </script> <!-- Custom JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/js/customer-custom.js"></script>
     <div state="voice" class="placeholder-icon" id="tts-placeholder-icon" title="Click to show TTS button" style="background-image: url(&quot;chrome-extension://cpnomhnclohkhnikegipapofcjihldck/data/content_script/icons/voice.png&quot;);"><canvas width="36" height="36" class="loading-circle" id="text-to-speech-loader" style="display: none;"></canvas></div><svg id="SvgjsSvg1001" width="2" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev" style="overflow: hidden; top: -100%; left: -100%; position: absolute; opacity: 0;">
         <defs id="SvgjsDefs1002"></defs>

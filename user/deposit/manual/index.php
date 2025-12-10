@@ -1,74 +1,64 @@
 <?php
 
-include_once '../../server/connection.php';
-include_once '../../server/model.php';
-include_once '../../server/auth/user.php';
+include_once '../../../server/connection.php';
+include_once '../../../server/model.php';
+include_once '../../../server/auth/user.php';
 
 
 
-if (isset($_POST['deposit'])) {
-    $amount = $_POST['amount'];
-    $method = $_POST['method'];
-    $reference = uniqid("dep_"); // unique transaction reference
+$ref = $_GET['ref'] ?? null;
+$amount = $_GET['amt'] ?? null;
 
-    // Save deposit record
-    $stmt = $connection->prepare("
-        INSERT INTO deposits (user, method, amount, reference, status)
-        VALUES (?, ?, ?, ?, 'pending')
-    ");
-    $stmt->bind_param("isds", $id, $method, $amount, $reference);
-    $stmt->execute();
-
-    // If Paystack
-    if ($method === "paystack") {
-
-        $curl = curl_init();
-        $callback_url =  $domain . "user/deposit/status/";
-
-        curl_setopt_array($curl, [
-            CURLOPT_URL => "https://api.paystack.co/transaction/initialize",
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CUSTOMREQUEST => "POST",
-            CURLOPT_POSTFIELDS => json_encode([
-                "email" => $email,
-                "amount" => $amount * 100,  // Convert to kobo
-                "reference" => $reference,
-                "callback_url" => $callback_url
-            ]),
-            CURLOPT_HTTPHEADER => [
-                "authorization: Bearer $paystack_secret",
-                "content-type: application/json",
-                "cache-control: no-cache"
-            ],
-        ]);
-
-        $response = curl_exec($curl);
-        curl_close($curl);
-
-        $res = json_decode($response);
-
-        if ($res->status === true) {
-            header("Location: " . $res->data->authorization_url);
-            exit;
-        } else {
-            echo "<script>alert('Could not initialize Paystack payment');</script>";
-        }
-    }
-
-    // If Crypto
-    if ($method === "crypto") {
-        echo "<script>
-            window.location.href = './manual/?ref=$reference&amt=$amount';
-        </script>";
-    }
-
-    if($method === "manual"){
-        echo "<script>
-            window.location.href = './manual/?ref=$reference&amt=$amount';
-        </script>";
-    }
+if (!$ref) {
+    showToast("Invalid deposit reference.");
+    die("Invalid deposit reference.");
+    
 }
 
+// Fetch deposit details using ref
+$depositQuery = mysqli_query($connection, "SELECT * FROM deposits WHERE reference = '$ref' LIMIT 1");
+$deposit = mysqli_fetch_assoc($depositQuery);
+
+if (!$deposit) {
+    showToast("Deposit not found.");
+    die("Deposit not found.");
+}
+
+$method = $deposit['method']; // crypto OR manual_bank
+
+print($method);
+
+
+// Fetch payment account details based on method
+$accountQuery = mysqli_query($connection, "
+    SELECT * FROM payment_account 
+    WHERE type = '$method'");
+
+echo mysqli_error($connection);
+
+$account = mysqli_fetch_assoc($accountQuery);
+
+
+
+
+// Handle form submission
+if (isset($_POST['deposit'])) {
+    $paidto_id = $account['id'];
+
+    $updateQuery = mysqli_query($connection, "
+        UPDATE deposits SET paidto = '$paidto_id' 
+        WHERE reference = '$ref'
+    ");
+
+    if ($updateQuery) {
+        showToast("Deposit updated successfully.");
+        echo "<script>
+            window.location.href = '../history/';
+        </script>";
+    } else {
+        showToast("Error updating deposit.");
+    }
+}
 
 
 
@@ -416,7 +406,7 @@ if (isset($_POST['deposit'])) {
 
     <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
     <div class="page"> <!-- app-header -->
-        <?php include_once '../../components/client/navbar.php'  ?>
+        <?php include_once '../../../components/client/navbar.php'  ?>
 
         <div class="main-content app-content">
             <div class="container-fluid"> <!-- Start::page-header -->
@@ -429,43 +419,67 @@ if (isset($_POST['deposit'])) {
                             <button class="btn btn-primary-light btn-wave waves-effect waves-light">
                                 <i class="bx bx-ticket align-middle me-1"></i>
                                 <i class="bx bx-show align-middle me-1"></i>
-                               Deposit History
+                                Deposit History
                             </button>
                         </a> </div>
                 </div> <!-- End::page-header --> <!-- Start::row-1 -->
                 <div class="row">
-                    <?php include_once '../../components/client/sidenavbar.php' ?>
+                    <?php include_once '../../../components/client/sidenavbar.php' ?>
                     <div class="col-xl-9">
                         <div class="row">
                             <div class="col-xl-12">
                                 <form method="POST" class="card custom-card">
-                                    <div class="card-header">
+
+                                    <div class="card-header" style="display:flex; align-items:center; justify-content:space-between">
                                         <div class="card-title">
                                             Make a Deposit
                                             <span class="subtitle fw-normal text-muted d-block fs-12">
                                                 Choose a payment method and enter the amount you want to deposit.
                                             </span>
                                         </div>
+                                        <div id="countdown" style="border-radius: 50%; height:70px; width:70px; display:flex; align-items:center; justify-content:center" class="bg-blue">
+                                            20:00
+                                        </div>
+
                                     </div>
 
                                     <div class="card-body">
                                         <div class="row gy-3">
 
-                                            <div class="col-xl-6">
-                                                <label class="form-label">Amount (₦)</label>
-                                                <input type="number" class="form-control form-control-light"
-                                                    name="amount" required min="100">
-                                            </div>
+                                            <?php if ($method == "manual"): ?>
+                                                <div class="col-xl-6">
+                                                    <label class="form-label">Bank Name</label>
+                                                    <p><?php echo $account['bank_name']; ?></p>
+                                                </div>
 
-                                            <div class="col-xl-6">
-                                                <label class="form-label">Payment Method</label>
-                                                <select class="form-select form-control-light" name="method" required>
-                                                    <option value="">Select Method</option>
-                                                    <option value="paystack">Bank Transfer (Paystack)</option>
-                                                    <option value="crypto">Crypto (USDT)</option>
-                                                    <option value="manual">Manual Bank Payment</option>
-                                                </select>
-                                            </div>
+                                                <div class="col-xl-6">
+                                                    <label class="form-label">Account Name</label>
+                                                    <p><?php echo $account['account_name']; ?></p>
+                                                </div>
+
+                                                <div class="col-xl-6">
+                                                    <label class="form-label">Account Number</label>
+                                                    <p><?php echo $account['account_number']; ?></p>
+                                                </div>
+                                            <?php endif; ?>
+
+
+                                            <?php if ($method == "crypto"): ?>
+                                                <div class="col-xl-6">
+                                                    <label class="form-label">Wallet Name</label>
+                                                    <p><?php echo $account['wallet_name']; ?></p>
+                                                </div>
+
+                                                <div class="col-xl-6">
+                                                    <label class="form-label">Wallet Network</label>
+                                                    <p><?php echo $account['wallet_network']; ?></p>
+                                                </div>
+
+                                                <div class="col-xl-6">
+                                                    <label class="form-label">Wallet Address</label>
+                                                    <p><?php echo $account['wallet_address']; ?></p>
+                                                </div>
+                                            <?php endif; ?>
 
                                         </div>
                                     </div>
@@ -478,6 +492,7 @@ if (isset($_POST['deposit'])) {
                                     </div>
 
                                 </form>
+
                             </div>
 
                         </div>
@@ -485,7 +500,7 @@ if (isset($_POST['deposit'])) {
                 </div> <!-- End::row-1 -->
             </div>
         </div> <!-- End::app-content --> <!-- Footer Start -->
-        <?php include_once '../../components/footer.php' ?>
+        <?php include_once '../../../components/footer.php' ?>
         <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -497,73 +512,49 @@ if (isset($_POST['deposit'])) {
         </div>
     </div> <!-- Responsive Header Search Modal End --> <!-- Scroll To Top -->
     <div class="scrollToTop"> <span class="arrow"><i class="ti ti-arrow-narrow-up fs-20"></i></span> </div>
-    <div id="responsive-overlay"></div> <!-- Scroll To Top --> <!-- Popper JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+    <div id="responsive-overlay"></div> <!-- Scroll To Top --> <!-- Popper JS -->
+
+
+    <script>
+        let countdownElement = document.getElementById('countdown');
+        let timeLeft = 20 * 60; // 20 minutes in seconds
+
+        let timer = setInterval(function() {
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+
+            countdownElement.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                countdownElement.textContent = "Expired";
+                // Optionally disable the submit button when expired
+                document.querySelector('button[name="deposit"]').disabled = true;
+            }
+
+            timeLeft--;
+        }, 1000);
+    </script>
+
+
+
+
     <script src="<?php echo $domain ?>assets/libs/@popperjs/core/umd/popper.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#hb6|n!WYr<2:hB/z4o");
-        -->
-    </script> <!-- Bootstrap JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#h aj©l4#h(vLUaTK;YSv");
-        -->
-    </script> <!-- Defaultmenu JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/js/defaultmenu.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#hC6.xWo2O(4rw-/z4o");
-        -->
-    </script> <!-- Node Waves JS--> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/libs/node-waves/waves.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#he-ce\"R©qa2,v\"g");
-        -->
-    </script> <!-- Sticky JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/js/sticky.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#heJ:Cc-Or|2:hB/z4o");
-        -->
-    </script> <!-- Simplebar JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":");
-        -->
-    </script> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/js/simplebar.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#h<A1IWkBr|I?UaTK;YSv");
-        -->
-    </script> <!-- Apex Charts JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/libs/apexcharts/apexcharts.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#hGXPn91©qa2,v\"g");
-        -->
-    </script> <!-- Custom JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
+
     <script src="<?php echo $domain ?>assets/js/customer-custom.js"></script>
     <div state="voice" class="placeholder-icon" id="tts-placeholder-icon" title="Click to show TTS button" style="background-image: url(&quot;chrome-extension://cpnomhnclohkhnikegipapofcjihldck/data/content_script/icons/voice.png&quot;);"><canvas width="36" height="36" class="loading-circle" id="text-to-speech-loader" style="display: none;"></canvas></div><svg id="SvgjsSvg1001" width="2" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev" style="overflow: hidden; top: -100%; left: -100%; position: absolute; opacity: 0;">
         <defs id="SvgjsDefs1002"></defs>
