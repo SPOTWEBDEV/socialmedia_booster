@@ -32,7 +32,7 @@ print($method);
 // Fetch payment account details based on method
 $accountQuery = mysqli_query($connection, "
     SELECT * FROM payment_account 
-    WHERE type = '$method'");
+    WHERE type = '$method' ORDER BY RAND() LIMIT 1");
 
 echo mysqli_error($connection);
 
