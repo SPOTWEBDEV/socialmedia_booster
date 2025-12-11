@@ -62,6 +62,7 @@ $siteemail = 'support@boosteryard.com';
 $money = '&#36;';
 $toast = '';
 $paystack_secret = "sk_test_d4e4ff7576d171cf3f51419738023c6b1ca0bd6e"; // Replace
+$min_crypto_deposit = 5; // Minimum crypto deposit amount
 
 
 

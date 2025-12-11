@@ -57,9 +57,15 @@ if (isset($_POST['deposit'])) {
 
     // If Crypto
     if ($method === "crypto") {
-        echo "<script>
+
+        if($amount < $min_crypto_deposit){
+            showToast("Minimum deposit for crypto is $$min_crypto_deposit", "error");
+        }else{
+            echo "<script>
             window.location.href = './manual/?ref=$reference&amt=$amount';
         </script>";
+        }
+        
     }
 
     if($method === "manual"){
@@ -454,7 +460,7 @@ if (isset($_POST['deposit'])) {
                                             <div class="col-xl-6">
                                                 <label class="form-label">Amount (₦)</label>
                                                 <input type="number" class="form-control form-control-light"
-                                                    name="amount" required min="100">
+                                                    name="amount" required>
                                             </div>
 
                                             <div class="col-xl-6">

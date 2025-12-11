@@ -411,155 +411,8 @@ include('server/connection.php');
     </style>
   </head>
   <body class="landing-body" cz-shortcut-listen="true">
-    <!-- Start Switcher -->
-    <div
-      class="offcanvas offcanvas-end"
-      tabindex="-1"
-      id="switcher-canvas"
-      aria-labelledby="offcanvasRightLabel"
-    >
-      <div class="offcanvas-header border-bottom">
-        <h5 class="offcanvas-title" id="offcanvasRightLabel">Switcher</h5>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="offcanvas"
-          aria-label="Close"
-        ></button>
-      </div>
-      <div class="offcanvas-body">
-        <div class="">
-          <p class="switcher-style-head">Theme Color Mode:</p>
-          <div class="row switcher-style">
-            <div class="col-4">
-              <div class="form-check switch-select">
-                <label class="form-check-label" for="switcher-light-theme">
-                  Light
-                </label>
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="theme-style"
-                  id="switcher-light-theme"
-                  checked=""
-                />
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-check switch-select">
-                <label class="form-check-label" for="switcher-dark-theme">
-                  Dark
-                </label>
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="theme-style"
-                  id="switcher-dark-theme"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="">
-          <p class="switcher-style-head">Directions:</p>
-          <div class="row switcher-style">
-            <div class="col-4">
-              <div class="form-check switch-select">
-                <label class="form-check-label" for="switcher-ltr"> LTR </label>
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="direction"
-                  id="switcher-ltr"
-                  checked=""
-                />
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-check switch-select">
-                <label class="form-check-label" for="switcher-rtl"> RTL </label>
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="direction"
-                  id="switcher-rtl"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="theme-colors">
-          <p class="switcher-style-head">Theme Primary:</p>
-          <div class="d-flex align-items-center switcher-style">
-            <div class="form-check switch-select me-3">
-              <input
-                class="form-check-input color-input color-primary-1"
-                type="radio"
-                name="theme-primary"
-                id="switcher-primary"
-              />
-            </div>
-            <div class="form-check switch-select me-3">
-              <input
-                class="form-check-input color-input color-primary-2"
-                type="radio"
-                name="theme-primary"
-                id="switcher-primary1"
-              />
-            </div>
-            <div class="form-check switch-select me-3">
-              <input
-                class="form-check-input color-input color-primary-3"
-                type="radio"
-                name="theme-primary"
-                id="switcher-primary2"
-              />
-            </div>
-            <div class="form-check switch-select me-3">
-              <input
-                class="form-check-input color-input color-primary-4"
-                type="radio"
-                name="theme-primary"
-                id="switcher-primary3"
-              />
-            </div>
-            <div class="form-check switch-select me-3">
-              <input
-                class="form-check-input color-input color-primary-5"
-                type="radio"
-                name="theme-primary"
-                id="switcher-primary4"
-              />
-            </div>
-            <div
-              class="form-check switch-select me-3 ps-0 mt-1 color-primary-light"
-            >
-              <div class="theme-container-primary">
-                <button class="active">nano</button>
-              </div>
-              <div class="pickr-container-primary">
-                <div class="pickr">
-                  <button
-                    type="button"
-                    class="pcr-button"
-                    role="button"
-                    aria-label="toggle color picker dialog"
-                    style="--pcr-color: rgba(185, 78, 237, 1)"
-                  ></button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <p class="switcher-style-head">reset:</p>
-          <div class="text-center">
-            <button id="reset-all" class="btn btn-danger mt-3">Reset</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- End Switcher -->
+    
+    
     <div class="landing-page-wrapper">
       <!-- app-header -->
       <header class="app-header">
@@ -611,13 +464,15 @@ include('server/connection.php');
                 <a href="<?php echo $domain . 'auth/register/' ?>" class="btn btn-primary-light">
                   Sign Up
                 </a>
-                <button
-                  class="btn btn-icon btn-success switcher-icon"
-                  data-bs-toggle="offcanvas"
-                  data-bs-target="#switcher-canvas"
+
+                <a href="<?php echo $domain . 'auth/login/' ?>">
+                  <button
+                  class="btn  btn-success switcher-icon"
                 >
-                  <i class="ri-settings-3-line"></i>
+                  Login
                 </button>
+                </a>
+                
               </div>
               <!-- End::header-link|switcher-icon -->
             </div>
@@ -728,13 +583,12 @@ include('server/connection.php');
                   <a href="<?php echo $domain . 'auth/register/' ?>" class="btn btn-wave btn-primary">
                     Sign Up
                   </a>
-                  <button
-                    class="btn btn-wave btn-icon btn-light switcher-icon"
-                    data-bs-toggle="offcanvas"
-                    data-bs-target="#switcher-canvas"
+                  <a href="<?php echo $domain . 'auth/login/' ?>"><button
+                    class="btn   btn-light "
+                    
                   >
-                    <i class="ri-settings-3-line"></i>
-                  </button>
+                    Login
+                  </button></a>
                 </div>
               </div>
             </nav>
