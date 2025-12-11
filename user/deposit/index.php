@@ -461,7 +461,7 @@ if (isset($_POST['deposit'])) {
                                                 <label class="form-label">Payment Method</label>
                                                 <select class="form-select form-control-light" name="method" required>
                                                     <option value="">Select Method</option>
-                                                    <option value="paystack">Bank Transfer (Paystack)</option>
+                                                    <!-- <option value="paystack">Bank Transfer (Paystack)</option> -->
                                                     <option value="crypto">Crypto (USDT)</option>
                                                     <option value="manual">Manual Bank Payment</option>
                                                 </select>

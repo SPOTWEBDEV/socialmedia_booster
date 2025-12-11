@@ -12,7 +12,6 @@ $amount = $_GET['amt'] ?? null;
 if (!$ref) {
     showToast("Invalid deposit reference.");
     die("Invalid deposit reference.");
-    
 }
 
 // Fetch deposit details using ref
@@ -437,7 +436,7 @@ if (isset($_POST['deposit'])) {
                                                 Choose a payment method and enter the amount you want to deposit.
                                             </span>
                                         </div>
-                                        <div id="countdown" style="border-radius: 50%; height:70px; width:70px; display:flex; align-items:center; justify-content:center" class="bg-blue">
+                                        <div id="countdown" style="border-radius: 50%; height:70px; width:70px; display:flex; align-items:center; justify-content:center; color:white; font-size:20px" class="bg-blue">
                                             20:00
                                         </div>
 
@@ -457,10 +456,16 @@ if (isset($_POST['deposit'])) {
                                                     <p><?php echo $account['account_name']; ?></p>
                                                 </div>
 
-                                                <div class="col-xl-6">
-                                                    <label class="form-label">Account Number</label>
-                                                    <p><?php echo $account['account_number']; ?></p>
+                                                <div style="display:flex; align-items:center; gap:10px;">
+                                                    <p style="margin:0;"><?php echo $account['account_number']; ?></p>
+
+                                                    <button type="button"
+                                                        onclick="copyText('<?php echo $account['account_number']; ?>')"
+                                                        class="btn btn-sm btn-outline-primary">
+                                                        Copy
+                                                    </button>
                                                 </div>
+
                                             <?php endif; ?>
 
 
@@ -475,10 +480,16 @@ if (isset($_POST['deposit'])) {
                                                     <p><?php echo $account['wallet_network']; ?></p>
                                                 </div>
 
-                                                <div class="col-xl-6">
-                                                    <label class="form-label">Wallet Address</label>
-                                                    <p><?php echo $account['wallet_address']; ?></p>
+                                                <div style="display:flex; align-items:center; gap:10px;">
+                                                    <p style="margin:0;"><?php echo $account['wallet_address']; ?></p>
+
+                                                    <button type="button"
+                                                        onclick="copyText('<?php echo $account['wallet_address']; ?>')"
+                                                        class="btn btn-sm btn-outline-primary">
+                                                        Copy
+                                                    </button>
                                                 </div>
+
                                             <?php endif; ?>
 
                                         </div>
@@ -534,7 +545,16 @@ if (isset($_POST['deposit'])) {
 
             timeLeft--;
         }, 1000);
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert("Copied to clipboard: ");
+                
+                
+            });
+        }
     </script>
+
 
 
 
