@@ -25,7 +25,7 @@ if (!$deposit) {
 
 $method = $deposit['method']; // crypto OR manual_bank
 
-print($method);
+
 
 
 // Fetch payment account details based on method

@@ -2,7 +2,7 @@
 
 include_once '../../server/connection.php';
 include_once '../../server/model.php';
-include_once '../../server/auth/user.php';
+
 
 
 
@@ -351,7 +351,7 @@ include_once '../../server/auth/user.php';
     <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
     <div class="page"> <!-- app-header -->
 
-        <?php include_once '../../components/client/navbar.php'  ?>
+        <?php include_once '../../components/admin/navbar.php'  ?>
 
         <div class="main-content app-content">
             <div class="container-fluid"> <!-- Start::page-header -->
@@ -368,7 +368,7 @@ include_once '../../server/auth/user.php';
                     </div>
                 </div> <!-- End::page-header --> <!-- Start::row-1 -->
                 <div class="row">
-                    <?php include_once '../../components/client/sidenavbar.php' ?>
+                    <?php include_once '../../components/admin/sidenavbar.php' ?>
                     <div class="col-xl-9">
                         <div class="row">
                             <div class="col-xl-12">
@@ -443,7 +443,7 @@ include_once '../../server/auth/user.php';
                                     function loadOrders() {
                                         let formData = new FormData();
                                         formData.append("action", "admin");
-                                        formData.append("userId", "<?php echo $id ?>");
+                                        
 
                                         fetch("<?php echo $domain ?>server/api/deposit.php", {
                                                 method: "POST",
@@ -522,7 +522,7 @@ include_once '../../server/auth/user.php';
                             </td>
 
                             <td>
-                              <button onclick="#" class="btn btn-sm btn-ghost-light border">
+                              <button onclick="window.location.href='./status/?id=${deposit.id}'" class="btn btn-sm btn-ghost-light border">
                                   <i class="fe fe-eye text-muted me-1"></i> View
                               </button>
                             </td>
