@@ -6,17 +6,28 @@ include_once '../../server/auth/user.php';
 
 
 
+
+$data = mysqli_fetch_assoc(mysqli_query($connection, "SELECT usd_to_naria_rate FROM admin WHERE id = 1"));
+$usd_to_naria_rate = $data['usd_to_naria_rate'];
+
+
 if (isset($_POST['deposit'])) {
-    $amount = $_POST['amount'];
     $method = $_POST['method'];
     $reference = uniqid("dep_"); // unique transaction reference
 
-    // Save deposit record
-    $stmt = $connection->prepare("
-        INSERT INTO deposits (user, method, amount, reference, status)
-        VALUES (?, ?, ?, ?, 'pending')
-    ");
-    $stmt->bind_param("isds", $id, $method, $amount, $reference);
+    $amount = (float) $_POST['amount'];
+    $amount_in_naira = $amount * $usd_to_naria_rate;
+    $amount_in_dollar = $amount;
+
+    
+
+        $stmt = $connection->prepare("
+    INSERT INTO deposits (user, method, amount, amount_in_dollar, reference, status)
+    VALUES (?, ?, ?, ?, ?, 'pending')
+");
+
+    $stmt->bind_param("issss", $id, $method, $amount_in_naira, $amount_in_dollar, $reference);
+
     $stmt->execute();
 
     // If Paystack
@@ -58,17 +69,16 @@ if (isset($_POST['deposit'])) {
     // If Crypto
     if ($method === "crypto") {
 
-        if($amount < $min_crypto_deposit){
+        if ($amount < $min_crypto_deposit) {
             showToast("Minimum deposit for crypto is $$min_crypto_deposit", "error");
-        }else{
+        } else {
             echo "<script>
             window.location.href = './manual/?ref=$reference&amt=$amount';
         </script>";
         }
-        
     }
 
-    if($method === "manual"){
+    if ($method === "manual") {
         echo "<script>
             window.location.href = './manual/?ref=$reference&amt=$amount';
         </script>";
@@ -435,7 +445,7 @@ if (isset($_POST['deposit'])) {
                             <button class="btn btn-primary-light btn-wave waves-effect waves-light">
                                 <i class="bx bx-ticket align-middle me-1"></i>
                                 <i class="bx bx-show align-middle me-1"></i>
-                               Deposit History
+                                Deposit History
                             </button>
                         </a> </div>
                 </div> <!-- End::page-header --> <!-- Start::row-1 -->
@@ -458,10 +468,20 @@ if (isset($_POST['deposit'])) {
                                         <div class="row gy-3">
 
                                             <div class="col-xl-6">
-                                                <label class="form-label">Amount (₦)</label>
-                                                <input type="number" class="form-control form-control-light"
-                                                    name="amount" required>
+                                                <label class="form-label">Amount in USD ($)</label>
+                                                <input type="number"
+                                                    class="form-control form-control-light"
+                                                    name="amount"
+                                                    id="amountUSD"
+                                                    required>
+
+                                                <!-- Naira display -->
+                                                <small class="text-muted d-block mt-1">
+                                                    You will pay:
+                                                    <strong id="amountNGN">₦0.00</strong>
+                                                </small>
                                             </div>
+
 
                                             <div class="col-xl-6">
                                                 <label class="form-label">Payment Method</label>
@@ -484,6 +504,23 @@ if (isset($_POST['deposit'])) {
                                     </div>
 
                                 </form>
+                                <script>
+                                    const usdToNairaRate = <?= (float)$usd_to_naria_rate ?>;
+                                    const amountInput = document.getElementById("amountUSD");
+                                    const nairaDisplay = document.getElementById("amountNGN");
+
+                                    amountInput.addEventListener("input", function() {
+                                        const usdAmount = parseFloat(this.value) || 0;
+                                        const nairaAmount = usdAmount * usdToNairaRate;
+
+                                        nairaDisplay.textContent =
+                                            "₦" + nairaAmount.toLocaleString("en-NG", {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2
+                                            });
+                                    });
+                                </script>
+
                             </div>
 
                         </div>

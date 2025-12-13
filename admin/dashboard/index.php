@@ -34,22 +34,24 @@ $totalDepositAmount = mysqli_fetch_assoc($getAmount)['total'] ?? 0;
 
 
 // Fetch current price
-$get = mysqli_query($connection, "SELECT sitePrice FROM admin WHERE id = 1");
+$get = mysqli_query($connection, "SELECT sitePrice , usd_to_naria_rate FROM admin WHERE id = 1");
 $data = mysqli_fetch_assoc($get);
 $price = $data['sitePrice'] ?? 0;
+$usd_to_naria_rate = $data['usd_to_naria_rate'];
 
 // Update price
 if (isset($_POST['update_price'])) {
-    $new_price = $_POST['price'];
+  $new_price = $_POST['price'];
+  $new_usd_to_naria_rate	= $_POST['usd_to_naria_rate'];
 
-    is_numeric($new_price) or die("<script>alert('Invalid price value'); </script>");
+  is_numeric($new_price) or die("<script>alert('Invalid price value or usd to naria rate value'); </script>");
 
-    $stmt = $connection->prepare("UPDATE admin SET sitePrice = ? WHERE id = 1");
-    $stmt->bind_param("s", $new_price);
+  $stmt = $connection->prepare("UPDATE admin SET sitePrice = ? , usd_to_naria_rate = ?  WHERE id = 1");
+  $stmt->bind_param("ss", $new_price, $new_usd_to_naria_rate);
 
-    if ($stmt->execute()) {
-        echo "<script>alert('Price updated successfully'); window.location.href='./';</script>";
-    }
+  if ($stmt->execute()) {
+    echo "<script>alert('Price updated successfully'); window.location.href='./';</script>";
+  }
 }
 
 
@@ -412,7 +414,7 @@ if (isset($_POST['update_price'])) {
             <div class="row">
               <div class="row">
 
-              <!-- Total Balance From Third Party -->
+                <!-- Total Balance From Third Party -->
                 <div class="col-xl-4">
                   <div class="card custom-card">
                     <div class="card-body">
@@ -575,37 +577,44 @@ if (isset($_POST['update_price'])) {
               </div>
 
               <div class="col-xl-12">
-    <form method="POST" class="card custom-card">
-        <div class="card-header">
-            <div class="card-title">
-                Site Edit
-            </div>
-        </div>
+                <form method="POST" class="card custom-card">
+                  <div class="card-header">
+                    <div class="card-title">
+                      Site Edit
+                    </div>
+                  </div>
 
-        <div class="card-body">
-            <div class="row gy-3">
+                  <div class="card-body">
+                    <div class="row gy-3">
 
-                <div class="col-xl-6">
-                    <label class="form-label">Price</label>
-                    <input 
-                        type="text" 
-                        class="form-control form-control-light"
-                        name="price" 
-                        value="<?php echo $price; ?>"
-                    >
-                </div>
+                      <div class="col-xl-6">
+                        <label class="form-label">Site Order Price</label>
+                        <input
+                          type="text"
+                          class="form-control form-control-light"
+                          name="price"
+                          value="<?php echo $price; ?>">
+                      </div>
+                      <div class="col-xl-6">
+                        <label class="form-label">USD To Naria Rate</label>
+                        <input
+                          type="text"
+                          class="form-control form-control-light"
+                          name="usd_to_naria_rate"
+                          value="<?php echo $usd_to_naria_rate ?>">
+                      </div>
 
-            </div>
-        </div>
+                    </div>
+                  </div>
 
-        <div class="card-footer">
-            <button type="submit" name="update_price"
-                class="btn btn-primary btn-wave float-end waves-effect waves-light">
-                Set
-            </button>
-        </div>
-    </form>
-</div>
+                  <div class="card-footer">
+                    <button type="submit" name="update_price"
+                      class="btn btn-primary btn-wave float-end waves-effect waves-light">
+                      Set
+                    </button>
+                  </div>
+                </form>
+              </div>
 
 
             </div>

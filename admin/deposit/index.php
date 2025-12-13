@@ -507,7 +507,7 @@ include_once '../../server/model.php';
                               
                             </td>
                             <td>
-                              <span class="d-block">${deposit.amount}</span>
+                              <span class="d-block">${deposit.amount} Naria || ${deposit.amount_in_dollar} USD  </span>
                               
                             </td>
                              <td>

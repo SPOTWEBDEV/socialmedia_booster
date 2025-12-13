@@ -5,19 +5,6 @@ include_once '../../../server/model.php';
 
 
 
-
-// Fetch all messages
-function fetchSupportMessages($connection)
-{
-  $sql = "SELECT support_messages.*, users.fullname, users.email 
-            FROM support_messages 
-            LEFT JOIN users ON support_messages.user = users.id
-            ORDER BY support_messages.id DESC";
-
-  return $connection->query($sql);
-}
-
-
 if (!isset($_GET['id'])) {
 
   echo "<script>alert('No message ID provided'); window.location.href='../';</script>";
@@ -26,7 +13,7 @@ if (!isset($_GET['id'])) {
 $msg_id = $_GET['id'];
 
 
-$deposit = mysqli_fetch_assoc(mysqli_query($connection, "SELECT deposits.*, users.fullname, users.email , payment_account.*
+$deposit = mysqli_fetch_assoc(mysqli_query($connection, "SELECT deposits.*, users.fullname, users.email , payment_account.* , deposits.status as payments_status
     FROM deposits 
     LEFT JOIN users ON deposits.user = users.id
     LEFT JOIN payment_account ON deposits.paidto = payment_account.id
@@ -38,11 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   // Approve deposit
   if (isset($_POST['approve_deposit'])) {
-    
+
     $sql = "UPDATE deposits SET status='approved' WHERE id=$msg_id";
     $connection->query($sql);
-    $update = mysqli_query($connection, "UPDATE users SET balance = balance + " . $deposit['amount'] . " WHERE id = " . $deposit['user']);
-    if($update){
+    $update = mysqli_query($connection, "UPDATE users SET balance = balance + " . $deposit['amount_in_dollar'] . " WHERE id = " . $deposit['user']);
+    if ($update) {
       // Balance updated
       echo showToast('Deposit approved and user balance updated successfully.', 'success');
     } else {
@@ -60,10 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
   echo "<script>setTimeout(function(){ window.location.href = '../'; }, 2000);</script>";
-
-  
-
- 
 }
 
 
@@ -448,9 +431,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </h6>
                         <div style="flex-direction: column; gap:10px" class="mt-2 d-flex flex-col g-3 p-2 border rounded bg-light">
                           <div><strong>Reference:</strong> <?php echo $deposit['reference']; ?></div>
-                          <div><strong>Amount:</strong> <?php echo $deposit['amount']; ?></div>
+                          <div><strong>Amount In USD:</strong> $<?php echo number_format($deposit['amount_in_dollar'], 2); ?></div>
+                          <div><strong>Amount In Naria:</strong> ₦<?php echo number_format($deposit['amount'], 2); ?></div>
+
                           <div><strong>Payment Method:</strong> <?php echo $deposit['method']; ?></div>
-                          <div><strong>Status:</strong> <?php echo ucfirst($deposit['status']); ?></div>
+                          <div><strong>Status:</strong> <?php echo ucfirst($deposit['payments_status']); ?></div>
                           <div><strong>Deposit Date:</strong> <?php echo $deposit['created_at']; ?></div>
                           <div><strong>Payment Method:</strong> <?php echo $deposit['type']; ?></div>
                           <?php
@@ -477,15 +462,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                           <input type="hidden" name="deposit_id" value="<?php echo $deposit['id']; ?>">
 
-                          <button type="submit" name="approve_deposit"
-                            class="btn btn-success btn-sm">
-                            <i class="fe fe-check"></i> Approve
-                          </button>
+
+                          <?php
+
+                          if ($deposit['payments_status'] != 'approved') { ?>
+
+                            <button type="submit" name="approve_deposit"
+                              class="btn btn-success btn-sm">
+                              <i class="fe fe-check"></i> Approve
+                            </button>
+
+                          <?php }
+
+                          ?>
+
+
 
                           <button type="submit" name="decline_deposit"
                             class="btn btn-danger btn-sm">
                             <i class="fe fe-x"></i> Decline
                           </button>
+
+                          <a href="../">
+                            <button type="button" 
+                              class="btn btn-primary btn-sm">
+                              <i class="fas fa-arrow-left"></i> Back
+                            </button>
+                          </a>
 
                         </form>
 
