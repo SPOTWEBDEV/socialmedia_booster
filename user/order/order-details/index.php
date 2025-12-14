@@ -399,9 +399,9 @@ if (isset($_POST['send_message'])) {
                                             <!-- Order Price -->
                                             <div class="col-xl-12">
                                                 <label class="form-label">Total Price</label>
-                                                <input type="hidden" id="totalPrice" name="totalprice" class="form-control form-control-light" readonly>
+                                                <input type="text" id="totalPrice" name="totalprice" class="form-control form-control-light" readonly>
                                                 <!-- <input type="text" id="totalPrice1" name="totalprice1" class="form-control form-control-light" readonly> -->
-                                                <div id="totalPrice1" class="totalPrice1"></div>
+                                                <div style="display: none;" id="totalPrice1" class="totalPrice1"></div>
                                             </div>
 
 
