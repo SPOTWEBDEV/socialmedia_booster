@@ -6,107 +6,132 @@ include_once '../../../server/auth/user.php';
 
 require_once '../../../server/controller/boosting.php';
 
-
+// ===============================
 // Fetch site price
+// ===============================
 $get = mysqli_query($connection, "SELECT sitePrice FROM admin WHERE id = 1");
 $data = mysqli_fetch_assoc($get);
 $site_price = floatval($data['sitePrice'] ?? 0);
 
 if (isset($_POST['send_message'])) {
 
-    // Get form values
-    $service_id     = $_POST['service'];
-    $order_name     = $_POST['order_name'];
+    // ===============================
+    // Sanitize & Get form values
+    // ===============================
+    $service_id     = intval($_POST['service']);
+    $order_name     = trim($_POST['order_name']);
     $order_rate     = floatval(str_replace('$', '', $_POST['orderRate']));
-    $order_category = $_POST['order_category'];
-    $social_url     = $_POST['order_url'];
-    $message        = $_POST['message'];
+    $order_category = trim($_POST['order_category']);
+    $social_url     = trim($_POST['order_url']);
+    $message        = trim($_POST['message']);
     $quantity       = floatval($_POST['quanity']);
 
     // ===============================
-    // 🔥 Correct Price Calculation
-    // Matches exactly with JavaScript
+    // Basic validation
     // ===============================
+    if ($quantity <= 0 || $order_rate <= 0 || $service_id <= 0) {
+        echo "<script>alert('Invalid order details.');</script>";
+        exit;
+    }
 
+    // ===============================
+    // 🔥 Price Calculation (Correct)
+    // ===============================
     $thirdPartyPrice = ($quantity / 1000) * $order_rate;
     $siteFee         = ($quantity / 1000) * $site_price;
 
-    $sub_price   = $thirdPartyPrice;                  // For database if needed
-    $order_price = $thirdPartyPrice + $siteFee;       // Final price to deduct
-
-    $order_price = round($order_price, 4); // Round to 4 decimal places
-
-
+    $sub_price   = round($thirdPartyPrice, 4);
+    $order_price = round($thirdPartyPrice + $siteFee, 4);
 
     // ===============================
-    // 📡 Send order to API
+    // Check user balance
     // ===============================
+    if ($order_price <= $balance) {
 
-    $order = $api->order([
-        'service'  => $service_id,
-        'link'     => $social_url,
-        'quantity' => $quantity
-    ]);
+        // ===============================
+        // 📡 Send order to API
+        // ===============================
+        $order = $api->order([
+            'service'  => $service_id,
+            'link'     => $social_url,
+            'quantity' => $quantity
+        ]);
 
-    // Check API for errors
-    if (isset($order->error)) {
+        // ===============================
+        // API Error
+        // ===============================
+        if (isset($order->error)) {
 
-        $msg = addslashes($order->error);
-        echo "<script>alert('API Error: $msg');</script>";
+            $msg = htmlspecialchars($order->error);
+            echo "<script>alert('API Error: $msg');</script>";
+            exit;
 
-    } elseif (isset($order->order)) {
+        } elseif (isset($order->order)) {
 
-        $orderId = addslashes($order->order);
+            $orderId = htmlspecialchars($order->order);
 
-        // Save order into database
-        $stmt = $connection->prepare("
-            INSERT INTO user_orders (
-                user, service_id, order_name, sub_price, order_price, 
-                order_category, social_url, message, quanity, order_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ");
+            // ===============================
+            // Save order to database
+            // ===============================
+            $stmt = $connection->prepare("
+                INSERT INTO user_orders (
+                    user, service_id, order_name, sub_price, order_price, 
+                    order_category, social_url, message, quanity, order_id
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
 
-        $stmt->bind_param(
-            "sissdssssi",
-            $id,
-            $service_id,
-            $order_name,
-            $sub_price,
-            $order_price,
-            $order_category,
-            $social_url,
-            $message,
-            $quantity,
-            $orderId
-        );
+            $stmt->bind_param(
+                "sissdssssi",
+                $id,
+                $service_id,
+                $order_name,
+                $sub_price,
+                $order_price,
+                $order_category,
+                $social_url,
+                $message,
+                $quantity,
+                $orderId
+            );
 
-        if ($stmt->execute()) {
+            if ($stmt->execute()) {
 
-            // Deduct user balance
-            $deduct = $connection->prepare("UPDATE users SET balance = balance - ? WHERE id = ?");
-            $deduct->bind_param("ds", $order_price, $id);
-            $deduct->execute();
+                // ===============================
+                // Deduct user balance
+                // ===============================
+                $deduct = $connection->prepare(
+                    "UPDATE users SET balance = balance - ? WHERE id = ?"
+                );
+                $deduct->bind_param("ds", $order_price, $id);
+                $deduct->execute();
+
+                echo "<script>
+                    alert('Order Placed Successfully! Order ID: $orderId');
+                    setTimeout(function(){
+                        window.location.href = '../my-order/';
+                    }, 1000);
+                </script>";
+
+            } else {
+                echo "<script>alert('Error saving order.');</script>";
+            }
 
         } else {
-            echo "<script>alert('Error saving order.');</script>";
+
+            // ===============================
+            // Unexpected API response
+            // ===============================
+            $unknown = htmlspecialchars(json_encode($order));
+            echo "<script>alert('Unexpected API Response: $unknown');</script>";
         }
 
-        // Success message
-        echo "<script>
-            alert('Order Placed Successfully! Order ID: $orderId');
-            setTimeout(function(){ window.location.href = '../my-order/'; }, 1000);
-        </script>";
-
     } else {
-
-        // Unknown API response
-        $unknown = addslashes(json_encode($order));
-        echo "<script>alert('Unexpected API Response: $unknown');</script>";
+        // ===============================
+        // Insufficient balance
+        // ===============================
+        echo "<script>alert('Insufficient balance. Please fund your wallet.');</script>";
     }
 }
-
-
-
 
 
 
