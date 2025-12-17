@@ -459,7 +459,7 @@ if (isset($_POST['deposit'])) {
                                         <div class="card-title">
                                             Make a Deposit
                                             <span class="subtitle fw-normal text-muted d-block fs-12">
-                                                Choose a payment method and enter the amount you want to deposit.
+                                                Kindly make your payment then click on proceed
                                             </span>
                                         </div>
                                     </div>
