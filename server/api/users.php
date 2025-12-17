@@ -1,7 +1,7 @@
 <?php
 require '../connection.php'; // include your database connection
 
-$sql = "SELECT id, fullname, email, status, status_message, created_at FROM users ORDER BY id DESC";
+$sql = "SELECT * FROM users ORDER BY id DESC";
 $result = $connection->query($sql);
 
 $users = [];

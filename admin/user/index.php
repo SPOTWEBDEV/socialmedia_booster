@@ -288,6 +288,7 @@ include_once '../../server/model.php';
                                                     <tr>
                                                         <th scope="col">User ID</th>
                                                         <th scope="col">Full Name</th>
+                                                        <th scope="col">Balance</th>
                                                         <th scope="col">Status</th>
                                                         <th scope="col">Date Registered</th>
                                                         <th scope="col">Action</th>
@@ -366,6 +367,7 @@ include_once '../../server/model.php';
                         <span class="d-block fs-12 text-muted fw-normal">${user.email}</span>
                     </div>
                 </td>
+                 <td><a href="#" class="text-primary text-decoration-underline">$${user.balance}</a></td>
 
                 <td><span class="badge bg-${getStatusColor(user.status)}-transparent">
                     ${user.status}
