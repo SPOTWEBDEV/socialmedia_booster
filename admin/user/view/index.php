@@ -13,6 +13,37 @@ if (!isset($_GET['id'])) {
 $msg_id = $_GET['id'];
 
 
+// ===========================
+// CHANGE BALANCE
+// ===========================
+if (isset($_POST['change_balance'])) {
+    $balance = floatval($_POST['balance']);
+
+    mysqli_query(
+        $connection,
+        "UPDATE users SET balance='$balance' WHERE id='$msg_id'"
+    );
+
+    echo "<script>alert('Balance updated successfully');window.location.href='?user_id=$msg_id';</script>";
+}
+
+// ===========================
+// SUSPEND USER
+// ===========================
+if (isset($_POST['suspend_user'])) {
+    $status_message = mysqli_real_escape_string($connection, $_POST['status_message']);
+
+    mysqli_query(
+        $connection,
+        "UPDATE users 
+         SET status='suspended', status_message='$status_message' 
+         WHERE id='$msg_id'"
+    );
+
+    echo "<script>alert('User suspended successfully');window.location.href='?user_id=$msg_id';</script>";
+}
+
+
 ?>
 
 
@@ -377,84 +408,115 @@ $msg_id = $_GET['id'];
                     <div class="col-xl-9">
                         <div class="row">
                             <div class="col-xl-12">
-                                <div class="card custom-card">
-                                    <div class="card-header">
-                                        <h4 class="card-title">Deposit Details</h4>
-                                    </div>
+    <div class="card custom-card">
+        <div class="card-header">
+            <h4 class="card-title">Deposit Details</h4>
+        </div>
 
-                                    <div class="card-body">
+        <div class="card-body">
 
-                                        <?php
+            <div class="rounded p-3 mb-3">
 
-                                        $select = mysqli_query($connection, "SELECT * FROM `users` WHERE id='$msg_id'");
-                                        $user = mysqli_fetch_assoc($select);
+                <div style="flex-direction: column; gap:10px"
+                     class="mt-2 d-flex g-3 p-2 border rounded bg-light">
 
-                                        ?>
+                    <div><strong>Fullname:</strong> <?= $user['fullname']; ?></div>
+                    <div><strong>Email:</strong> <?= $user['email']; ?></div>
+                    <div><strong>Balance:</strong> ₦<?= number_format($user['balance'], 2); ?></div>
+                    <div><strong>Registered Date:</strong> <?= $user['created_at']; ?></div>
+                    <div><strong>Status:</strong> <?= ucfirst($user['status'] ?? 'active'); ?></div>
 
+                    <?php if (!empty($user['status_message'])): ?>
+                        <div class="text-danger">
+                            <strong>Suspension Reason:</strong>
+                            <?= $user['status_message']; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
 
-                                        <div class="rounded p-3 mb-3">
+                <!-- CHANGE BALANCE -->
+                <form method="post" class="mt-3">
+                    <label>Balance</label>
+                    <input type="number" step="0.01" name="balance"
+                           class="form-control" required>
+                    <button type="submit" name="change_balance"
+                            class="btn btn-success btn-sm mt-2">
+                        Change Balance
+                    </button>
+                </form>
 
-                                           
-                                            <div style="flex-direction: column; gap:10px" class="mt-2 d-flex flex-col g-3 p-2 border rounded bg-light">
-                                                <div><strong>Fullname:</strong> <?php echo $user['fullname']; ?></div>
-                                                <div><strong>Email:</strong> <?php echo $user['email']; ?></div>
-                                                <div><strong>Balance:</strong> <?php echo $user['balance']; ?></div>
+                <!-- SUSPEND USER -->
+                <form method="POST" class="mt-3">
+                    <label>Reason for Suspension</label>
+                    <textarea name="suspend_reason"
+                              class="form-control" required></textarea>
 
+                    <button type="submit" name="suspend_user"
+                            class="btn btn-danger btn-sm mt-2">
+                        <i class="fe fe-x"></i> Suspend User
+                    </button>
+                </form>
 
-                                                <div><strong>Registered Date:</strong> <?php echo $user['created_at']; ?></div>
-                                            </div>
-                                            <form method="post">
-                                                <div>
-                                                    <label for="">Balance</label>
-                                                    <input type="text">
-                                                </div>
-                                                <button>Change Balance</button>
-                                            </form>
-                                            <form method="POST" class="d-flex gap-2 mt-3">
+                <a href="../" class="btn btn-primary btn-sm mt-3">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
 
-                                                <input type="hidden" name="deposit_id" value="<?php echo $deposit['id']; ?>">
+            </div>
 
-                                                <button type="submit" name="decline_deposit"
-                                                    class="btn btn-danger btn-sm">
-                                                    <i class="fe fe-x"></i> Suspended User
-                                                </button>
+            <!-- FETCH FROM DEPOSIT TABLE -->
+            <div class="table-responsive">
+                <table class="table text-nowrap">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name / Email</th>
+                            <th>Reference</th>
+                            <th>Payment Method</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
 
-                                                <a href="../">
-                                                    <button type="button"
-                                                        class="btn btn-primary btn-sm">
-                                                        <i class="fas fa-arrow-left"></i> Back
-                                                    </button>
-                                                </a>
+                    <?php if (mysqli_num_rows($deposits) > 0): ?>
+                        <?php while ($deposit = mysqli_fetch_assoc($deposits)): ?>
+                            <tr>
+                                <td><?= $deposit['id']; ?></td>
+                                <td>
+                                    <?= $user['fullname']; ?><br>
+                                    <small><?= $user['email']; ?></small>
+                                </td>
+                                <td><?= $deposit['reference']; ?></td>
+                                <td><?= ucfirst($deposit['method']); ?></td>
+                                <td>₦<?= number_format($deposit['amount'], 2); ?></td>
+                                <td><?= $deposit['created_at']; ?></td>
+                                <td>
+                                    <span class="badge bg-<?=
+                                        $deposit['status'] == 'success' ? 'success' :
+                                        ($deposit['status'] == 'pending' ? 'warning' : 'danger');
+                                    ?>">
+                                        <?= ucfirst($deposit['status']); ?>
+                                    </span>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">
+                                No deposits found
+                            </td>
+                        </tr>
+                    <?php endif; ?>
 
-                                            </form>
+                    </tbody>
+                </table>
+            </div>
 
-                                        </div>
+        </div>
+    </div>
+</div>
 
-                                        <!-- FETCH FROM DEPOSIT TABLE  -->
-                                        <div class="table-responsive">
-                                            <table class="table text-nowrap">
-                                                <thead>
-                                                    <tr>
-                                                        <th scope="col">ID</th>
-                                                        <th scope="col">Name / Email</th>
-                                                        <th scope="col">Reference</th>
-                                                        <th scope="col">Payment Method</th>
-                                                        <th scope="col">Amount</th>
-                                                        <th scope="col">Date</th>
-                                                        <th scope="col">Status</th>
-                                                        <th scope="col">Action</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-
-                                                </tbody>
-                                            </table>
-                                        </div>
-
-
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
