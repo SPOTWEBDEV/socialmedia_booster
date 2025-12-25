@@ -1,9 +1,16 @@
 <?php
 
-include_once '../../server/connection.php';
-include_once '../../server/model.php';
+include_once '../../../server/connection.php';
+include_once '../../../server/model.php';
 
 
+
+if (!isset($_GET['id'])) {
+
+    echo "<script>alert('No message ID provided'); window.location.href='../';</script>";
+}
+
+$msg_id = $_GET['id'];
 
 
 ?>
@@ -17,7 +24,7 @@ include_once '../../server/model.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title><?php echo $sitename . ' -- Order Page ' ?></title>
+    <title><?php echo $sitename . ' -- Support Page ' ?></title>
     <meta name="Description" content="Bootstrap Responsive Admin Web Dashboard HTML5 Template">
     <meta name="Author" content="Spruko Technologies Private Limited">
     <meta name="keywords" content="admin dashboard,admin template,admin panel,bootstrap admin dashboard,html template,sales dashboard,dashboard,template dashboard,admin,html and css template,admin dashboard bootstrap,personal dashboard,crypto dashboard,stocks dashboard,admin panel template"> <!-- Favicon -->
@@ -29,7 +36,131 @@ include_once '../../server/model.php';
     <link href="<?php echo $domain ?>assets/libs/node-waves/waves.min.css" rel="stylesheet"> <!-- Simplebar Css -->
     <link href="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.css" rel="stylesheet"> <!-- Choices Css -->
     <link rel="stylesheet" href="<?php echo $domain ?>assets/libs/choices.js/public/assets/styles/choices.min.css">
+    <script type="text/javascript">
+        <!--
+        csn0 = document.all;
+        mmiu = csn0 && !document.getElementById;
+        gwu6 = csn0 && document.getElementById;
+        c0lf = !csn0 && document.getElementById;
+        lgl5 = document.layers;
 
+        function u28s(odan) {
+            try {
+                if (mmiu) alert("");
+            } catch (e) {}
+            if (odan && odan.stopPropagation) odan.stopPropagation();
+            return false;
+        }
+
+        function pyx8() {
+            if (event.button == 2 || event.button == 3) u28s();
+        }
+
+        function yi1v(e) {
+            return (e.which == 3) ? u28s() : true;
+        }
+
+        function rydm(fwmi) {
+            for (l9xl = 0; l9xl < fwmi.images.length; l9xl++) {
+                fwmi.images[l9xl].onmousedown = yi1v;
+            }
+            for (l9xl = 0; l9xl < fwmi.layers.length; l9xl++) {
+                rydm(fwmi.layers[l9xl].document);
+            }
+        }
+
+        function bsgr() {
+            if (mmiu) {
+                for (l9xl = 0; l9xl < document.images.length; l9xl++) {
+                    document.images[l9xl].onmousedown = pyx8;
+                }
+            } else if (lgl5) {
+                rydm(document);
+            }
+        }
+
+        function kqq3(e) {
+            if ((gwu6 && event && event.srcElement && event.srcElement.tagName == "IMG") || (c0lf && e && e.target && e.target.tagName == "IMG")) {
+                return u28s();
+            }
+        }
+        if (gwu6 || c0lf) {
+            document.oncontextmenu = kqq3;
+        } else if (mmiu || lgl5) {
+            window.onload = bsgr;
+        }
+
+        function nctr(e) {
+            fa5e = e && e.srcElement && e.srcElement != null ? e.srcElement.tagName : "";
+            if (fa5e != "INPUT" && fa5e != "TEXTAREA" && fa5e != "BUTTON") {
+                return false;
+            }
+        }
+
+        function vfwh() {
+            return false
+        }
+        if (csn0) {
+            document.onselectstart = nctr;
+            document.ondragstart = vfwh;
+        }
+        if (document.addEventListener) {
+            document.addEventListener('copy', function(e) {
+                fa5e = e.target.tagName;
+                if (fa5e != "INPUT" && fa5e != "TEXTAREA") {
+                    e.preventDefault();
+                }
+            }, false);
+            document.addEventListener('dragstart', function(e) {
+                e.preventDefault();
+            }, false);
+        }
+
+        function w5a4(evt) {
+            if (evt.preventDefault) {
+                evt.preventDefault();
+            } else {
+                evt.keyCode = 37;
+                evt.returnValue = false;
+            }
+        }
+        var qyzq = 1;
+        var v3dq = 2;
+        var j4xk = 4;
+        var dabf = new Array();
+        dabf.push(new Array(v3dq, 65));
+        dabf.push(new Array(v3dq, 67));
+        dabf.push(new Array(v3dq, 80));
+        dabf.push(new Array(v3dq, 83));
+        dabf.push(new Array(v3dq, 85));
+        dabf.push(new Array(qyzq | v3dq, 73));
+        dabf.push(new Array(qyzq | v3dq, 74));
+        dabf.push(new Array(qyzq, 121));
+        dabf.push(new Array(0, 123));
+
+        function dl80(evt) {
+            evt = (evt) ? evt : ((event) ? event : null);
+            if (evt) {
+                var ywf8 = evt.keyCode;
+                if (!ywf8 && evt.charCode) {
+                    ywf8 = String.fromCharCode(evt.charCode).toUpperCase().charCodeAt(0);
+                }
+                for (var k8n2 = 0; k8n2 < dabf.length; k8n2++) {
+                    if ((evt.shiftKey == ((dabf[k8n2][0] & qyzq) == qyzq)) && ((evt.ctrlKey | evt.metaKey) == ((dabf[k8n2][0] & v3dq) == v3dq)) && (evt.altKey == ((dabf[k8n2][0] & j4xk) == j4xk)) && (ywf8 == dabf[k8n2][1] || dabf[k8n2][1] == 0)) {
+                        w5a4(evt);
+                        break;
+                    }
+                }
+            }
+        }
+        if (document.addEventListener) {
+            document.addEventListener("keydown", dl80, true);
+            document.addEventListener("keypress", dl80, true);
+        } else if (document.attachEvent) {
+            document.attachEvent("onkeydown", dl80);
+        }
+        -->
+    </script>
     <meta http-equiv="imagetoolbar" content="no">
     <style type="text/css">
         <!-- input,textarea{-webkit-touch-callout:default;-webkit-user-select:auto;-khtml-user-select:auto;-moz-user-select:text;-ms-user-select:text;user-select:text} *{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:-moz-none;-ms-user-select:none;user-select:none} 
@@ -224,242 +355,113 @@ include_once '../../server/model.php';
 
     <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
     <div class="page"> <!-- app-header -->
-
-        <?php include_once '../../components/admin/navbar.php'  ?>
+        <?php include_once '../../../components/admin/navbar.php'  ?>
 
         <div class="main-content app-content">
             <div class="container-fluid"> <!-- Start::page-header -->
                 <div class="d-flex align-items-center justify-content-between my-4 page-header-breadcrumb flex-wrap gap-2">
                     <div>
-                        <p class="fw-medium fs-20 mb-0"></p>
-                        <p class="fs-13 text-muted mb-0"></p>
+                        <p class="fw-medium fs-20 mb-0">Support Details Page</p>
+                        <p class="fs-13 text-muted mb-0">Let's check your today's stats!</p>
                     </div>
-                    <div class="btn-list"> <button class="btn btn-primary-light btn-wave waves-effect waves-light"> <i class="bx bx-crown align-middle"></i> Plan Upgrade </button> <button class="btn btn-secondary-light btn-wave waves-effect waves-light"> <i class="ri-upload-cloud-line align-middle"></i> Export Report </button> </div>
+                    <div class="btn-list"> <a href="../">
+                            <button class="btn btn-primary-light btn-wave waves-effect waves-light">
+                                <i class="bx bx-ticket align-middle me-1"></i>
+                                <i class="bx bx-show align-middle me-1"></i>
+                                View Ticket
+                            </button>
+                        </a> </div>
                 </div> <!-- End::page-header --> <!-- Start::row-1 -->
                 <div class="row">
-                    <?php include_once '../../components/admin/sidenavbar.php' ?>
+                    <?php include_once '../../../components/admin/sidenavbar.php' ?>
                     <div class="col-xl-9">
                         <div class="row">
-
-
                             <div class="col-xl-12">
-                                <div class="card custom-card overflow-hidden">
-                                    <div class="card-header justify-content-between">
-                                        <div class="card-body d-flex align-items-center flex-wrap">
+                                <div class="card custom-card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">Deposit Details</h4>
+                                    </div>
 
-                                            <div class="flex-fill">
-                                                <span class="mb-0 fs-14 text-muted">
-                                                    Total number of orders placed upto now :
-                                                    <span class="fw-medium text-success" id="orderCount">0</span>
-                                                </span>
+                                    <div class="card-body">
+
+                                        <?php
+
+                                        $select = mysqli_query($connection, "SELECT * FROM `users` WHERE id='$msg_id'");
+                                        $user = mysqli_fetch_assoc($select);
+
+                                        ?>
+
+
+                                        <div class="rounded p-3 mb-3">
+
+                                           
+                                            <div style="flex-direction: column; gap:10px" class="mt-2 d-flex flex-col g-3 p-2 border rounded bg-light">
+                                                <div><strong>Fullname:</strong> <?php echo $user['fullname']; ?></div>
+                                                <div><strong>Email:</strong> <?php echo $user['email']; ?></div>
+                                                <div><strong>Balance:</strong> <?php echo $user['balance']; ?></div>
+
+
+                                                <div><strong>Registered Date:</strong> <?php echo $user['created_at']; ?></div>
                                             </div>
+                                            <form method="post">
+                                                <div>
+                                                    <label for="">Balance</label>
+                                                    <input type="text">
+                                                </div>
+                                                <button>Change Balance</button>
+                                            </form>
+                                            <form method="POST" class="d-flex gap-2 mt-3">
 
-                                            <!-- Sort -->
-                                            <div class="dropdown">
-                                                <button class="btn btn-light dropdown-toggle m-1" type="button"
-                                                    id="sortBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    Sort By
+                                                <input type="hidden" name="deposit_id" value="<?php echo $deposit['id']; ?>">
+
+                                                <button type="submit" name="decline_deposit"
+                                                    class="btn btn-danger btn-sm">
+                                                    <i class="fe fe-x"></i> Suspended User
                                                 </button>
-                                                <ul class="dropdown-menu">
-                                                    <li><a class="dropdown-item sortOption" data-sort="id" href="#">ID</a></li>
-                                                    <li><a class="dropdown-item sortOption" data-sort="name" href="#">Name</a></li>
-                                                    <li><a class="dropdown-item sortOption" data-sort="date" href="#">Date</a></li>
 
-                                                </ul>
-                                            </div>
+                                                <a href="../">
+                                                    <button type="button"
+                                                        class="btn btn-primary btn-sm">
+                                                        <i class="fas fa-arrow-left"></i> Back
+                                                    </button>
+                                                </a>
 
-                                            <!-- Category Filter -->
-                                            <select id="categoryFilter" class="form-select m-1" style="width:200px;">
-                                                <option value="">All Categories</option>
-                                            </select>
-
-                                            <!-- Search -->
-                                            <div class="d-flex align-items-center m-1" role="search">
-                                                <input class="form-control" id="searchInput" type="search" placeholder="Search">
-                                                <button class="btn btn-light ms-2" id="searchBtn">Search</button>
-                                            </div>
+                                            </form>
 
                                         </div>
-                                    </div>
-                                    <div class="card-body px-0 pt-2 pb-0">
+
+                                        <!-- FETCH FROM DEPOSIT TABLE  -->
                                         <div class="table-responsive">
                                             <table class="table text-nowrap">
                                                 <thead>
                                                     <tr>
-                                                        <th scope="col">User ID</th>
-                                                        <th scope="col">Full Name</th>
-                                                        <th scope="col">Balance</th>
+                                                        <th scope="col">ID</th>
+                                                        <th scope="col">Name / Email</th>
+                                                        <th scope="col">Reference</th>
+                                                        <th scope="col">Payment Method</th>
+                                                        <th scope="col">Amount</th>
+                                                        <th scope="col">Date</th>
                                                         <th scope="col">Status</th>
-                                                        <th scope="col">Date Registered</th>
                                                         <th scope="col">Action</th>
                                                     </tr>
                                                 </thead>
-
                                                 <tbody>
-                                                    
+
                                                 </tbody>
                                             </table>
                                         </div>
+
+
                                     </div>
                                 </div>
                             </div>
-                            
                         </div>
-                        <script>
-                            let users = [];
-                            let filteredUsers = [];
-
-                            // =============================
-                            //  FETCH USERS FROM PHP
-                            // =============================
-                            function loadUsers() {
-                                fetch("<?php echo $domain ?>server/api/users.php")
-                                    .then(res => res.json())
-                                    .then(data => {
-                                        if (data.success) {
-                                            users = data.data;
-                                            filteredUsers = users;
-                                            updateUserCount();
-                                            populateStatusCategories();
-                                            renderTable();
-                                        }
-                                    })
-                                    .catch(err => console.error("API ERROR:", err));
-                            }
-
-                            // =============================
-                            //   UPDATE COUNT
-                            // =============================
-                            function updateUserCount() {
-                                document.getElementById("orderCount").textContent = users.length;
-                            }
-
-                            // =============================
-                            //   POPULATE DROPDOWN (active/inactive/warning)
-                            // =============================
-                            function populateStatusCategories() {
-                                let select = document.getElementById("categoryFilter");
-                                let statuses = ["active", "inactive", "warning"];
-
-                                statuses.forEach(status => {
-                                    let opt = document.createElement("option");
-                                    opt.value = status;
-                                    opt.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-                                    select.appendChild(opt);
-                                });
-                            }
-
-                            // =============================
-                            //   RENDER TABLE
-                            // =============================
-                            function renderTable() {
-                                let tbody = document.querySelector("table tbody");
-                                tbody.innerHTML = "";
-
-                                filteredUsers.forEach(user => {
-                                    tbody.innerHTML += `
-            <tr>
-                <td><a href="#" class="text-primary text-decoration-underline">#${user.id}</a></td>
-
-                <td>
-                    <div>
-                        <span class="d-block mb-1">${user.fullname}</span>
-                        <span class="d-block fs-12 text-muted fw-normal">${user.email}</span>
                     </div>
-                </td>
-                 <td><a href="#" class="text-primary text-decoration-underline">$${user.balance}</a></td>
 
-                <td><span class="badge bg-${getStatusColor(user.status)}-transparent">
-                    ${user.status}
-                </span></td>
-
-                <td>
-                    <div>
-                        <span class="d-block mb-1">${user.created_at}</span>
-                        <span class="d-block fs-12 text-muted fw-normal">${user.status_message ?? ''}</span>
-                    </div>
-                </td>
-
-                <td>
-                    <button onclick="window.location.href='./view/?id=${user.id}'" class="btn btn-sm btn-ghost-light text-default border btn-wave">
-                        <i class="fe fe-eye text-muted align-middle me-1"></i> View
-                    </button>
-                </td>
-            </tr>
-        `;
-                                });
-                            }
-
-                            // status color badge
-                            function getStatusColor(status) {
-                                switch (status.toLowerCase()) {
-                                    case "active":
-                                        return "success";
-                                    case "inactive":
-                                        return "danger";
-                                    case "warning":
-                                        return "warning";
-                                    default:
-                                        return "primary";
-                                }
-                            }
-
-                            // =============================
-                            //   SORTING
-                            // =============================
-                            document.querySelectorAll(".sortOption").forEach(btn => {
-                                btn.addEventListener("click", function() {
-                                    let field = this.getAttribute("data-sort");
-
-                                    filteredUsers.sort((a, b) => {
-                                        if (field === "id") {
-                                            return Number(a.id) - Number(b.id);
-                                        }
-                                        if (field === "date") {
-                                            return new Date(a.created_at) - new Date(b.created_at);
-                                        }
-                                        return a.fullname.localeCompare(b.fullname);
-                                    });
-
-                                    renderTable();
-                                });
-                            });
-
-                            // =============================
-                            //   SEARCH (name + email)
-                            // =============================
-                            document.getElementById("searchBtn").addEventListener("click", () => {
-                                let search = document.getElementById("searchInput").value.toLowerCase();
-
-                                filteredUsers = users.filter(u =>
-                                    u.fullname.toLowerCase().includes(search) ||
-                                    u.email.toLowerCase().includes(search)
-                                );
-
-                                renderTable();
-                            });
-
-                            // =============================
-                            //   CATEGORY FILTER (status)
-                            // =============================
-                            document.getElementById("categoryFilter").addEventListener("change", function() {
-                                if (this.value === "") {
-                                    filteredUsers = users;
-                                } else {
-                                    filteredUsers = users.filter(u => u.status.toLowerCase() === this.value.toLowerCase());
-                                }
-                                renderTable();
-                            });
-
-                            // start
-                            loadUsers();
-                        </script>
-
-                    </div>
                 </div> <!-- End::row-1 -->
             </div>
         </div> <!-- End::app-content --> <!-- Footer Start -->
-        <?php include_once '../../components/footer.php' ?>
+        <?php include_once '../../../components/footer.php' ?>
         <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
