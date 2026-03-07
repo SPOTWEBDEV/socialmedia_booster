@@ -478,7 +478,7 @@ if (isset($_POST['deposit'])) {
                                                 <!-- Naira display -->
                                                 <small class="text-muted d-block mt-1">
                                                     You will pay:
-                                                    <strong id="amountNGN">₦0.00</strong>
+                                                    <strong id="amountNGN">₦0.00</strong> in Naira
                                                 </small>
                                             </div>
 

@@ -32,7 +32,7 @@ if ($isLocalhost) {
 
     define("USER", "root");
     define("PASSWORD", "");
-    define("DATABASE", "boosteryard");
+    define("DATABASE", "boosteryard1");
 
     // Database connection
     $connection = mysqli_connect(HOST, USER, PASSWORD, DATABASE);

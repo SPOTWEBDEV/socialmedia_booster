@@ -1537,32 +1537,7 @@ include('server/connection.php');
                 <div class="text-center">
                   <h5 class="mb-0">Joseph Aniston</h5>
                   <p class="mb-0 fs-15">Director</p>
-                  <div class="d-flex justify-content-center mt-3">
-                    <a
-                      aria-label="anchor"
-                      href="javascript:void(0);"
-                      class="btn btn-icon btn-pil btn-primary-light"
-                      ><i class="bx bxl-twitter"></i
-                    ></a>
-                    <a
-                      aria-label="anchor"
-                      href="javascript:void(0);"
-                      class="btn btn-icon btn-pil btn-primary-light ms-2"
-                      ><i class="bx bxl-facebook"></i
-                    ></a>
-                    <a
-                      aria-label="anchor"
-                      href="javascript:void(0);"
-                      class="btn btn-icon btn-pil btn-primary-light ms-2"
-                      ><i class="bx bxl-instagram"></i
-                    ></a>
-                    <a
-                      aria-label="anchor"
-                      href="javascript:void(0);"
-                      class="btn btn-icon btn-pil btn-primary-light ms-2"
-                      ><i class="bx bxl-linkedin"></i
-                    ></a>
-                  </div>
+                  
                 </div>
               </div>
               <div
@@ -1583,32 +1558,7 @@ include('server/connection.php');
                 <div class="text-center">
                   <h5 class="mb-0">Luke Harper</h5>
                   <p class="mb-0 fs-15">Manager</p>
-                  <div class="d-flex justify-content-center mt-3">
-                    <a
-                      aria-label="anchor"
-                      href="javascript:void(0);"
-                      class="btn btn-icon btn-pil btn-primary-light"
-                      ><i class="bx bxl-twitter"></i
-                    ></a>
-                    <a
-                      aria-label="anchor"
-                      href="javascript:void(0);"
-                      class="btn btn-icon btn-pil btn-primary-light ms-2"
-                      ><i class="bx bxl-facebook"></i
-                    ></a>
-                    <a
-                      aria-label="anchor"
-                      href="javascript:void(0);"
-                      class="btn btn-icon btn-pil btn-primary-light ms-2"
-                      ><i class="bx bxl-instagram"></i
-                    ></a>
-                    <a
-                      aria-label="anchor"
-                      href="javascript:void(0);"
-                      class="btn btn-icon btn-pil btn-primary-light ms-2"
-                      ><i class="bx bxl-linkedin"></i
-                    ></a>
-                  </div>
+                  
                 </div>
               </div>
               <div
@@ -1629,32 +1579,7 @@ include('server/connection.php');
                 <div class="text-center">
                   <h5 class="mb-0">Melissa Queen</h5>
                   <p class="mb-0 fs-15">Creative Director</p>
-                  <div class="d-flex justify-content-center mt-3">
-                    <a
-                      aria-label="anchor"
-                      href="javascript:void(0);"
-                      class="btn btn-icon btn-pil btn-primary-light"
-                      ><i class="bx bxl-twitter"></i
-                    ></a>
-                    <a
-                      aria-label="anchor"
-                      href="javascript:void(0);"
-                      class="btn btn-icon btn-pil btn-primary-light ms-2"
-                      ><i class="bx bxl-facebook"></i
-                    ></a>
-                    <a
-                      aria-label="anchor"
-                      href="javascript:void(0);"
-                      class="btn btn-icon btn-pil btn-primary-light ms-2"
-                      ><i class="bx bxl-instagram"></i
-                    ></a>
-                    <a
-                      aria-label="anchor"
-                      href="javascript:void(0);"
-                      class="btn btn-icon btn-pil btn-primary-light ms-2"
-                      ><i class="bx bxl-linkedin"></i
-                    ></a>
-                  </div>
+                  
                 </div>
               </div>
               <div
@@ -1675,32 +1600,7 @@ include('server/connection.php');
                 <div class="text-center">
                   <h5 class="mb-0">Teressa Smith</h5>
                   <p class="mb-0 fs-15">Board Director</p>
-                  <div class="d-flex justify-content-center mt-3">
-                    <a
-                      aria-label="anchor"
-                      href="javascript:void(0);"
-                      class="btn btn-icon btn-pil btn-primary-light"
-                      ><i class="bx bxl-twitter"></i
-                    ></a>
-                    <a
-                      aria-label="anchor"
-                      href="javascript:void(0);"
-                      class="btn btn-icon btn-pil btn-primary-light ms-2"
-                      ><i class="bx bxl-facebook"></i
-                    ></a>
-                    <a
-                      aria-label="anchor"
-                      href="javascript:void(0);"
-                      class="btn btn-icon btn-pil btn-primary-light ms-2"
-                      ><i class="bx bxl-instagram"></i
-                    ></a>
-                    <a
-                      aria-label="anchor"
-                      href="javascript:void(0);"
-                      class="btn btn-icon btn-pil btn-primary-light ms-2"
-                      ><i class="bx bxl-linkedin"></i
-                    ></a>
-                  </div>
+                  
                 </div>
               </div>
             </div>
@@ -2178,7 +2078,8 @@ include('server/connection.php');
                   <p class="fw-medium mb-3">
                     <a href="index.html">
                       <img
-                        src="<?php echo $domain ?>assets/images/brand-logos/desktop-dark.png"
+                        width="80px"
+                        src="<?php echo $domain ?>assets/images/logo.png"
                         alt="Boost Yard Logo"
                       />
                     </a>
@@ -2308,38 +2209,7 @@ include('server/connection.php');
                         123-4567
                       </a>
                     </li>
-                    <li class="mt-3">
-                      <p class="mb-2 fw-medium op-8">FOLLOW US ON :</p>
-                      <div class="mb-0">
-                        <div class="btn-list">
-                          <button
-                            class="btn btn-sm btn-icon btn-primary-light btn-wave waves-effect waves-light"
-                          >
-                            <i class="ri-facebook-line fw-bold"></i>
-                          </button>
-                          <button
-                            class="btn btn-sm btn-icon btn-secondary-light btn-wave waves-effect waves-light"
-                          >
-                            <i class="ri-twitter-line fw-bold"></i>
-                          </button>
-                          <button
-                            class="btn btn-sm btn-icon btn-warning-light btn-wave waves-effect waves-light"
-                          >
-                            <i class="ri-instagram-line fw-bold"></i>
-                          </button>
-                          <button
-                            class="btn btn-sm btn-icon btn-success-light btn-wave waves-effect waves-light"
-                          >
-                            <i class="ri-github-line fw-bold"></i>
-                          </button>
-                          <button
-                            class="btn btn-sm btn-icon btn-danger-light btn-wave waves-effect waves-light"
-                          >
-                            <i class="ri-youtube-line fw-bold"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </li>
+                    
                   </ul>
                 </div>
               </div>

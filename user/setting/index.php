@@ -6,69 +6,130 @@ include_once '../../server/auth/user.php';
 
 $user_id = $_SESSION['user_id']; // replace with actual logged-in user ID
 
+
+// Fetch existing keys
+  $apiKeys = [
+    'test_key' => '',
+    'live_key' => ''
+  ];
+
+  $stmt = $connection->prepare("SELECT test_key, live_key FROM user_api_keys WHERE user_id=?");
+  $stmt->bind_param("i", $user_id);
+  $stmt->execute();
+  $res = $stmt->get_result();
+
+  if ($row = $res->fetch_assoc()) {
+    $apiKeys = $row;
+  }
+
 // ===================== HANDLE FORM SUBMISSION =====================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // --- 1️⃣ Save Security Settings ---
-    if (isset($_POST['save_settings'])) {
-        $two_step = isset($_POST['two_step']) ? 1 : 0;
-        $auth_type = $_POST['auth_type'] ?? 'pin';
-        $recovery_email = isset($_POST['recovery_email']) ? 1 : 0;
+  // --- 1️⃣ Save Security Settings ---
+  if (isset($_POST['save_settings'])) {
+    $two_step = isset($_POST['two_step']) ? 1 : 0;
+    $auth_type = $_POST['auth_type'] ?? 'pin';
+    $recovery_email = isset($_POST['recovery_email']) ? 1 : 0;
 
-        $sql = "INSERT INTO user_security_settings (user_id, two_step, auth_type, recovery_email)
+    $sql = "INSERT INTO user_security_settings (user_id, two_step, auth_type, recovery_email)
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE
                 two_step = VALUES(two_step),
                 auth_type = VALUES(auth_type),
                 recovery_email = VALUES(recovery_email)";
-        $stmt = $connection->prepare($sql);
-        $stmt->bind_param("issi", $user_id, $two_step, $auth_type, $recovery_email);
+    $stmt = $connection->prepare($sql);
+    $stmt->bind_param("issi", $user_id, $two_step, $auth_type, $recovery_email);
 
-        if ($stmt->execute()) {
-            showToast("Security settings saved successfully.");
-        } else {
-            showToast("Error saving settings: " . $stmt->error , "error");
-        }
+    if ($stmt->execute()) {
+      showToast("Security settings saved successfully.");
+    } else {
+      showToast("Error saving settings: " . $stmt->error, "error");
     }
+  }
 
-    // --- 2️⃣ Change Password ---
-    if (isset($_POST['change_password'])) {
-        $current = $_POST['current_password'] ?? '';
-        $new = $_POST['new_password'] ?? '';
-        $confirm = $_POST['confirm_password'] ?? '';
+  // --- 2️⃣ Change Password ---
+  if (isset($_POST['change_password'])) {
+    $current = $_POST['current_password'] ?? '';
+    $new = $_POST['new_password'] ?? '';
+    $confirm = $_POST['confirm_password'] ?? '';
 
-        // Get current hashed password
-        $stmt = $connection->prepare("SELECT password FROM users WHERE id = ?");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-        $hashed_password = $row['password'] ?? '';
+    // Get current hashed password
+    $stmt = $connection->prepare("SELECT password FROM users WHERE id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $hashed_password = $row['password'] ?? '';
 
-        if (!password_verify($current, $hashed_password)) {
-            showToast("Current password is incorrect." , "error");
-        } elseif ($new !== $confirm) {
-            showToast("New password and confirmation do not match.");
-        } elseif (!preg_match('/^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/', $new)) {
-            showToast("Password must be 8+ characters, include 1 capital and 1 special character." , "error");
-        } else {
-            $new_hashed = password_hash($new, PASSWORD_DEFAULT);
-            $stmt = $connection->prepare("UPDATE users SET password = ? WHERE id = ?");
-            $stmt->bind_param("si", $new_hashed, $user_id);
-            if ($stmt->execute()) {
-                showToast("Password changed successfully.");
-            } else {
-                showToast("Error updating password." , "error");
-            }
-        }
+    if (!password_verify($current, $hashed_password)) {
+      showToast("Current password is incorrect.", "error");
+    } elseif ($new !== $confirm) {
+      showToast("New password and confirmation do not match.");
+    } elseif (!preg_match('/^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/', $new)) {
+      showToast("Password must be 8+ characters, include 1 capital and 1 special character.", "error");
+    } else {
+      $new_hashed = password_hash($new, PASSWORD_DEFAULT);
+      $stmt = $connection->prepare("UPDATE users SET password = ? WHERE id = ?");
+      $stmt->bind_param("si", $new_hashed, $user_id);
+      if ($stmt->execute()) {
+        showToast("Password changed successfully.");
+      } else {
+        showToast("Error updating password.", "error");
+      }
     }
+  }
+
+  // ===================== GENERATE API KEYS =====================
+
+  function generateApiKey($prefix)
+  {
+    return $prefix . '_' . bin2hex(random_bytes(16));
+  }
+
+  
+
+  
+
+  // Generate Test API
+  if (isset($_POST['generate_test_key'])) {
+
+    $test_key = generateApiKey('test');
+
+    $stmt = $connection->prepare("
+        INSERT INTO user_api_keys (user_id, test_key)
+        VALUES (?, ?)
+        ON DUPLICATE KEY UPDATE test_key=VALUES(test_key)
+    ");
+
+    $stmt->bind_param("is", $user_id, $test_key);
+    $stmt->execute();
+
+    showToast("Test API Key generated successfully.");
+  }
+
+  // Generate Live API
+  if (isset($_POST['generate_live_key'])) {
+
+    $live_key = generateApiKey('live');
+
+    $stmt = $connection->prepare("
+        INSERT INTO user_api_keys (user_id, live_key)
+        VALUES (?, ?)
+        ON DUPLICATE KEY UPDATE live_key=VALUES(live_key)
+    ");
+
+    $stmt->bind_param("is", $user_id, $live_key);
+    $stmt->execute();
+
+    showToast("Live API Key generated successfully.");
+  }
 }
 
 // ===================== FETCH CURRENT SETTINGS =====================
 $settings = [
-    'two_step' => 0,
-    'auth_type' => 'pin',
-    'recovery_email' => 1
+  'two_step' => 0,
+  'auth_type' => 'pin',
+  'recovery_email' => 1
 ];
 
 $stmt = $connection->prepare("SELECT two_step, auth_type, recovery_email FROM user_security_settings WHERE user_id = ?");
@@ -76,7 +137,7 @@ $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 if ($row = $result->fetch_assoc()) {
-    $settings = $row;
+  $settings = $row;
 }
 
 
@@ -396,16 +457,60 @@ if ($row = $result->fetch_assoc()) {
                             <label class="form-label">Confirm Password</label>
                             <input type="password" class="form-control" name="confirm_password">
                           </div>
-                           <!-- Change Password Button -->
-                        <button type="submit" name="change_password" class="btn btn-success mt-3">Change Password</button>
+                          <!-- Change Password Button -->
+                          <button type="submit" name="change_password" class="btn btn-success mt-3">Change Password</button>
                         </div>
 
-                       
+
                       </div>
 
                     </div>
                   </div>
 
+                </form>
+
+
+                <form method="POST" class="card custom-card mt-4">
+                  <div class="card-header">
+                    <h5 class="card-title">API Access</h5>
+                  </div>
+
+                  <div class="card-body">
+
+                    <p class="text-muted mb-3">
+                      Use API keys to connect your applications to our platform.
+                    </p>
+
+                    <!-- Test API -->
+                    <div class="mb-3">
+                      <label class="form-label">Test API Key</label>
+                      <div class="input-group">
+                        <input type="text" class="form-control" value="<?= $apiKeys['test_key'] ?>" readonly>
+                        <button class="btn btn-primary" name="generate_test_key">
+                          Generate
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Live API -->
+                    <div class="mb-3">
+                      <label class="form-label">Live API Key</label>
+                      <div class="input-group">
+                        <input type="text" class="form-control" value="<?= $apiKeys['live_key'] ?>" readonly>
+                        <button class="btn btn-success" name="generate_live_key">
+                          Generate
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Documentation -->
+                    <div class="mt-3">
+                      <a href="<?= $domain ?>api/docs" target="_blank" class="btn btn-outline-dark">
+                        <i class="ri-book-open-line"></i> View API Documentation
+                      </a>
+                    </div>
+
+                  </div>
                 </form>
 
               </div>
@@ -427,23 +532,12 @@ if ($row = $result->fetch_assoc()) {
     </div>
   </div> <!-- Responsive Header Search Modal End --> <!-- Scroll To Top -->
   <div class="scrollToTop"> <span class="arrow"><i class="ti ti-arrow-narrow-up fs-20"></i></span> </div>
-  <div id="responsive-overlay"></div> <!-- Scroll To Top --> <!-- Popper JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/libs/@popperjs/core/umd/popper.min.js"></script>
 
   <script src="<?php echo $domain ?>assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-  <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
   <script src="<?php echo $domain ?>assets/js/defaultmenu.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#hC6.xWo2O(4rw-/z4o");
-    -->
-  </script> <!-- Node Waves JS--> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/libs/node-waves/waves.min.js"></script>
 
   <script src="<?php echo $domain ?>assets/js/sticky.js"></script>
@@ -451,13 +545,7 @@ if ($row = $result->fetch_assoc()) {
   <script src="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.js"></script>
 
   <script src="<?php echo $domain ?>assets/js/simplebar.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#h<A1IWkBr|I?UaTK;YSv");
-    -->
-  </script> <!-- Apex Charts JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
+
   <script src="<?php echo $domain ?>assets/libs/apexcharts/apexcharts.min.js"></script>
 
   <script src="<?php echo $domain ?>assets/js/customer-custom.js"></script>

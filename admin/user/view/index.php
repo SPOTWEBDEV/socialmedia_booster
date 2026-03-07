@@ -6,11 +6,20 @@ include_once '../../../server/model.php';
 
 
 if (!isset($_GET['id'])) {
-
     echo "<script>alert('No message ID provided'); window.location.href='../';</script>";
 }
 
 $msg_id = $_GET['id'];
+
+$query = mysqli_query($connection, "SELECT * FROM users WHERE id='$msg_id'");
+if (mysqli_num_rows($query) == 0) {
+    echo "<script>alert('User not found'); window.location.href='../';</script>";
+}
+$user = mysqli_fetch_assoc($query);
+
+
+$deposits = mysqli_query($connection, "SELECT * FROM deposits WHERE user='$msg_id' ORDER BY created_at DESC");
+
 
 
 // ===========================
@@ -24,7 +33,7 @@ if (isset($_POST['change_balance'])) {
         "UPDATE users SET balance='$balance' WHERE id='$msg_id'"
     );
 
-    echo "<script>alert('Balance updated successfully');window.location.href='?user_id=$msg_id';</script>";
+    echo "<script>alert('Balance updated successfully');window.location.href='?id=$msg_id';</script>";
 }
 
 // ===========================
@@ -40,8 +49,9 @@ if (isset($_POST['suspend_user'])) {
          WHERE id='$msg_id'"
     );
 
-    echo "<script>alert('User suspended successfully');window.location.href='?user_id=$msg_id';</script>";
+    echo "<script>alert('User suspended successfully');window.location.href='?id=$msg_id';</script>";
 }
+
 
 
 ?>

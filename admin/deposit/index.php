@@ -426,7 +426,7 @@ include_once '../../server/model.php';
                                                         <th scope="col">Action</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody>
+                                                <tbody style="overflow-x: scroll;">
 
                                                 </tbody>
                                             </table>

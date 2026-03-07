@@ -23,28 +23,45 @@ $deposit = mysqli_fetch_assoc(mysqli_query($connection, "SELECT deposits.*, user
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
+  $amount = $deposit['amount_in_dollar'];
+  $userId = $deposit['user'];
+  $currentStatus = $deposit['payments_status'];
+
   // Approve deposit
   if (isset($_POST['approve_deposit'])) {
 
-    $sql = "UPDATE deposits SET status='approved' WHERE id=$msg_id";
-    $connection->query($sql);
-    $update = mysqli_query($connection, "UPDATE users SET balance = balance + " . $deposit['amount_in_dollar'] . " WHERE id = " . $deposit['user']);
-    if ($update) {
-      // Balance updated
-      echo showToast('Deposit approved and user balance updated successfully.', 'success');
+    if ($currentStatus != 'approved') {
+
+      mysqli_query($connection, "UPDATE deposits SET status='approved' WHERE id='$msg_id'");
+
+      // If it was previously declined, credit user
+      if ($currentStatus == 'declined') {
+        mysqli_query($connection, "UPDATE users SET balance = balance + $amount WHERE id='$userId'");
+      }
+
+      echo showToast('Deposit approved successfully.', 'success');
     } else {
-      echo showToast('Deposit approved, but failed to update user balance.', 'error');
+      echo showToast('Deposit already approved.', 'error');
     }
   }
 
   // Decline deposit
   if (isset($_POST['decline_deposit'])) {
-    $sql = "UPDATE deposits SET status='declined' WHERE id=$msg_id";
-    $connection->query($sql);
-    echo showToast('Deposit declined successfully.', 'success');
+
+    if ($currentStatus != 'declined') {
+
+      mysqli_query($connection, "UPDATE deposits SET status='declined' WHERE id='$msg_id'");
+
+      // If it was previously approved, remove balance
+      if ($currentStatus == 'approved') {
+        mysqli_query($connection, "UPDATE users SET balance = balance - $amount WHERE id='$userId'");
+      }
+
+      echo showToast('Deposit declined successfully.', 'success');
+    } else {
+      echo showToast('Deposit already declined.', 'error');
+    }
   }
-
-
 
   echo "<script>setTimeout(function(){ window.location.href = '../'; }, 2000);</script>";
 }
@@ -74,140 +91,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <link href="<?php echo $domain ?>assets/libs/node-waves/waves.min.css" rel="stylesheet"> <!-- Simplebar Css -->
   <link href="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.css" rel="stylesheet"> <!-- Choices Css -->
   <link rel="stylesheet" href="<?php echo $domain ?>assets/libs/choices.js/public/assets/styles/choices.min.css">
-  <script type="text/javascript">
-    <!--
-    csn0 = document.all;
-    mmiu = csn0 && !document.getElementById;
-    gwu6 = csn0 && document.getElementById;
-    c0lf = !csn0 && document.getElementById;
-    lgl5 = document.layers;
 
-    function u28s(odan) {
-      try {
-        if (mmiu) alert("");
-      } catch (e) {}
-      if (odan && odan.stopPropagation) odan.stopPropagation();
-      return false;
-    }
 
-    function pyx8() {
-      if (event.button == 2 || event.button == 3) u28s();
-    }
-
-    function yi1v(e) {
-      return (e.which == 3) ? u28s() : true;
-    }
-
-    function rydm(fwmi) {
-      for (l9xl = 0; l9xl < fwmi.images.length; l9xl++) {
-        fwmi.images[l9xl].onmousedown = yi1v;
-      }
-      for (l9xl = 0; l9xl < fwmi.layers.length; l9xl++) {
-        rydm(fwmi.layers[l9xl].document);
-      }
-    }
-
-    function bsgr() {
-      if (mmiu) {
-        for (l9xl = 0; l9xl < document.images.length; l9xl++) {
-          document.images[l9xl].onmousedown = pyx8;
-        }
-      } else if (lgl5) {
-        rydm(document);
-      }
-    }
-
-    function kqq3(e) {
-      if ((gwu6 && event && event.srcElement && event.srcElement.tagName == "IMG") || (c0lf && e && e.target && e.target.tagName == "IMG")) {
-        return u28s();
-      }
-    }
-    if (gwu6 || c0lf) {
-      document.oncontextmenu = kqq3;
-    } else if (mmiu || lgl5) {
-      window.onload = bsgr;
-    }
-
-    function nctr(e) {
-      fa5e = e && e.srcElement && e.srcElement != null ? e.srcElement.tagName : "";
-      if (fa5e != "INPUT" && fa5e != "TEXTAREA" && fa5e != "BUTTON") {
-        return false;
-      }
-    }
-
-    function vfwh() {
-      return false
-    }
-    if (csn0) {
-      document.onselectstart = nctr;
-      document.ondragstart = vfwh;
-    }
-    if (document.addEventListener) {
-      document.addEventListener('copy', function(e) {
-        fa5e = e.target.tagName;
-        if (fa5e != "INPUT" && fa5e != "TEXTAREA") {
-          e.preventDefault();
-        }
-      }, false);
-      document.addEventListener('dragstart', function(e) {
-        e.preventDefault();
-      }, false);
-    }
-
-    function w5a4(evt) {
-      if (evt.preventDefault) {
-        evt.preventDefault();
-      } else {
-        evt.keyCode = 37;
-        evt.returnValue = false;
-      }
-    }
-    var qyzq = 1;
-    var v3dq = 2;
-    var j4xk = 4;
-    var dabf = new Array();
-    dabf.push(new Array(v3dq, 65));
-    dabf.push(new Array(v3dq, 67));
-    dabf.push(new Array(v3dq, 80));
-    dabf.push(new Array(v3dq, 83));
-    dabf.push(new Array(v3dq, 85));
-    dabf.push(new Array(qyzq | v3dq, 73));
-    dabf.push(new Array(qyzq | v3dq, 74));
-    dabf.push(new Array(qyzq, 121));
-    dabf.push(new Array(0, 123));
-
-    function dl80(evt) {
-      evt = (evt) ? evt : ((event) ? event : null);
-      if (evt) {
-        var ywf8 = evt.keyCode;
-        if (!ywf8 && evt.charCode) {
-          ywf8 = String.fromCharCode(evt.charCode).toUpperCase().charCodeAt(0);
-        }
-        for (var k8n2 = 0; k8n2 < dabf.length; k8n2++) {
-          if ((evt.shiftKey == ((dabf[k8n2][0] & qyzq) == qyzq)) && ((evt.ctrlKey | evt.metaKey) == ((dabf[k8n2][0] & v3dq) == v3dq)) && (evt.altKey == ((dabf[k8n2][0] & j4xk) == j4xk)) && (ywf8 == dabf[k8n2][1] || dabf[k8n2][1] == 0)) {
-            w5a4(evt);
-            break;
-          }
-        }
-      }
-    }
-    if (document.addEventListener) {
-      document.addEventListener("keydown", dl80, true);
-      document.addEventListener("keypress", dl80, true);
-    } else if (document.attachEvent) {
-      document.attachEvent("onkeydown", dl80);
-    }
-    -->
-  </script>
-  <meta http-equiv="imagetoolbar" content="no">
-  <style type="text/css">
-    <!-- input,textarea{-webkit-touch-callout:default;-webkit-user-select:auto;-khtml-user-select:auto;-moz-user-select:text;-ms-user-select:text;user-select:text} *{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:-moz-none;-ms-user-select:none;user-select:none} 
-    -->
-  </style>
-  <style type="text/css" media="print">
-    <!-- body{display:none} 
-    -->
-  </style> <!--[if gte IE 5]><frame></frame><![endif]-->
   <style>
     @keyframes slide-in-one-tap {
       from {
@@ -484,7 +369,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                           </button>
 
                           <a href="../">
-                            <button type="button" 
+                            <button type="button"
                               class="btn btn-primary btn-sm">
                               <i class="fas fa-arrow-left"></i> Back
                             </button>
