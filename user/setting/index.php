@@ -505,7 +505,7 @@ if ($row = $result->fetch_assoc()) {
 
                     <!-- Documentation -->
                     <div class="mt-3">
-                      <a href="<?= $domain ?>api/docs" target="_blank" class="btn btn-outline-dark">
+                      <a href="<?= $domain ?>documentation/" target="_blank" class="btn btn-outline-dark">
                         <i class="ri-book-open-line"></i> View API Documentation
                       </a>
                     </div>
