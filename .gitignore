@@ -67,6 +67,7 @@ web_modules/
 
 # dotenv environment variable files
 .env
+temp_auto_push.bat
 .env.*
 !.env.example
 
@@ -123,7 +124,6 @@ dist
 .tern-port
 
 # Stores VSCode versions used for testing VSCode extensions
-.vscode-test
 
 # yarn v3
 .pnp.*
@@ -137,3 +137,5 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+.gitignore
+temp_interactive_push.bat
