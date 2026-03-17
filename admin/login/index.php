@@ -2,7 +2,30 @@
 
 
 include('../../server/connection.php');
+include_once '../../server/model.php';
 
+
+
+if(isset($_POST['login'])){
+  $password = $_POST['password'];
+
+  $query = mysqli_query($connection, "SELECT id FROM `admin` WHERE `password`='$password'");
+
+  if(mysqli_num_rows($query)){
+     $admin = mysqli_fetch_assoc($query);
+     $id = $admin['id'];
+     $_SESSION['admin_'] = $id;
+     showToast("Login  successfully", 'success');
+        echo "<script>
+            setTimeout(function() {
+                window.location.href = '../dashboard/';
+            }, 1500);
+        </script>";
+  }else{
+     showToast("Incorrect login details", 'error'); 
+  }
+
+}
 
 
 
@@ -281,7 +304,7 @@ include('../../server/connection.php');
                 <p class="mb-0 text-dark">admin@admin.com</p>
               </div>
             </div>
-            <div class="row gy-3">
+            <form method="POST" class="row gy-3">
               <div class="col-xl-12 mb-2">
                 <label
                   for="lockscreen-password"
@@ -289,6 +312,7 @@ include('../../server/connection.php');
                 <div class="position-relative">
                   <input
                     type="password"
+                    name="password"
                     class="form-control form-control-lg"
                     id="lockscreen-password"
                     placeholder="password" />
@@ -314,9 +338,9 @@ include('../../server/connection.php');
                 </div>
               </div>
               <div class="col-xl-12 d-grid mt-2">
-                <a href="index.html" class="btn btn-lg btn-primary">Unlock</a>
+                <button name="login" type="submit" class="btn btn-lg btn-primary">Unlock</button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       </div>

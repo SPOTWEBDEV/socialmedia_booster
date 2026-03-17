@@ -30,14 +30,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   // Approve deposit
   if (isset($_POST['approve_deposit'])) {
 
-    if ($currentStatus != 'approved') {
+    if ($currentStatus == 'pending' || $currentStatus == 'declined') {
 
       mysqli_query($connection, "UPDATE deposits SET status='approved' WHERE id='$msg_id'");
-
-      // If it was previously declined, credit user
-      if ($currentStatus == 'declined') {
-        mysqli_query($connection, "UPDATE users SET balance = balance + $amount WHERE id='$userId'");
-      }
+      mysqli_query($connection, "UPDATE users SET balance = balance + $amount WHERE id='$userId'");
 
       echo showToast('Deposit approved successfully.', 'success');
     } else {

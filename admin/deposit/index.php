@@ -2,6 +2,7 @@
 
 include_once '../../server/connection.php';
 include_once '../../server/model.php';
+include_once '../../server/auth/admin.php';
 
 
 
@@ -539,6 +540,8 @@ include_once '../../server/model.php';
                                             case "completed":
                                                 return "success";
                                             case "processing":
+                                                return "warning";
+                                            case "declined":
                                                 return "warning";
                                             case "pending":
                                                 return "danger";

@@ -2,6 +2,7 @@
 
 include_once '../../server/connection.php';
 include_once '../../server/model.php';
+include_once '../../server/auth/admin.php';
 
 
 $user_id = $_SESSION['user_id']; // replace with actual logged-in user ID
