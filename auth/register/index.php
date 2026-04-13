@@ -92,7 +92,7 @@ if (isset($_POST['create_account'])) {
     <!-- Favicon -->
     <link
       rel="icon"
-      href="<?php echo $domain ?>assets/images/brand-logos/favicon.ico"
+      href="<?php echo $domain ?>assets/images/logo.png"
       type="image/x-icon"
     />
     <!-- Main Theme Js -->
