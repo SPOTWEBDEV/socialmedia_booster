@@ -1099,7 +1099,9 @@ if(isset($_POST['login'])) {
                       ><i class="ri-eye-off-line align-middle"></i
                     ></a>
                   </div>
+                  
                 </div>
+                 <a style="margin-top: 10px;" class="mt-4 text-primary" href="../verification/">Forgot Password?</a>
                 
               </div>
               
