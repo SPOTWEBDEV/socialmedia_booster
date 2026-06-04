@@ -2197,18 +2197,10 @@ include('server/connection.php');
                         class="text-fixed-white op-6"
                       >
                         <i class="ri-phone-line me-1 align-middle"></i>
-                        +(555)-BOOST-YD
+                        +234 9164687839
                       </a>
                     </li>
-                    <li>
-                      <a
-                        href="javascript:void(0);"
-                        class="text-fixed-white op-6"
-                      >
-                        <i class="ri-printer-line me-1 align-middle"></i> +(555)
-                        123-4567
-                      </a>
-                    </li>
+                    
                     
                   </ul>
                 </div>
