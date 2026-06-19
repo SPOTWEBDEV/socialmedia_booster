@@ -1,12 +1,6 @@
 <?php
+include_once __DIR__ . '/../connection.php';
 
-require __DIR__ . '/../../vendor/autoload.php';
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../');
-$dotenv->load();
-
-
-
-$api_key = $_ENV['BOOSTING_KEY'];
 
 class Api
 {
@@ -171,4 +165,4 @@ class Api
 
 // Examples
 
-$api = new Api($_ENV['BOOSTING_KEY']);
+$api = new Api($api_key);

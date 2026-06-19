@@ -2,6 +2,16 @@
 // error_reporting(E_ALL);
 // ini_set('display_errors', 1);
 
+
+require __DIR__ . '/../vendor/autoload.php';
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
+
+
+
+$api_key = $_ENV['BOOSTING_KEY'];
+
+
 session_start();
 
 function checkUrlProtocol($url)
