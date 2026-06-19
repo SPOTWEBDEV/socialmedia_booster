@@ -1,12 +1,27 @@
 <?php
+
+require __DIR__ . '/../../vendor/autoload.php';
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../');
+$dotenv->load();
+
+
+
+$api_key = $_ENV['BOOSTING_KEY'];
+
 class Api
 {
     /** API URL */
     public $api_url = 'https://honestsmm.com/api/v2';
 
-    /** Your API key */
-    // public $api_key = 'a0813fd35b7c461935e9f716e0467674';
-    public $api_key = '3842153dbeac6c279402578b220d3914';
+    private string $api_key;
+
+    public function __construct(string $api_key)
+    {
+        $this->api_key = $api_key;
+    }
+
+
+
 
     /** Add order */
     public function order($data)
@@ -156,8 +171,4 @@ class Api
 
 // Examples
 
-$api = new Api();
-
-
-
-
+$api = new Api($_ENV['BOOSTING_KEY']);

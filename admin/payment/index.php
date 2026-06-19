@@ -1,13 +1,11 @@
 <?php
-
 include_once '../../server/connection.php';
 include_once '../../server/model.php';
 include_once '../../server/auth/admin.php';
 
-
-
-
-
+// =========================================================
+//  ADD ACCOUNT  (traditional POST + redirect, unchanged logic)
+// =========================================================
 if (isset($_POST['add_account'])) {
     $type = $_POST['type'];
     $status = 'active'; // default status
@@ -30,12 +28,11 @@ if (isset($_POST['add_account'])) {
             VALUES ('$type', '$wallet_name', '$wallet_network', '$wallet_address', '$status')";
     }
 
-    if (mysqli_query($connection, $insertQuery)) {
-
+    if (isset($insertQuery) && mysqli_query($connection, $insertQuery)) {
         showToast("Payment account added successfully", 'success');
         echo "<script>
             setTimeout(function() {
-                window.location.href = './list/';
+                window.location.href = './';
             }, 1500);
         </script>";
     } else {
@@ -43,507 +40,385 @@ if (isset($_POST['add_account'])) {
     }
 }
 
-
-
-
-
+$pageTitle    = 'Payment Methods';
+$pageSubtitle = 'manual accounts · crypto wallets';
+$activeNav    = 'Payment Method';
+include '../../components/admin/_layout_head.php';
 ?>
 
+  <main class="flex-1 w-full px-6 py-6">
 
-<!DOCTYPE html>
-<html lang="en" dir="ltr" data-nav-layout="horizontal" data-theme-mode="light" data-header-styles="light" data-menu-styles="light" loader="disable" data-nav-style="menu-click" data-bybit-channel-name="TTSbHg5jTOANoxu2zEIr9" data-bybit-is-default-wallet="true" data-toggled="close">
-<div id="in-page-channel-node-id" data-channel-name="in_page_channel_sAqFZG"></div>
+    <!-- Page header row -->
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <div>
+        <p class="text-sm text-slate-400">Accounts customers see when funding their balance.</p>
+      </div>
+      <button id="openAddModal" class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition">
+        <i class="bi bi-plus-lg"></i>
+        Add Account
+      </button>
+    </div>
 
-<head><!-- Meta Data -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title><?php echo $sitename . ' -- Support Page ' ?></title>
-    <meta name="Description" content="Bootstrap Responsive Admin Web Dashboard HTML5 Template">
-    <meta name="Author" content="Spruko Technologies Private Limited">
-    <meta name="keywords" content="admin dashboard,admin template,admin panel,bootstrap admin dashboard,html template,sales dashboard,dashboard,template dashboard,admin,html and css template,admin dashboard bootstrap,personal dashboard,crypto dashboard,stocks dashboard,admin panel template"> <!-- Favicon -->
-    <link rel="icon" href="<?php echo $domain ?>assets/images/brand-logos/favicon.ico" type="image/x-icon"> <!-- Choices JS -->
-    <script src="<?php echo $domain ?>assets/libs/choices.js/public/assets/scripts/choices.min.js"></script> <!-- Bootstrap Css -->
-    <link id="style" href="<?php echo $domain ?>assets/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet"> <!-- Style Css -->
-    <link href="<?php echo $domain ?>assets/css/styles.css" rel="stylesheet"> <!-- Icons Css -->
-    <link href="<?php echo $domain ?>assets/css/icons.css" rel="stylesheet"> <!-- Node Waves Css -->
-    <link href="<?php echo $domain ?>assets/libs/node-waves/waves.min.css" rel="stylesheet"> <!-- Simplebar Css -->
-    <link href="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.css" rel="stylesheet"> <!-- Choices Css -->
-    <link rel="stylesheet" href="<?php echo $domain ?>assets/libs/choices.js/public/assets/styles/choices.min.css">
-    <script type="text/javascript">
-        <!--
-        csn0 = document.all;
-        mmiu = csn0 && !document.getElementById;
-        gwu6 = csn0 && document.getElementById;
-        c0lf = !csn0 && document.getElementById;
-        lgl5 = document.layers;
+    <!-- Summary strip -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <div class="bg-card border border-line rounded-2xl p-5">
+        <p class="text-xs text-slate-500 mb-1">Total accounts</p>
+        <p id="statTotal" class="font-display text-2xl font-semibold text-white">0</p>
+      </div>
+      <div class="bg-card border border-line rounded-2xl p-5">
+        <p class="text-xs text-slate-500 mb-1">Active</p>
+        <p id="statActive" class="font-display text-2xl font-semibold text-emerald-400">0</p>
+      </div>
+      <div class="bg-card border border-line rounded-2xl p-5">
+        <p class="text-xs text-slate-500 mb-1">Inactive</p>
+        <p id="statInactive" class="font-display text-2xl font-semibold text-rose-400">0</p>
+      </div>
+    </div>
 
-        function u28s(odan) {
-            try {
-                if (mmiu) alert("");
-            } catch (e) {}
-            if (odan && odan.stopPropagation) odan.stopPropagation();
-            return false;
-        }
+    <!-- Table card -->
+    <section class="bg-card border border-line rounded-2xl overflow-hidden">
 
-        function pyx8() {
-            if (event.button == 2 || event.button == 3) u28s();
-        }
-
-        function yi1v(e) {
-            return (e.which == 3) ? u28s() : true;
-        }
-
-        function rydm(fwmi) {
-            for (l9xl = 0; l9xl < fwmi.images.length; l9xl++) {
-                fwmi.images[l9xl].onmousedown = yi1v;
-            }
-            for (l9xl = 0; l9xl < fwmi.layers.length; l9xl++) {
-                rydm(fwmi.layers[l9xl].document);
-            }
-        }
-
-        function bsgr() {
-            if (mmiu) {
-                for (l9xl = 0; l9xl < document.images.length; l9xl++) {
-                    document.images[l9xl].onmousedown = pyx8;
-                }
-            } else if (lgl5) {
-                rydm(document);
-            }
-        }
-
-        function kqq3(e) {
-            if ((gwu6 && event && event.srcElement && event.srcElement.tagName == "IMG") || (c0lf && e && e.target && e.target.tagName == "IMG")) {
-                return u28s();
-            }
-        }
-        if (gwu6 || c0lf) {
-            document.oncontextmenu = kqq3;
-        } else if (mmiu || lgl5) {
-            window.onload = bsgr;
-        }
-
-        function nctr(e) {
-            fa5e = e && e.srcElement && e.srcElement != null ? e.srcElement.tagName : "";
-            if (fa5e != "INPUT" && fa5e != "TEXTAREA" && fa5e != "BUTTON") {
-                return false;
-            }
-        }
-
-        function vfwh() {
-            return false
-        }
-        if (csn0) {
-            document.onselectstart = nctr;
-            document.ondragstart = vfwh;
-        }
-        if (document.addEventListener) {
-            document.addEventListener('copy', function(e) {
-                fa5e = e.target.tagName;
-                if (fa5e != "INPUT" && fa5e != "TEXTAREA") {
-                    e.preventDefault();
-                }
-            }, false);
-            document.addEventListener('dragstart', function(e) {
-                e.preventDefault();
-            }, false);
-        }
-
-        function w5a4(evt) {
-            if (evt.preventDefault) {
-                evt.preventDefault();
-            } else {
-                evt.keyCode = 37;
-                evt.returnValue = false;
-            }
-        }
-        var qyzq = 1;
-        var v3dq = 2;
-        var j4xk = 4;
-        var dabf = new Array();
-        dabf.push(new Array(v3dq, 65));
-        dabf.push(new Array(v3dq, 67));
-        dabf.push(new Array(v3dq, 80));
-        dabf.push(new Array(v3dq, 83));
-        dabf.push(new Array(v3dq, 85));
-        dabf.push(new Array(qyzq | v3dq, 73));
-        dabf.push(new Array(qyzq | v3dq, 74));
-        dabf.push(new Array(qyzq, 121));
-        dabf.push(new Array(0, 123));
-
-        function dl80(evt) {
-            evt = (evt) ? evt : ((event) ? event : null);
-            if (evt) {
-                var ywf8 = evt.keyCode;
-                if (!ywf8 && evt.charCode) {
-                    ywf8 = String.fromCharCode(evt.charCode).toUpperCase().charCodeAt(0);
-                }
-                for (var k8n2 = 0; k8n2 < dabf.length; k8n2++) {
-                    if ((evt.shiftKey == ((dabf[k8n2][0] & qyzq) == qyzq)) && ((evt.ctrlKey | evt.metaKey) == ((dabf[k8n2][0] & v3dq) == v3dq)) && (evt.altKey == ((dabf[k8n2][0] & j4xk) == j4xk)) && (ywf8 == dabf[k8n2][1] || dabf[k8n2][1] == 0)) {
-                        w5a4(evt);
-                        break;
-                    }
-                }
-            }
-        }
-        if (document.addEventListener) {
-            document.addEventListener("keydown", dl80, true);
-            document.addEventListener("keypress", dl80, true);
-        } else if (document.attachEvent) {
-            document.attachEvent("onkeydown", dl80);
-        }
-        -->
-    </script>
-    <meta http-equiv="imagetoolbar" content="no">
-    <style type="text/css">
-        <!-- input,textarea{-webkit-touch-callout:default;-webkit-user-select:auto;-khtml-user-select:auto;-moz-user-select:text;-ms-user-select:text;user-select:text} *{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:-moz-none;-ms-user-select:none;user-select:none} 
-        -->
-    </style>
-    <style type="text/css" media="print">
-        <!-- body{display:none} 
-        -->
-    </style> <!--[if gte IE 5]><frame></frame><![endif]-->
-    <style>
-        @keyframes slide-in-one-tap {
-            from {
-                transform: translateY(80px);
-            }
-
-            to {
-                transform: translateY(0px);
-            }
-        }
-
-        .trust-hide-gracefully {
-            opacity: 0;
-        }
-
-        .trust-wallet-one-tap .hidden {
-            display: none;
-        }
-
-        .trust-wallet-one-tap .semibold {
-            font-weight: 500;
-        }
-
-        .trust-wallet-one-tap .binance-plex {
-            font-family: 'Binance';
-        }
-
-        .trust-wallet-one-tap .rounded-full {
-            border-radius: 50%;
-        }
-
-        .trust-wallet-one-tap .flex {
-            display: flex;
-        }
-
-        .trust-wallet-one-tap .flex-col {
-            flex-direction: column;
-        }
-
-        .trust-wallet-one-tap .items-center {
-            align-items: center;
-        }
-
-        .trust-wallet-one-tap .space-between {
-            justify-content: space-between;
-        }
-
-        .trust-wallet-one-tap .justify-center {
-            justify-content: center;
-        }
-
-        .trust-wallet-one-tap .w-full {
-            width: 100%;
-        }
-
-        .trust-wallet-one-tap .box {
-            transition: all 0.5s cubic-bezier(0, 0, 0, 1.43);
-            animation: slide-in-one-tap 0.5s cubic-bezier(0, 0, 0, 1.43);
-            width: 384px;
-            border-radius: 15px;
-            background: #fff;
-            box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.25);
-            position: fixed;
-            right: 30px;
-            bottom: 30px;
-            z-index: 1020;
-        }
-
-        .trust-wallet-one-tap .header {
-            gap: 15px;
-            border-bottom: 1px solid #e6e6e6;
-            padding: 10px 18px;
-        }
-
-        .trust-wallet-one-tap .header .left-items {
-            gap: 15px;
-        }
-
-        .trust-wallet-one-tap .header .title {
-            color: #1e2329;
-            font-size: 18px;
-            font-weight: 600;
-            line-height: 28px;
-        }
-
-        .trust-wallet-one-tap .header .subtitle {
-            color: #474d57;
-            font-size: 14px;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .header .close {
-            color: #1e2329;
-            cursor: pointer;
-        }
-
-        .trust-wallet-one-tap .body {
-            padding: 9px 18px;
-            gap: 10px;
-        }
-
-        .trust-wallet-one-tap .body .right-items {
-            gap: 10px;
-            width: 100%;
-        }
-
-        .trust-wallet-one-tap .body .right-items .wallet-title {
-            color: #1e2329;
-            font-size: 16px;
-            font-weight: 600;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .body .right-items .wallet-subtitle {
-            color: #474d57;
-            font-size: 14px;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .connect-indicator {
-            gap: 15px;
-            padding: 8px 0;
-        }
-
-        .trust-wallet-one-tap .connect-indicator .flow-icon {
-            color: #474d57;
-        }
-
-        .trust-wallet-one-tap .loading-color {
-            color: #fff;
-        }
-
-        .trust-wallet-one-tap .button {
-            border-radius: 50px;
-            outline: 2px solid transparent;
-            outline-offset: 2px;
-            background-color: rgb(5, 0, 255);
-            border-color: rgb(229, 231, 235);
-            cursor: pointer;
-            text-align: center;
-            height: 45px;
-        }
-
-        .trust-wallet-one-tap .button .button-text {
-            color: #fff;
-            font-size: 16px;
-            font-weight: 600;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .footer {
-            margin: 20px 30px;
-        }
-
-        .trust-wallet-one-tap .check-icon {
-            color: #fff;
-        }
-
-        @font-face {
-            font-family: 'Binance';
-            src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-Regular.otf) format('opentype');
-            font-weight: 400;
-            font-style: normal;
-        }
-
-        @font-face {
-            font-family: 'Binance';
-            src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-Medium.otf) format('opentype');
-            font-weight: 500;
-            font-style: normal;
-        }
-
-        @font-face {
-            font-family: 'Binance';
-            src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-SemiBold.otf) format('opentype');
-            font-weight: 600;
-            font-style: normal;
-        }
-    </style>
-</head>
-
-<body class="customer-dashboard" cz-shortcut-listen="true">
-
-    <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
-    <div class="page"> <!-- app-header -->
-        <?php include_once '../../components/admin/navbar.php'  ?>
-
-        <div class="main-content app-content">
-            <div class="container-fluid"> <!-- Start::page-header -->
-                <div class="d-flex align-items-center justify-content-between my-4 page-header-breadcrumb flex-wrap gap-2">
-                    <div>
-                        <p class="fw-medium fs-20 mb-0">Payment Account</p>
-                        <p class="fs-13 text-muted mb-0">Let's check your today's stats!</p>
-                    </div>
-                    <div class="btn-list"> <a href="./list/">
-                            <button class="btn btn-primary-light btn-wave waves-effect waves-light">
-                                <i class="bx bx-ticket align-middle me-1"></i>
-                                <i class="bx bx-show align-middle me-1"></i>
-                                View Payment Methods
-                            </button>
-                        </a> </div>
-                </div> <!-- End::page-header --> <!-- Start::row-1 -->
-                <div class="row">
-                    <?php include_once '../../components/admin/sidenavbar.php' ?>
-                    <div class="col-xl-9">
-                        <div class="row">
-                            <div class="col-xl-12">
-                                <form method="POST" class="card custom-card" id="paymentAccountForm">
-                                    <div class="card-header">
-                                        <div class="card-title">
-                                            Add Payment Account
-                                            <span class="subtitle fw-normal text-muted d-block fs-12">
-                                                Choose the account type and fill in the details.
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div class="card-body">
-                                        <div class="row gy-3">
-
-                                            <div class="col-xl-6">
-                                                <label class="form-label">Account Type</label>
-                                                <select name="type" id="accountType" class="form-control" required>
-                                                    <option value="" selected disabled>Select Type</option>
-                                                    <option value="manual">Bank</option>
-                                                    <option value="crypto">Crypto</option>
-                                                </select>
-                                            </div>
-
-                                            <!-- Bank fields -->
-                                            <div id="bankFields" style="display:none;">
-                                                <div class="row g-3">
-                                                    <div class="col-xl-12">
-                                                        <label class="form-label">Bank Name</label>
-                                                        <input type="text" name="bank_name" class="form-control" placeholder="Bank Name">
-                                                    </div>
-
-                                                    <div class="col-xl-12">
-                                                        <label class="form-label">Account Name</label>
-                                                        <input type="text" name="account_name" class="form-control" placeholder="Account Name">
-                                                    </div>
-
-                                                    <div class="col-xl-12">
-                                                        <label class="form-label">Account Number</label>
-                                                        <input type="text" name="account_number" class="form-control" placeholder="Account Number">
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Crypto fields -->
-                                            <div id="cryptoFields" style="display:none;">
-                                                <div class="row g-3">
-                                                    <div class="col-xl-12">
-                                                        <label class="form-label">Wallet Name</label>
-                                                        <input type="text" name="wallet_name" class="form-control" placeholder="Wallet Name">
-                                                    </div>
-
-                                                    <div class="col-xl-12">
-                                                        <label class="form-label">Wallet Network</label>
-                                                        <input type="text" name="wallet_network" class="form-control" placeholder="Wallet Network">
-                                                    </div>
-
-                                                    <div class="col-xl-12">
-                                                        <label class="form-label">Wallet Address</label>
-                                                        <input type="text" name="wallet_address" class="form-control" placeholder="Wallet Address">
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-
-                                    <div class="card-footer">
-                                        <button type="submit" name="add_account" class="btn btn-primary float-end">Add Account</button>
-                                    </div>
-                                </form>
-
-                                <script>
-                                    document.getElementById('accountType').addEventListener('change', function() {
-                                        let type = this.value;
-                                        if (type === 'manual') {
-                                            document.getElementById('bankFields').style.display = 'flex';
-                                            document.getElementById('cryptoFields').style.display = 'none';
-                                        } else if (type === 'crypto') {
-                                            document.getElementById('bankFields').style.display = 'none';
-                                            document.getElementById('cryptoFields').style.display = 'flex';
-                                        }
-                                    });
-                                </script>
-
-
-                            </div>
-                        </div>
-                    </div>
-                </div> <!-- End::row-1 -->
-            </div>
-        </div> <!-- End::app-content --> <!-- Footer Start -->
-        <?php include_once '../../components/footer.php' ?>
-        <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-body">
-                        <div class="input-group"> <input type="text" class="form-control border-end-0" placeholder="Search Anything ..." aria-label="Search Anything ..." aria-describedby="button-addon2"> <button class="btn btn-primary" type="button" id="button-addon2"><i class="bi bi-search"></i></button> </div>
-                    </div>
-                </div>
-            </div>
+      <div class="p-5 border-b border-line flex flex-wrap items-center gap-3">
+        <div class="relative flex-1 min-w-[200px]">
+          <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" /></svg>
+          <input id="searchInput" type="search" placeholder="Search bank, wallet, name, or address"
+            class="w-full bg-surface border border-line rounded-lg pl-9 pr-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition" />
         </div>
-    </div> <!-- Responsive Header Search Modal End --> <!-- Scroll To Top -->
-    <div class="scrollToTop"> <span class="arrow"><i class="ti ti-arrow-narrow-up fs-20"></i></span> </div>
-    <div id="responsive-overlay"></div> <!-- Scroll To Top --> <!-- Popper JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/libs/@popperjs/core/umd/popper.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#hb6|n!WYr<2:hB/z4o");
-        -->
-    </script> <!-- Bootstrap JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-    <script src="<?php echo $domain ?>assets/js/defaultmenu.min.js"></script>
+        <select id="typeFilter" class="bg-surface border border-line rounded-lg px-3 py-2 text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+          <option value="">All types</option>
+          <option value="manual">Bank</option>
+          <option value="crypto">Crypto</option>
+        </select>
 
-    <script src="<?php echo $domain ?>assets/libs/node-waves/waves.min.js"></script>
+        <select id="statusFilter" class="bg-surface border border-line rounded-lg px-3 py-2 text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
 
-    <script src="<?php echo $domain ?>assets/js/sticky.js"></script>
+      <div class="overflow-x-auto scrollbar-thin">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-line text-left text-xs uppercase tracking-wider text-slate-500">
+              <th class="px-5 py-3 font-medium font-mono">#</th>
+              <th class="px-3 py-3 font-medium">Type</th>
+              <th class="px-3 py-3 font-medium">Bank / Wallet</th>
+              <th class="px-3 py-3 font-medium">Account name</th>
+              <th class="px-3 py-3 font-medium">Account no. / address</th>
+              <th class="px-3 py-3 font-medium">Network</th>
+              <th class="px-3 py-3 font-medium">Status</th>
+              <th class="px-3 py-3 font-medium text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-line">
+            <!-- rows injected by JS -->
+          </tbody>
+        </table>
 
-    <script src="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.js"></script>
+        <div id="emptyState" class="hidden flex-col items-center justify-center text-center py-20 px-6">
+          <div class="w-12 h-12 rounded-full bg-surface border border-line flex items-center justify-center mb-3 mx-auto">
+            <i class="bi bi-wallet2 text-lg text-slate-500"></i>
+          </div>
+          <p class="text-slate-300 font-medium">No payment accounts yet</p>
+          <p class="text-slate-500 text-sm mt-1">Add a bank or crypto account so customers have somewhere to send funds.</p>
+        </div>
+      </div>
 
-    <script src="<?php echo $domain ?>assets/js/simplebar.js"></script>
+      <div class="border-t border-line px-5 py-3 text-xs text-slate-500 font-mono" id="rowCount">
+        0 accounts loaded
+      </div>
+    </section>
+  </main>
 
-    <script src="<?php echo $domain ?>assets/libs/apexcharts/apexcharts.min.js"></script>
+  <!-- ===================== ADD ACCOUNT MODAL ===================== -->
+  <div id="addModalOverlay" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60" id="addModalBackdrop"></div>
 
-    <script src="<?php echo $domain ?>assets/js/customer-custom.js"></script>
-    <div state="voice" class="placeholder-icon" id="tts-placeholder-icon" title="Click to show TTS button" style="background-image: url(&quot;chrome-extension://cpnomhnclohkhnikegipapofcjihldck/data/content_script/icons/voice.png&quot;);"><canvas width="36" height="36" class="loading-circle" id="text-to-speech-loader" style="display: none;"></canvas></div><svg id="SvgjsSvg1001" width="2" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev" style="overflow: hidden; top: -100%; left: -100%; position: absolute; opacity: 0;">
-        <defs id="SvgjsDefs1002"></defs>
-        <polyline id="SvgjsPolyline1003" points="0,0"></polyline>
-        <path id="SvgjsPath1004" d="M0 0 "></path>
-    </svg>
+    <div class="modal-in relative w-full max-w-lg bg-card border border-line rounded-2xl overflow-hidden">
+      <form method="POST" id="paymentAccountForm">
+        <div class="flex items-center justify-between px-6 py-5 border-b border-line">
+          <div>
+            <h2 class="font-display font-semibold text-white text-base">Add payment account</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Choose a type and fill in the details.</p>
+          </div>
+          <button type="button" id="closeAddModal" class="w-8 h-8 rounded-lg hover:bg-surface flex items-center justify-center text-slate-400 hover:text-white transition">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <div class="px-6 py-5 space-y-4 max-h-[60vh] overflow-y-auto scrollbar-thin">
+
+          <div>
+            <label class="text-xs text-slate-400 mb-1.5 block">Account type</label>
+            <select name="type" id="accountType" required
+              class="w-full bg-surface border border-line rounded-lg px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition">
+              <option value="" selected disabled>Select type</option>
+              <option value="manual">Bank</option>
+              <option value="crypto">Crypto</option>
+            </select>
+          </div>
+
+          <!-- Bank fields -->
+          <div id="bankFields" class="hidden space-y-4">
+            <div>
+              <label class="text-xs text-slate-400 mb-1.5 block">Bank name</label>
+              <input type="text" name="bank_name" placeholder="e.g. GTBank"
+                class="w-full bg-surface border border-line rounded-lg px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition" />
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 mb-1.5 block">Account name</label>
+              <input type="text" name="account_name" placeholder="e.g. Booster Yard Ltd"
+                class="w-full bg-surface border border-line rounded-lg px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition" />
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 mb-1.5 block">Account number</label>
+              <input type="text" name="account_number" placeholder="0123456789"
+                class="w-full bg-surface border border-line rounded-lg px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition font-mono" />
+            </div>
+          </div>
+
+          <!-- Crypto fields -->
+          <div id="cryptoFields" class="hidden space-y-4">
+            <div>
+              <label class="text-xs text-slate-400 mb-1.5 block">Wallet name</label>
+              <input type="text" name="wallet_name" placeholder="e.g. USDT Wallet"
+                class="w-full bg-surface border border-line rounded-lg px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition" />
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 mb-1.5 block">Network</label>
+              <input type="text" name="wallet_network" placeholder="e.g. TRC20, ERC20, BEP20"
+                class="w-full bg-surface border border-line rounded-lg px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition" />
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 mb-1.5 block">Wallet address</label>
+              <input type="text" name="wallet_address" placeholder="0x..."
+                class="w-full bg-surface border border-line rounded-lg px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition font-mono" />
+            </div>
+          </div>
+
+        </div>
+
+        <div class="px-6 py-4 border-t border-line flex items-center justify-end gap-3">
+          <button type="button" id="cancelAddModal" class="text-sm px-4 py-2.5 rounded-lg border border-line text-slate-300 hover:bg-surface hover:text-white transition">
+            Cancel
+          </button>
+          <button type="submit" name="add_account" class="text-sm font-semibold px-4 py-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white transition">
+            Add account
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-6 right-6 z-50 hidden max-w-sm"></div>
+
+<?php include '../../components/admin/_layout_foot.php'; ?>
+
+<script>
+const domain = "<?php echo $domain ?>";
+
+let accounts = [];
+let filteredAccounts = [];
+
+// ===================================================
+//  FETCH ACCOUNTS
+// ===================================================
+function loadAccounts() {
+  let formData = new FormData();
+  formData.append("action", "admin");
+
+  fetch(domain + "server/api/payment_account.php", { method: "POST", body: formData })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        accounts = data.data;
+        filteredAccounts = accounts;
+        updateStats();
+        renderTable();
+      }
+    })
+    .catch(err => console.error("API ERROR:", err));
+}
+
+// ===================================================
+//  STATS
+// ===================================================
+function updateStats() {
+  document.getElementById("statTotal").textContent = accounts.length;
+  document.getElementById("statActive").textContent = accounts.filter(a => (a.status || '').toLowerCase() === 'active').length;
+  document.getElementById("statInactive").textContent = accounts.filter(a => (a.status || '').toLowerCase() !== 'active').length;
+}
+
+// ===================================================
+//  RENDER TABLE
+// ===================================================
+function renderTable() {
+  const tbody = document.getElementById("tableBody");
+  const emptyState = document.getElementById("emptyState");
+  tbody.innerHTML = "";
+
+  if (filteredAccounts.length === 0) {
+    emptyState.classList.remove("hidden");
+    emptyState.classList.add("flex");
+  } else {
+    emptyState.classList.add("hidden");
+    emptyState.classList.remove("flex");
+  }
+
+  filteredAccounts.forEach((acc, index) => {
+    const isActive = (acc.status || '').toLowerCase() === 'active';
+    const typeLabel = acc.type === 'crypto' ? 'Crypto' : 'Bank';
+    const typeIcon = acc.type === 'crypto' ? 'bi-currency-bitcoin' : 'bi-bank';
+
+    const tr = document.createElement("tr");
+    tr.className = "hover:bg-surface/60 transition-colors";
+    tr.innerHTML = `
+      <td class="px-5 py-3 font-mono text-slate-500">${index + 1}</td>
+      <td class="px-3 py-3">
+        <span class="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full bg-slate-500/15 text-slate-300">
+          <i class="bi ${typeIcon}"></i> ${typeLabel}
+        </span>
+      </td>
+      <td class="px-3 py-3 font-medium text-slate-200">${escapeHtml(acc.bank_name ?? acc.wallet_name ?? "—")}</td>
+      <td class="px-3 py-3 text-slate-300">${escapeHtml(acc.account_name ?? "—")}</td>
+      <td class="px-3 py-3 font-mono text-xs text-slate-400">${escapeHtml(acc.account_number ?? acc.wallet_address ?? "—")}</td>
+      <td class="px-3 py-3 text-slate-400">${escapeHtml(acc.wallet_network ?? "—")}</td>
+      <td class="px-3 py-3">
+        <button onclick="toggleStatus(${acc.id}, '${isActive ? 'inactive' : 'active'}')"
+          class="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full transition cursor-pointer ${isActive ? 'bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25' : 'bg-rose-500/15 text-rose-400 hover:bg-rose-500/25'}"
+          title="Click to ${isActive ? 'deactivate' : 'activate'}">
+          <span class="w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-400' : 'bg-rose-400'}"></span>
+          ${isActive ? 'Active' : 'Inactive'}
+        </button>
+      </td>
+      <td class="px-3 py-3 text-right">
+        <button onclick="deleteAccount(${acc.id})" class="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-line text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/30 transition">
+          <i class="bi bi-trash3"></i> Delete
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("rowCount").textContent = `${accounts.length} account${accounts.length === 1 ? "" : "s"} loaded`;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str ?? "";
+  return div.innerHTML;
+}
+
+// ===================================================
+//  TOGGLE STATUS
+// ===================================================
+function toggleStatus(id, newStatus) {
+  let formData = new FormData();
+  formData.append("id", id);
+  formData.append("status", newStatus);
+
+  fetch(domain + "server/api/toggle_payment_account_status.php", { method: "POST", body: formData })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        const acc = accounts.find(a => a.id == id);
+        if (acc) acc.status = newStatus;
+        updateStats();
+        renderTable();
+        showToast(`Account marked ${newStatus}.`, "success");
+      } else {
+        showToast(data.error || "Couldn't update status.", "error");
+      }
+    })
+    .catch(err => {
+      console.error("Toggle status error:", err);
+      showToast("Network error — status wasn't changed.", "error");
+    });
+}
+
+// ===================================================
+//  DELETE
+// ===================================================
+function deleteAccount(id) {
+  if (!confirm("Delete this payment account? This can't be undone.")) return;
+
+  let formData = new FormData();
+  formData.append("delete", "1");
+  formData.append("id", id);
+
+  fetch(domain + "server/api/delete_payment_account.php", { method: "POST", body: formData })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        accounts = accounts.filter(item => item.id != id);
+        filteredAccounts = filteredAccounts.filter(item => item.id != id);
+        updateStats();
+        renderTable();
+        showToast("Account deleted.", "success");
+      } else {
+        showToast("Failed to delete account.", "error");
+      }
+    })
+    .catch(err => {
+      console.error("Delete error:", err);
+      showToast("Network error — account wasn't deleted.", "error");
+    });
+}
+
+// ===================================================
+//  SEARCH + FILTER
+// ===================================================
+function applyFilters() {
+  const term = document.getElementById("searchInput").value.toLowerCase().trim();
+  const type = document.getElementById("typeFilter").value;
+  const status = document.getElementById("statusFilter").value;
+
+  filteredAccounts = accounts.filter(a => {
+    const haystack = [a.bank_name, a.wallet_name, a.account_name, a.account_number, a.wallet_address, a.wallet_network]
+      .filter(Boolean).join(" ").toLowerCase();
+    const matchesTerm = !term || haystack.includes(term);
+    const matchesType = !type || a.type === type;
+    const matchesStatus = !status || (a.status || '').toLowerCase() === status;
+    return matchesTerm && matchesType && matchesStatus;
+  });
+  renderTable();
+}
+
+document.getElementById("searchInput").addEventListener("input", applyFilters);
+document.getElementById("typeFilter").addEventListener("change", applyFilters);
+document.getElementById("statusFilter").addEventListener("change", applyFilters);
+
+// ===================================================
+//  ADD ACCOUNT MODAL
+// ===================================================
+const addModalOverlay = document.getElementById("addModalOverlay");
+
+function openAddModal() { addModalOverlay.classList.remove("hidden"); }
+function closeAddModalFn() { addModalOverlay.classList.add("hidden"); }
+
+document.getElementById("openAddModal").addEventListener("click", openAddModal);
+document.getElementById("closeAddModal").addEventListener("click", closeAddModalFn);
+document.getElementById("cancelAddModal").addEventListener("click", closeAddModalFn);
+document.getElementById("addModalBackdrop").addEventListener("click", closeAddModalFn);
+
+document.getElementById("accountType").addEventListener("change", function () {
+  const type = this.value;
+  document.getElementById("bankFields").classList.toggle("hidden", type !== "manual");
+  document.getElementById("cryptoFields").classList.toggle("hidden", type !== "crypto");
+});
+
+<?php if (isset($_POST['add_account'])): ?>
+  // server flagged an add attempt this request — keep modal open on validation-style errors,
+  // the PHP toast + redirect above handles the success path.
+  openAddModal();
+<?php endif; ?>
+
+// init
+loadAccounts();
+</script>
+
 </body>
-
 </html>

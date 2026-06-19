@@ -1,581 +1,390 @@
 <?php
-
 include_once '../../server/connection.php';
 include_once '../../server/model.php';
 include_once '../../server/auth/admin.php';
 
+// =========================================================
+//  SAVE REPLY  (sets status to 'replied' automatically)
+// =========================================================
+if (isset($_POST['save_reply'])) {
+    $reply  = $_POST['reply'];
+    $status = 'replied';
+    $msg_id = $_POST['msg_id'];
 
+    $stmt = $connection->prepare("
+        UPDATE support_messages
+        SET reply = ?, status = ?
+        WHERE id = ?
+    ");
+    $stmt->bind_param("ssi", $reply, $status, $msg_id);
 
+    if ($stmt->execute()) {
+        header("Location: ./?replied=$msg_id");
+        exit;
+    } else {
+        $flashError = "Failed to save reply.";
+    }
+}
 
+// =========================================================
+//  DELETE REPLY
+// =========================================================
+if (isset($_POST['delete_reply'])) {
+    $msg_id = $_POST['msg_id'];
 
+    $stmt = $connection->prepare("UPDATE support_messages SET reply = '' WHERE id = ?");
+    $stmt->bind_param("i", $msg_id);
 
+    if ($stmt->execute()) {
+        header("Location: ./?deleted=$msg_id");
+        exit;
+    } else {
+        $flashError = "Failed to delete reply.";
+    }
+}
 
+// =========================================================
+//  MANUAL STATUS UPDATE (used by the AJAX status dropdown-free
+//  flow is intentionally NOT here per spec — status is reply-driven only)
+// =========================================================
+
+$pageTitle    = 'Support Tickets';
+$pageSubtitle = 'customer messages · replies';
+$activeNav    = 'Support';
+include '../../components/admin/_layout_head.php';
 ?>
 
+  <main class="flex-1 w-full px-6 py-6">
 
-<!DOCTYPE html>
-<html lang="en" dir="ltr" data-nav-layout="horizontal" data-theme-mode="light" data-header-styles="light" data-menu-styles="light" loader="disable" data-nav-style="menu-click" data-bybit-channel-name="TTSbHg5jTOANoxu2zEIr9" data-bybit-is-default-wallet="true" data-toggled="close">
-<div id="in-page-channel-node-id" data-channel-name="in_page_channel_sAqFZG"></div>
+    <!-- Page header row -->
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <p class="text-sm text-slate-400">Customer support messages and your replies.</p>
+    </div>
 
-<head><!-- Meta Data -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title><?php echo $sitename . ' -- Admin Support Page ' ?></title>
-    <meta name="Description" content="Bootstrap Responsive Admin Web Dashboard HTML5 Template">
-    <meta name="Author" content="Spruko Technologies Private Limited">
-    <meta name="keywords" content="admin dashboard,admin template,admin panel,bootstrap admin dashboard,html template,sales dashboard,dashboard,template dashboard,admin,html and css template,admin dashboard bootstrap,personal dashboard,crypto dashboard,stocks dashboard,admin panel template"> <!-- Favicon -->
-    <link rel="icon" href="<?php echo $domain ?>assets/images/brand-logos/favicon.ico" type="image/x-icon"> <!-- Choices JS -->
-    <script src="<?php echo $domain ?>assets/libs/choices.js/public/assets/scripts/choices.min.js"></script> <!-- Bootstrap Css -->
-    <link id="style" href="<?php echo $domain ?>assets/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet"> <!-- Style Css -->
-    <link href="<?php echo $domain ?>assets/css/styles.css" rel="stylesheet"> <!-- Icons Css -->
-    <link href="<?php echo $domain ?>assets/css/icons.css" rel="stylesheet"> <!-- Node Waves Css -->
-    <link href="<?php echo $domain ?>assets/libs/node-waves/waves.min.css" rel="stylesheet"> <!-- Simplebar Css -->
-    <link href="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.css" rel="stylesheet"> <!-- Choices Css -->
-    <link rel="stylesheet" href="<?php echo $domain ?>assets/libs/choices.js/public/assets/styles/choices.min.css">
-    <script type="text/javascript">
-        <!--
-        csn0 = document.all;
-        mmiu = csn0 && !document.getElementById;
-        gwu6 = csn0 && document.getElementById;
-        c0lf = !csn0 && document.getElementById;
-        lgl5 = document.layers;
+    <!-- Summary strip -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+      <div class="bg-card border border-line rounded-2xl p-5">
+        <p class="text-xs text-slate-500 mb-1">Total tickets</p>
+        <p id="statTotal" class="font-display text-2xl font-semibold text-white">0</p>
+      </div>
+      <div class="bg-card border border-line rounded-2xl p-5">
+        <p class="text-xs text-slate-500 mb-1">Pending</p>
+        <p id="statPending" class="font-display text-2xl font-semibold text-rose-400">0</p>
+      </div>
+      <div class="bg-card border border-line rounded-2xl p-5">
+        <p class="text-xs text-slate-500 mb-1">In progress</p>
+        <p id="statProgress" class="font-display text-2xl font-semibold text-sky-400">0</p>
+      </div>
+      <div class="bg-card border border-line rounded-2xl p-5">
+        <p class="text-xs text-slate-500 mb-1">Replied / resolved</p>
+        <p id="statDone" class="font-display text-2xl font-semibold text-emerald-400">0</p>
+      </div>
+    </div>
 
-        function u28s(odan) {
-            try {
-                if (mmiu) alert("");
-            } catch (e) {}
-            if (odan && odan.stopPropagation) odan.stopPropagation();
-            return false;
-        }
+    <!-- Table card -->
+    <section class="bg-card border border-line rounded-2xl overflow-hidden">
 
-        function pyx8() {
-            if (event.button == 2 || event.button == 3) u28s();
-        }
-
-        function yi1v(e) {
-            return (e.which == 3) ? u28s() : true;
-        }
-
-        function rydm(fwmi) {
-            for (l9xl = 0; l9xl < fwmi.images.length; l9xl++) {
-                fwmi.images[l9xl].onmousedown = yi1v;
-            }
-            for (l9xl = 0; l9xl < fwmi.layers.length; l9xl++) {
-                rydm(fwmi.layers[l9xl].document);
-            }
-        }
-
-        function bsgr() {
-            if (mmiu) {
-                for (l9xl = 0; l9xl < document.images.length; l9xl++) {
-                    document.images[l9xl].onmousedown = pyx8;
-                }
-            } else if (lgl5) {
-                rydm(document);
-            }
-        }
-
-        function kqq3(e) {
-            if ((gwu6 && event && event.srcElement && event.srcElement.tagName == "IMG") || (c0lf && e && e.target && e.target.tagName == "IMG")) {
-                return u28s();
-            }
-        }
-        if (gwu6 || c0lf) {
-            document.oncontextmenu = kqq3;
-        } else if (mmiu || lgl5) {
-            window.onload = bsgr;
-        }
-
-        function nctr(e) {
-            fa5e = e && e.srcElement && e.srcElement != null ? e.srcElement.tagName : "";
-            if (fa5e != "INPUT" && fa5e != "TEXTAREA" && fa5e != "BUTTON") {
-                return false;
-            }
-        }
-
-        function vfwh() {
-            return false
-        }
-        if (csn0) {
-            document.onselectstart = nctr;
-            document.ondragstart = vfwh;
-        }
-        if (document.addEventListener) {
-            document.addEventListener('copy', function(e) {
-                fa5e = e.target.tagName;
-                if (fa5e != "INPUT" && fa5e != "TEXTAREA") {
-                    e.preventDefault();
-                }
-            }, false);
-            document.addEventListener('dragstart', function(e) {
-                e.preventDefault();
-            }, false);
-        }
-
-        function w5a4(evt) {
-            if (evt.preventDefault) {
-                evt.preventDefault();
-            } else {
-                evt.keyCode = 37;
-                evt.returnValue = false;
-            }
-        }
-        var qyzq = 1;
-        var v3dq = 2;
-        var j4xk = 4;
-        var dabf = new Array();
-        dabf.push(new Array(v3dq, 65));
-        dabf.push(new Array(v3dq, 67));
-        dabf.push(new Array(v3dq, 80));
-        dabf.push(new Array(v3dq, 83));
-        dabf.push(new Array(v3dq, 85));
-        dabf.push(new Array(qyzq | v3dq, 73));
-        dabf.push(new Array(qyzq | v3dq, 74));
-        dabf.push(new Array(qyzq, 121));
-        dabf.push(new Array(0, 123));
-
-        function dl80(evt) {
-            evt = (evt) ? evt : ((event) ? event : null);
-            if (evt) {
-                var ywf8 = evt.keyCode;
-                if (!ywf8 && evt.charCode) {
-                    ywf8 = String.fromCharCode(evt.charCode).toUpperCase().charCodeAt(0);
-                }
-                for (var k8n2 = 0; k8n2 < dabf.length; k8n2++) {
-                    if ((evt.shiftKey == ((dabf[k8n2][0] & qyzq) == qyzq)) && ((evt.ctrlKey | evt.metaKey) == ((dabf[k8n2][0] & v3dq) == v3dq)) && (evt.altKey == ((dabf[k8n2][0] & j4xk) == j4xk)) && (ywf8 == dabf[k8n2][1] || dabf[k8n2][1] == 0)) {
-                        w5a4(evt);
-                        break;
-                    }
-                }
-            }
-        }
-        if (document.addEventListener) {
-            document.addEventListener("keydown", dl80, true);
-            document.addEventListener("keypress", dl80, true);
-        } else if (document.attachEvent) {
-            document.attachEvent("onkeydown", dl80);
-        }
-        -->
-    </script>
-    <meta http-equiv="imagetoolbar" content="no">
-    <style type="text/css">
-        <!-- input,textarea{-webkit-touch-callout:default;-webkit-user-select:auto;-khtml-user-select:auto;-moz-user-select:text;-ms-user-select:text;user-select:text} *{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:-moz-none;-ms-user-select:none;user-select:none} 
-        -->
-    </style>
-    <style type="text/css" media="print">
-        <!-- body{display:none} 
-        -->
-    </style> <!--[if gte IE 5]><frame></frame><![endif]-->
-    <style>
-        @keyframes slide-in-one-tap {
-            from {
-                transform: translateY(80px);
-            }
-
-            to {
-                transform: translateY(0px);
-            }
-        }
-
-        .trust-hide-gracefully {
-            opacity: 0;
-        }
-
-        .trust-wallet-one-tap .hidden {
-            display: none;
-        }
-
-        .trust-wallet-one-tap .semibold {
-            font-weight: 500;
-        }
-
-        .trust-wallet-one-tap .binance-plex {
-            font-family: 'Binance';
-        }
-
-        .trust-wallet-one-tap .rounded-full {
-            border-radius: 50%;
-        }
-
-        .trust-wallet-one-tap .flex {
-            display: flex;
-        }
-
-        .trust-wallet-one-tap .flex-col {
-            flex-direction: column;
-        }
-
-        .trust-wallet-one-tap .items-center {
-            align-items: center;
-        }
-
-        .trust-wallet-one-tap .space-between {
-            justify-content: space-between;
-        }
-
-        .trust-wallet-one-tap .justify-center {
-            justify-content: center;
-        }
-
-        .trust-wallet-one-tap .w-full {
-            width: 100%;
-        }
-
-        .trust-wallet-one-tap .box {
-            transition: all 0.5s cubic-bezier(0, 0, 0, 1.43);
-            animation: slide-in-one-tap 0.5s cubic-bezier(0, 0, 0, 1.43);
-            width: 384px;
-            border-radius: 15px;
-            background: #fff;
-            box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.25);
-            position: fixed;
-            right: 30px;
-            bottom: 30px;
-            z-index: 1020;
-        }
-
-        .trust-wallet-one-tap .header {
-            gap: 15px;
-            border-bottom: 1px solid #e6e6e6;
-            padding: 10px 18px;
-        }
-
-        .trust-wallet-one-tap .header .left-items {
-            gap: 15px;
-        }
-
-        .trust-wallet-one-tap .header .title {
-            color: #1e2329;
-            font-size: 18px;
-            font-weight: 600;
-            line-height: 28px;
-        }
-
-        .trust-wallet-one-tap .header .subtitle {
-            color: #474d57;
-            font-size: 14px;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .header .close {
-            color: #1e2329;
-            cursor: pointer;
-        }
-
-        .trust-wallet-one-tap .body {
-            padding: 9px 18px;
-            gap: 10px;
-        }
-
-        .trust-wallet-one-tap .body .right-items {
-            gap: 10px;
-            width: 100%;
-        }
-
-        .trust-wallet-one-tap .body .right-items .wallet-title {
-            color: #1e2329;
-            font-size: 16px;
-            font-weight: 600;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .body .right-items .wallet-subtitle {
-            color: #474d57;
-            font-size: 14px;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .connect-indicator {
-            gap: 15px;
-            padding: 8px 0;
-        }
-
-        .trust-wallet-one-tap .connect-indicator .flow-icon {
-            color: #474d57;
-        }
-
-        .trust-wallet-one-tap .loading-color {
-            color: #fff;
-        }
-
-        .trust-wallet-one-tap .button {
-            border-radius: 50px;
-            outline: 2px solid transparent;
-            outline-offset: 2px;
-            background-color: rgb(5, 0, 255);
-            border-color: rgb(229, 231, 235);
-            cursor: pointer;
-            text-align: center;
-            height: 45px;
-        }
-
-        .trust-wallet-one-tap .button .button-text {
-            color: #fff;
-            font-size: 16px;
-            font-weight: 600;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .footer {
-            margin: 20px 30px;
-        }
-
-        .trust-wallet-one-tap .check-icon {
-            color: #fff;
-        }
-
-        @font-face {
-            font-family: 'Binance';
-            src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-Regular.otf) format('opentype');
-            font-weight: 400;
-            font-style: normal;
-        }
-
-        @font-face {
-            font-family: 'Binance';
-            src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-Medium.otf) format('opentype');
-            font-weight: 500;
-            font-style: normal;
-        }
-
-        @font-face {
-            font-family: 'Binance';
-            src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-SemiBold.otf) format('opentype');
-            font-weight: 600;
-            font-style: normal;
-        }
-    </style>
-</head>
-
-<body class="customer-dashboard" cz-shortcut-listen="true">
-
-    <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
-    <div class="page"> <!-- app-header -->
-        <?php include_once '../../components/admin/navbar.php'  ?>
-
-        <div class="main-content app-content">
-            <div class="container-fluid"> <!-- Start::page-header -->
-                <div class="d-flex align-items-center justify-content-between my-4 page-header-breadcrumb flex-wrap gap-2">
-                    <div>
-                        <p class="fw-medium fs-20 mb-0">Support Page</p>
-                        <p class="fs-13 text-muted mb-0">Let's check your today's stats!</p>
-                    </div>
-                    <div class="btn-list"> <a href="../"><button class="btn btn-primary-light btn-wave waves-effect waves-light">
-                                <i class="bx bx-plus-circle align-middle me-1"></i>
-                                Create Ticket
-                            </button></a> </div>
-                </div> <!-- End::page-header --> <!-- Start::row-1 -->
-                <div class="row">
-                    <?php include_once '../../components/admin/sidenavbar.php' ?>
-                    <div class="col-xl-9">
-                        <div class="row">
-                            <div class="col-xl-12">
-                                <div class="card custom-card">
-
-                                    <div class="card-body px-0 pt-2 pb-0">
-                                        <div class="table-responsive">
-                                            <table class="table text-nowrap">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Ticket ID</th>
-                                                        <th>Name / Email</th>
-                                                        <th>Preview Message / Date</th>
-                                                        <th>Status</th>
-                                                        
-                                                        <th>Action</th>
-                                                    </tr>
-                                                </thead>
-
-                                                <tbody>
-                                                    <?php
-                                                    $query = mysqli_query($connection, "SELECT support_messages.* , users.fullname , users.email FROM support_messages , users WHERE users.id =support_messages.user ORDER BY support_messages.id DESC");
-                                                    while ($row = mysqli_fetch_assoc($query)) {
-                                                        $support_id = $row['id'];
-                                                        $message = htmlspecialchars($row['message']); // safe
-                                                        $status = $row['status'];
-                                                        $date = $row['created_at'];
-                                                        $reply = htmlspecialchars($row['reply']); //
-
-                                                        $fullname = $row['fullname'];
-                                                        $email = $row['email'];
-                                                        
-
-                                                        // MESSAGE PREVIEW — first 30 characters
-                                                        $preview = substr($message, 0, 30);
-                                                        if (strlen($message) > 30) {
-                                                            $preview .= "...";
-                                                        }
-
-                                                        // STATUS COLORS
-                                                        if ($status == "pending") {
-                                                            $badge = '<span class="badge bg-danger text-dark py-2 px-2 text-white" style="font-size:15px">Pending</span>';
-                                                        } elseif ($status == "inprogress") {
-                                                            $badge = '<span class="badge bg-info text-dark py-2 px-2 text-white " style="font-size:15px">In Progress</span>';
-                                                        } elseif ($status == "resolved") {
-                                                            $badge = '<span class="badge bg-success py-2 px-2 text-white " style="font-size:15px">Resolved</span>';
-                                                        } elseif ($status == "replied") {
-                                                            $badge = '<span class="badge bg-warning py-2 px-2 text-white " style="font-size:15px">Replied</span>';
-                                                        }
-                                                         else {
-                                                            $badge = '<span class="badge bg-secondary py-2 px-2 text-white " style="font-size:15px">Unknown</span>';
-                                                        }
-                                                    ?>
-                                                        <!-- NORMAL ROW -->
-                                                        <tr>
-                                                            <td>#<?= $support_id ?></td>
-                                                            <td>
-                                                                <p><?php echo $fullname  ?></p>
-                                                                <p><?php echo $email  ?></p>
-                                                            </td>
-                                                            <td>
-                                                                <p><?= $preview . '...' ?></p>
-                                                                <p><?= $date ?></p>
-                                                            </td>
-                                                            <td><?= $badge ?></td>
-                                                           
-                                                            <td>
-                                                                <button id="btn-<?= $support_id ?>" class="btn btn-sm btn-outline-primary"
-                                                                    onclick="toggleMessage(<?= $support_id ?>)">
-                                                                    View
-                                                                </button>
-                                                                <button id="btn-<?= $support_id ?>" class="btn btn-sm btn-outline-primary"
-                                                                    onclick="window.location.href='./reply/?id=<?= $support_id ?>'">
-                                                                    Reply
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-
-                                                        <!-- HIDDEN MESSAGE ROW -->
-                                                        <tr id="msg-<?= $support_id ?>" style="display: none;">
-                                                            <td colspan="5" class="bg-light">
-                                                                <strong>Message:</strong>
-                                                                <p class="mt-2"><?= nl2br($message) ?></p>
-                                                                <strong>Support Reply:</strong>
-                                                                <p class="mt-2"><?php echo ($reply != '') ? $reply : 'No Comment Yet' ?></p>
-                                                            </td>
-                                                        </tr>
-
-                                                    <?php } ?>
-                                                </tbody>
-                                            </table>
-
-                                            <script>
-                                                function toggleMessage(id) {
-                                                    console.log("Toggling message for ID:", id);
-                                                    let row = document.getElementById("msg-" + id);
-                                                    let btn = document.getElementById("btn-" + id);
-                                                    console.log("Current display style:", row, btn);
-
-                                                    if (row.style.display === "none") {
-                                                        row.style.display = "table-row";
-                                                        btn.textContent = "Close";
-                                                    } else {
-                                                        row.style.display = "none";
-                                                        btn.textContent = "View";
-                                                    }
-                                                }
-                                            </script>
-
-
-
-                                        </div>
-                                    </div>
-
-
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                </div> <!-- End::row-1 -->
-            </div>
-        </div> <!-- End::app-content --> <!-- Footer Start -->
-        <?php include_once '../../components/footer.php' ?>
-        <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-body">
-                        <div class="input-group"> <input type="text" class="form-control border-end-0" placeholder="Search Anything ..." aria-label="Search Anything ..." aria-describedby="button-addon2"> <button class="btn btn-primary" type="button" id="button-addon2"><i class="bi bi-search"></i></button> </div>
-                    </div>
-                </div>
-            </div>
+      <div class="p-5 border-b border-line flex flex-wrap items-center gap-3">
+        <div class="relative flex-1 min-w-[200px]">
+          <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" /></svg>
+          <input id="searchInput" type="search" placeholder="Search name, email, or message"
+            class="w-full bg-surface border border-line rounded-lg pl-9 pr-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition" />
         </div>
-    </div> <!-- Responsive Header Search Modal End --> <!-- Scroll To Top -->
-    <div class="scrollToTop"> <span class="arrow"><i class="ti ti-arrow-narrow-up fs-20"></i></span> </div>
-    <div id="responsive-overlay"></div> <!-- Scroll To Top --> <!-- Popper JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/libs/@popperjs/core/umd/popper.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#hb6|n!WYr<2:hB/z4o");
-        -->
-    </script> <!-- Bootstrap JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#h aj©l4#h(vLUaTK;YSv");
-        -->
-    </script> <!-- Defaultmenu JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/js/defaultmenu.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#hC6.xWo2O(4rw-/z4o");
-        -->
-    </script> <!-- Node Waves JS--> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/libs/node-waves/waves.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#he-ce\"R©qa2,v\"g");
-        -->
-    </script> <!-- Sticky JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/js/sticky.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#heJ:Cc-Or|2:hB/z4o");
-        -->
-    </script> <!-- Simplebar JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":");
-        -->
-    </script> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/js/simplebar.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#h<A1IWkBr|I?UaTK;YSv");
-        -->
-    </script> <!-- Apex Charts JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/libs/apexcharts/apexcharts.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#hGXPn91©qa2,v\"g");
-        -->
-    </script> <!-- Custom JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/js/customer-custom.js"></script>
-    <div state="voice" class="placeholder-icon" id="tts-placeholder-icon" title="Click to show TTS button" style="background-image: url(&quot;chrome-extension://cpnomhnclohkhnikegipapofcjihldck/data/content_script/icons/voice.png&quot;);"><canvas width="36" height="36" class="loading-circle" id="text-to-speech-loader" style="display: none;"></canvas></div><svg id="SvgjsSvg1001" width="2" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev" style="overflow: hidden; top: -100%; left: -100%; position: absolute; opacity: 0;">
-        <defs id="SvgjsDefs1002"></defs>
-        <polyline id="SvgjsPolyline1003" points="0,0"></polyline>
-        <path id="SvgjsPath1004" d="M0 0 "></path>
-    </svg>
-</body>
 
+        <select id="statusFilter" class="bg-surface border border-line rounded-lg px-3 py-2 text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+          <option value="">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="inprogress">In progress</option>
+          <option value="replied">Replied</option>
+          <option value="resolved">Resolved</option>
+        </select>
+      </div>
+
+      <div class="overflow-x-auto scrollbar-thin">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-line text-left text-xs uppercase tracking-wider text-slate-500">
+              <th class="px-5 py-3 font-medium font-mono">Ticket</th>
+              <th class="px-3 py-3 font-medium">Customer</th>
+              <th class="px-3 py-3 font-medium">Message preview</th>
+              <th class="px-3 py-3 font-medium">Date</th>
+              <th class="px-3 py-3 font-medium">Status</th>
+              <th class="px-3 py-3 font-medium text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-line">
+            <!-- rows injected by JS -->
+          </tbody>
+        </table>
+
+        <div id="emptyState" class="hidden flex-col items-center justify-center text-center py-20 px-6">
+          <div class="w-12 h-12 rounded-full bg-surface border border-line flex items-center justify-center mb-3 mx-auto">
+            <i class="bi bi-headset text-lg text-slate-500"></i>
+          </div>
+          <p class="text-slate-300 font-medium">No tickets match this search</p>
+          <p class="text-slate-500 text-sm mt-1">Try a different name, email, or status filter.</p>
+        </div>
+      </div>
+
+      <div class="border-t border-line px-5 py-3 text-xs text-slate-500 font-mono" id="rowCount">
+        0 tickets loaded
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== SLIDE-OVER: TICKET DETAIL + REPLY ===================== -->
+  <div id="panelOverlay" class="hidden fixed inset-0 z-50">
+    <div class="absolute inset-0 bg-black/60" id="panelBackdrop"></div>
+
+    <aside id="ticketPanel" class="absolute right-0 top-0 h-full w-full sm:w-[480px] bg-card border-l border-line flex flex-col"
+           style="transform: translateX(100%); transition: transform .25s ease-out;">
+
+      <div class="flex items-start justify-between gap-3 px-6 py-5 border-b border-line">
+        <div class="min-w-0">
+          <p class="text-xs text-slate-500 font-mono mb-1" id="panelTicketId">Ticket #—</p>
+          <h2 class="font-display font-semibold text-white text-base truncate" id="panelName">—</h2>
+          <p class="text-xs text-slate-500 truncate" id="panelEmail">—</p>
+        </div>
+        <button id="closePanel" class="w-8 h-8 rounded-lg hover:bg-surface flex items-center justify-center text-slate-400 hover:text-white transition shrink-0">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto scrollbar-thin px-6 py-5 space-y-6">
+
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Status</p>
+            <span id="panelStatusBadge" class="text-xs px-2 py-1 rounded-full"></span>
+          </div>
+          <p class="text-xs text-slate-500" id="panelDate">—</p>
+        </div>
+
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Customer message</p>
+          <div class="bg-surface border border-line rounded-xl p-4 text-sm text-slate-200 leading-relaxed whitespace-pre-line" id="panelMessage">
+            —
+          </div>
+        </div>
+
+        <div id="panelExistingReplyWrap" class="hidden">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Current reply</p>
+            <form method="POST" id="deleteReplyForm">
+              <input type="hidden" name="msg_id" id="deleteReplyMsgId" value="">
+              <button type="submit" name="delete_reply" class="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1 transition">
+                <i class="bi bi-trash3"></i> Delete reply
+              </button>
+            </form>
+          </div>
+          <div class="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4 text-sm text-slate-200 leading-relaxed whitespace-pre-line" id="panelExistingReply">
+            —
+          </div>
+        </div>
+
+        <form method="POST" id="replyForm">
+          <input type="hidden" name="msg_id" id="replyMsgId" value="">
+          <label class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2 block">Write a reply</label>
+          <textarea name="reply" id="replyTextarea" rows="5" placeholder="Type your response to the customer…"
+            class="w-full bg-surface border border-line rounded-lg px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition resize-none"></textarea>
+          <p class="text-xs text-slate-500 mt-1.5">Saving sets this ticket's status to <span class="text-amber-400 font-medium">Replied</span> automatically.</p>
+          <button type="submit" name="save_reply"
+            class="mt-3 w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white font-semibold text-sm py-2.5 rounded-lg transition flex items-center justify-center gap-2">
+            <i class="bi bi-send"></i> Save reply
+          </button>
+        </form>
+
+      </div>
+    </aside>
+  </div>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-6 right-6 z-50 hidden max-w-sm"></div>
+
+<?php include '../../components/admin/_layout_foot.php'; ?>
+
+<script>
+const domain = "<?php echo $domain ?>";
+
+// Tickets are rendered server-side into JSON so we get one DB query,
+// then all filtering/search/panel logic runs client-side.
+let tickets = <?php
+    $query = mysqli_query($connection, "SELECT support_messages.*, users.fullname, users.email FROM support_messages, users WHERE users.id = support_messages.user ORDER BY support_messages.id DESC");
+    $rows = [];
+    while ($row = mysqli_fetch_assoc($query)) {
+        $rows[] = [
+            'id'        => (int) $row['id'],
+            'fullname'  => $row['fullname'],
+            'email'     => $row['email'],
+            'message'   => $row['message'],
+            'reply'     => $row['reply'],
+            'status'    => $row['status'],
+            'created_at'=> $row['created_at'],
+        ];
+    }
+    echo json_encode($rows, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+?>;
+let filteredTickets = tickets;
+
+// ===================================================
+//  STATUS HELPERS
+// ===================================================
+function statusMeta(status) {
+  switch ((status || '').toLowerCase()) {
+    case 'pending':    return { label: 'Pending',     cls: 'bg-rose-500/15 text-rose-400' };
+    case 'inprogress': return { label: 'In progress', cls: 'bg-sky-500/15 text-sky-400' };
+    case 'resolved':   return { label: 'Resolved',    cls: 'bg-emerald-500/15 text-emerald-400' };
+    case 'replied':    return { label: 'Replied',     cls: 'bg-amber-500/15 text-amber-400' };
+    default:           return { label: 'Unknown',     cls: 'bg-slate-500/15 text-slate-400' };
+  }
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str ?? "";
+  return div.innerHTML;
+}
+
+// ===================================================
+//  STATS
+// ===================================================
+function updateStats() {
+  document.getElementById("statTotal").textContent = tickets.length;
+  document.getElementById("statPending").textContent = tickets.filter(t => (t.status || '').toLowerCase() === 'pending').length;
+  document.getElementById("statProgress").textContent = tickets.filter(t => (t.status || '').toLowerCase() === 'inprogress').length;
+  document.getElementById("statDone").textContent = tickets.filter(t => ['replied', 'resolved'].includes((t.status || '').toLowerCase())).length;
+}
+
+// ===================================================
+//  RENDER TABLE
+// ===================================================
+function renderTable() {
+  const tbody = document.getElementById("tableBody");
+  const emptyState = document.getElementById("emptyState");
+  tbody.innerHTML = "";
+
+  if (filteredTickets.length === 0) {
+    emptyState.classList.remove("hidden");
+    emptyState.classList.add("flex");
+  } else {
+    emptyState.classList.add("hidden");
+    emptyState.classList.remove("flex");
+  }
+
+  filteredTickets.forEach(t => {
+    const meta = statusMeta(t.status);
+    let preview = (t.message || '').slice(0, 50);
+    if ((t.message || '').length > 50) preview += '…';
+
+    const tr = document.createElement("tr");
+    tr.className = "hover:bg-surface/60 transition-colors cursor-pointer";
+    tr.addEventListener("click", () => openPanel(t.id));
+    tr.innerHTML = `
+      <td class="px-5 py-3 font-mono text-slate-500">#${t.id}</td>
+      <td class="px-3 py-3">
+        <div class="font-medium text-slate-200">${escapeHtml(t.fullname)}</div>
+        <div class="text-xs text-slate-500">${escapeHtml(t.email)}</div>
+      </td>
+      <td class="px-3 py-3 text-slate-400 max-w-xs truncate">${escapeHtml(preview)}</td>
+      <td class="px-3 py-3 text-slate-400 text-xs font-mono">${escapeHtml(t.created_at)}</td>
+      <td class="px-3 py-3">
+        <span class="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full ${meta.cls}">
+          ${meta.label}
+        </span>
+      </td>
+      <td class="px-3 py-3 text-right">
+        <button class="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-line text-slate-300 hover:bg-surface hover:text-white transition">
+          <i class="bi bi-eye"></i> View
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("rowCount").textContent = `${tickets.length} ticket${tickets.length === 1 ? "" : "s"} loaded`;
+}
+
+// ===================================================
+//  SEARCH + FILTER
+// ===================================================
+function applyFilters() {
+  const term = document.getElementById("searchInput").value.toLowerCase().trim();
+  const status = document.getElementById("statusFilter").value;
+
+  filteredTickets = tickets.filter(t => {
+    const haystack = `${t.fullname} ${t.email} ${t.message}`.toLowerCase();
+    const matchesTerm = !term || haystack.includes(term);
+    const matchesStatus = !status || (t.status || '').toLowerCase() === status;
+    return matchesTerm && matchesStatus;
+  });
+  renderTable();
+}
+
+document.getElementById("searchInput").addEventListener("input", applyFilters);
+document.getElementById("statusFilter").addEventListener("change", applyFilters);
+
+// ===================================================
+//  SLIDE-OVER PANEL
+// ===================================================
+const panelOverlay = document.getElementById("panelOverlay");
+const ticketPanel = document.getElementById("ticketPanel");
+
+function openPanel(id) {
+  const t = tickets.find(x => x.id === id);
+  if (!t) return;
+
+  const meta = statusMeta(t.status);
+
+  document.getElementById("panelTicketId").textContent = `Ticket #${t.id}`;
+  document.getElementById("panelName").textContent = t.fullname;
+  document.getElementById("panelEmail").textContent = t.email;
+  document.getElementById("panelDate").textContent = t.created_at;
+  document.getElementById("panelMessage").textContent = t.message;
+
+  const badge = document.getElementById("panelStatusBadge");
+  badge.textContent = meta.label;
+  badge.className = `text-xs px-2 py-1 rounded-full ${meta.cls}`;
+
+  const existingWrap = document.getElementById("panelExistingReplyWrap");
+  if (t.reply && t.reply.trim() !== '') {
+    existingWrap.classList.remove("hidden");
+    document.getElementById("panelExistingReply").textContent = t.reply;
+    document.getElementById("deleteReplyMsgId").value = t.id;
+  } else {
+    existingWrap.classList.add("hidden");
+  }
+
+  document.getElementById("replyMsgId").value = t.id;
+  document.getElementById("replyTextarea").value = t.reply || '';
+
+  panelOverlay.classList.remove("hidden");
+  requestAnimationFrame(() => { ticketPanel.style.transform = "translateX(0)"; });
+}
+
+function closePanel() {
+  ticketPanel.style.transform = "translateX(100%)";
+  setTimeout(() => panelOverlay.classList.add("hidden"), 250);
+}
+
+document.getElementById("closePanel").addEventListener("click", closePanel);
+document.getElementById("panelBackdrop").addEventListener("click", closePanel);
+
+// ===================================================
+//  INIT
+// ===================================================
+updateStats();
+renderTable();
+
+<?php if (isset($_GET['replied'])): ?>
+  showToast("Reply saved — ticket marked as Replied.", "success");
+<?php endif; ?>
+<?php if (isset($_GET['deleted'])): ?>
+  showToast("Reply deleted.", "success");
+<?php endif; ?>
+<?php if (isset($flashError)): ?>
+  showToast(<?php echo json_encode($flashError); ?>, "error");
+<?php endif; ?>
+</script>
+
+</body>
 </html>

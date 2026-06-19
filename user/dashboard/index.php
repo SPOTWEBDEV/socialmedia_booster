@@ -715,6 +715,72 @@ $totalSupport = mysqli_num_rows(mysqli_query($connection, "SELECT `id` FROM supp
     <defs id="SvgjsDefs1002"></defs>
     <polyline id="SvgjsPolyline1003" points="0,0"></polyline>
     <path id="SvgjsPath1004" d="M0 0 "></path>
+
+    <div class="modal fade" id="maintenanceModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:550px;">
+        <div class="modal-content" style="border:none;border-radius:20px;overflow:hidden;">
+
+```
+        <div style="padding:35px 30px;text-align:center;">
+
+            <div style="width:70px;height:70px;background:#f4f7ff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+                <span style="font-size:32px;">⚡</span>
+            </div>
+
+            <h3 style="font-weight:700;color:#111;margin-bottom:10px;">
+                Platform Upgrade in Progress
+            </h3>
+
+            <p style="color:#666;font-size:15px;margin-bottom:25px;">
+                We're improving parts of the platform to provide a better experience.
+            </p>
+
+            <div style="background:#f8fafc;border-radius:12px;padding:18px;text-align:left;margin-bottom:20px;">
+
+                <div style="margin-bottom:10px;">
+                    ✓ Email Receiver
+                </div>
+
+                <div style="margin-bottom:10px;">
+                    ✓ Dashboard
+                </div>
+
+                <div>
+                    ✓ Welcome Page
+                </div>
+
+            </div>
+
+            <div style="background:#ecfdf5;border:1px solid #d1fae5;padding:15px;border-radius:12px;margin-bottom:25px;">
+                <strong style="color:#065f46;">
+                    Your funds and account data remain fully secure.
+                </strong>
+                <div style="font-size:14px;color:#047857;margin-top:5px;">
+                    No balances, transactions, or personal information will be affected.
+                </div>
+            </div>
+
+            <button
+                type="button"
+                data-bs-dismiss="modal"
+                style="background:#111827;color:#fff;border:none;padding:12px 30px;border-radius:10px;font-weight:600;">
+                Continue
+            </button>
+
+        </div>
+
+    </div>
+</div>
+```
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    new bootstrap.Modal(document.getElementById('maintenanceModal')).show();
+});
+</script>
+
   </svg>
 </body>
 
