@@ -2,8 +2,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// 1. Establish absolute project paths to prevent inclusion crashes
-// dirname(__DIR__) points directly to the absolute path of your "booster" root directory
+
 $projectRoot = dirname(__DIR__); 
 
 // 2. Load Composer Autoloader using the absolute path

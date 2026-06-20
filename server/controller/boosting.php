@@ -1,10 +1,5 @@
 <?php
-/**
- * API Controller Class Blueprint
- * Location: localhost\booster\server\controller\boosting.php
- * * NOTE: Do not instantiate this class or include connection files here.
- * Always initialize via context handlers down inside your execution points.
- */
+
 
 class Api
 {

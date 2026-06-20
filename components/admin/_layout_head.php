@@ -74,7 +74,7 @@ $navItems = [
     <div class="h-16 flex items-center gap-3 px-5 border-b border-line">
       <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-display font-bold text-white text-sm shrink-0">BY</div>
       <div class="leading-tight overflow-hidden">
-        <p class="font-display font-semibold text-white text-sm truncate">Booster Yard</p>
+        <p class="font-display font-semibold text-white text-sm truncate">Boost Yard</p>
         <p class="text-[11px] text-slate-500 font-mono truncate">admin panel</p>
       </div>
     </div>
@@ -143,7 +143,7 @@ $navItems = [
         <div class="h-16 flex items-center justify-between gap-3 px-5 border-b border-line">
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-display font-bold text-white text-sm">BY</div>
-            <p class="font-display font-semibold text-white text-sm">Booster Yard</p>
+            <p class="font-display font-semibold text-white text-sm">Boost Yard</p>
           </div>
           <button id="mobileNavClose" class="text-slate-400"><i class="bi bi-x-lg"></i></button>
         </div>
