@@ -169,7 +169,7 @@ include '../../components/admin/_layout_head.php';
             </div>
             <div>
               <label class="text-xs text-slate-400 mb-1.5 block">Account name</label>
-              <input type="text" name="account_name" placeholder="e.g. Booster Yard Ltd"
+              <input type="text" name="account_name" placeholder="e.g. Boost Yard Ltd"
                 class="w-full bg-surface border border-line rounded-lg px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition" />
             </div>
             <div>

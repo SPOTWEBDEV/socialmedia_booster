@@ -1,501 +1,481 @@
 <?php
-
 include_once '../../server/connection.php';
 include_once '../../server/model.php';
 include_once '../../server/auth/admin.php';
 
-
-
+$pageTitle    = 'Users';
+$pageSubtitle = 'accounts · balances · deposit history';
+$activeNav    = 'User';
+include '../../components/admin/_layout_head.php';
 ?>
 
-
-<!DOCTYPE html>
-<html lang="en" dir="ltr" data-nav-layout="horizontal" data-theme-mode="light" data-header-styles="light" data-menu-styles="light" loader="disable" data-nav-style="menu-click" data-bybit-channel-name="TTSbHg5jTOANoxu2zEIr9" data-bybit-is-default-wallet="true" data-toggled="close">
-<div id="in-page-channel-node-id" data-channel-name="in_page_channel_sAqFZG"></div>
-
-<head><!-- Meta Data -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title><?php echo $sitename . ' -- Order Page ' ?></title>
-    <meta name="Description" content="Bootstrap Responsive Admin Web Dashboard HTML5 Template">
-    <meta name="Author" content="Spruko Technologies Private Limited">
-    <meta name="keywords" content="admin dashboard,admin template,admin panel,bootstrap admin dashboard,html template,sales dashboard,dashboard,template dashboard,admin,html and css template,admin dashboard bootstrap,personal dashboard,crypto dashboard,stocks dashboard,admin panel template"> <!-- Favicon -->
-    <link rel="icon" href="<?php echo $domain ?>assets/images/brand-logos/favicon.ico" type="image/x-icon"> <!-- Choices JS -->
-    <script src="<?php echo $domain ?>assets/libs/choices.js/public/assets/scripts/choices.min.js"></script> <!-- Bootstrap Css -->
-    <link id="style" href="<?php echo $domain ?>assets/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet"> <!-- Style Css -->
-    <link href="<?php echo $domain ?>assets/css/styles.css" rel="stylesheet"> <!-- Icons Css -->
-    <link href="<?php echo $domain ?>assets/css/icons.css" rel="stylesheet"> <!-- Node Waves Css -->
-    <link href="<?php echo $domain ?>assets/libs/node-waves/waves.min.css" rel="stylesheet"> <!-- Simplebar Css -->
-    <link href="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.css" rel="stylesheet"> <!-- Choices Css -->
-    <link rel="stylesheet" href="<?php echo $domain ?>assets/libs/choices.js/public/assets/styles/choices.min.css">
-
-    <meta http-equiv="imagetoolbar" content="no">
-    <style type="text/css">
-        <!-- input,textarea{-webkit-touch-callout:default;-webkit-user-select:auto;-khtml-user-select:auto;-moz-user-select:text;-ms-user-select:text;user-select:text} *{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:-moz-none;-ms-user-select:none;user-select:none} 
-        -->
-    </style>
-    <style type="text/css" media="print">
-        <!-- body{display:none} 
-        -->
-    </style> <!--[if gte IE 5]><frame></frame><![endif]-->
-    <style>
-        @keyframes slide-in-one-tap {
-            from {
-                transform: translateY(80px);
-            }
-
-            to {
-                transform: translateY(0px);
-            }
-        }
-
-        .trust-hide-gracefully {
-            opacity: 0;
-        }
-
-        .trust-wallet-one-tap .hidden {
-            display: none;
-        }
-
-        .trust-wallet-one-tap .semibold {
-            font-weight: 500;
-        }
-
-        .trust-wallet-one-tap .binance-plex {
-            font-family: 'Binance';
-        }
-
-        .trust-wallet-one-tap .rounded-full {
-            border-radius: 50%;
-        }
-
-        .trust-wallet-one-tap .flex {
-            display: flex;
-        }
-
-        .trust-wallet-one-tap .flex-col {
-            flex-direction: column;
-        }
-
-        .trust-wallet-one-tap .items-center {
-            align-items: center;
-        }
-
-        .trust-wallet-one-tap .space-between {
-            justify-content: space-between;
-        }
-
-        .trust-wallet-one-tap .justify-center {
-            justify-content: center;
-        }
-
-        .trust-wallet-one-tap .w-full {
-            width: 100%;
-        }
-
-        .trust-wallet-one-tap .box {
-            transition: all 0.5s cubic-bezier(0, 0, 0, 1.43);
-            animation: slide-in-one-tap 0.5s cubic-bezier(0, 0, 0, 1.43);
-            width: 384px;
-            border-radius: 15px;
-            background: #fff;
-            box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.25);
-            position: fixed;
-            right: 30px;
-            bottom: 30px;
-            z-index: 1020;
-        }
-
-        .trust-wallet-one-tap .header {
-            gap: 15px;
-            border-bottom: 1px solid #e6e6e6;
-            padding: 10px 18px;
-        }
-
-        .trust-wallet-one-tap .header .left-items {
-            gap: 15px;
-        }
-
-        .trust-wallet-one-tap .header .title {
-            color: #1e2329;
-            font-size: 18px;
-            font-weight: 600;
-            line-height: 28px;
-        }
-
-        .trust-wallet-one-tap .header .subtitle {
-            color: #474d57;
-            font-size: 14px;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .header .close {
-            color: #1e2329;
-            cursor: pointer;
-        }
-
-        .trust-wallet-one-tap .body {
-            padding: 9px 18px;
-            gap: 10px;
-        }
-
-        .trust-wallet-one-tap .body .right-items {
-            gap: 10px;
-            width: 100%;
-        }
-
-        .trust-wallet-one-tap .body .right-items .wallet-title {
-            color: #1e2329;
-            font-size: 16px;
-            font-weight: 600;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .body .right-items .wallet-subtitle {
-            color: #474d57;
-            font-size: 14px;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .connect-indicator {
-            gap: 15px;
-            padding: 8px 0;
-        }
-
-        .trust-wallet-one-tap .connect-indicator .flow-icon {
-            color: #474d57;
-        }
-
-        .trust-wallet-one-tap .loading-color {
-            color: #fff;
-        }
-
-        .trust-wallet-one-tap .button {
-            border-radius: 50px;
-            outline: 2px solid transparent;
-            outline-offset: 2px;
-            background-color: rgb(5, 0, 255);
-            border-color: rgb(229, 231, 235);
-            cursor: pointer;
-            text-align: center;
-            height: 45px;
-        }
-
-        .trust-wallet-one-tap .button .button-text {
-            color: #fff;
-            font-size: 16px;
-            font-weight: 600;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .footer {
-            margin: 20px 30px;
-        }
-
-        .trust-wallet-one-tap .check-icon {
-            color: #fff;
-        }
-
-        @font-face {
-            font-family: 'Binance';
-            src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-Regular.otf) format('opentype');
-            font-weight: 400;
-            font-style: normal;
-        }
-
-        @font-face {
-            font-family: 'Binance';
-            src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-Medium.otf) format('opentype');
-            font-weight: 500;
-            font-style: normal;
-        }
-
-        @font-face {
-            font-family: 'Binance';
-            src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-SemiBold.otf) format('opentype');
-            font-weight: 600;
-            font-style: normal;
-        }
-    </style>
-</head>
-
-<body class="customer-dashboard" cz-shortcut-listen="true">
-
-    <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
-    <div class="page"> <!-- app-header -->
-
-        <?php include_once '../../components/admin/navbar.php'  ?>
-
-        <div class="main-content app-content">
-            <div class="container-fluid"> <!-- Start::page-header -->
-                <div class="d-flex align-items-center justify-content-between my-4 page-header-breadcrumb flex-wrap gap-2">
-                    <div>
-                        <p class="fw-medium fs-20 mb-0"></p>
-                        <p class="fs-13 text-muted mb-0"></p>
-                    </div>
-                    <div class="btn-list"> <button class="btn btn-primary-light btn-wave waves-effect waves-light"> <i class="bx bx-crown align-middle"></i> Plan Upgrade </button> <button class="btn btn-secondary-light btn-wave waves-effect waves-light"> <i class="ri-upload-cloud-line align-middle"></i> Export Report </button> </div>
-                </div> <!-- End::page-header --> <!-- Start::row-1 -->
-                <div class="row">
-                    <?php include_once '../../components/admin/sidenavbar.php' ?>
-                    <div class="col-xl-9">
-                        <div class="row">
-
-
-                            <div class="col-xl-12">
-                                <div class="card custom-card overflow-hidden">
-                                    <div class="card-header justify-content-between">
-                                        <div class="card-body d-flex align-items-center flex-wrap">
-
-                                            <div class="flex-fill">
-                                                <span class="mb-0 fs-14 text-muted">
-                                                    Total number of orders placed upto now :
-                                                    <span class="fw-medium text-success" id="orderCount">0</span>
-                                                </span>
-                                            </div>
-
-                                            <!-- Sort -->
-                                            <div class="dropdown">
-                                                <button class="btn btn-light dropdown-toggle m-1" type="button"
-                                                    id="sortBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    Sort By
-                                                </button>
-                                                <ul class="dropdown-menu">
-                                                    <li><a class="dropdown-item sortOption" data-sort="id" href="#">ID</a></li>
-                                                    <li><a class="dropdown-item sortOption" data-sort="name" href="#">Name</a></li>
-                                                    <li><a class="dropdown-item sortOption" data-sort="date" href="#">Date</a></li>
-
-                                                </ul>
-                                            </div>
-
-                                            <!-- Category Filter -->
-                                            <select id="categoryFilter" class="form-select m-1" style="width:200px;">
-                                                <option value="">All Categories</option>
-                                            </select>
-
-                                            <!-- Search -->
-                                            <div class="d-flex align-items-center m-1" role="search">
-                                                <input class="form-control" id="searchInput" type="search" placeholder="Search">
-                                                <button class="btn btn-light ms-2" id="searchBtn">Search</button>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                    <div class="card-body px-0 pt-2 pb-0">
-                                        <div class="table-responsive">
-                                            <table class="table text-nowrap">
-                                                <thead>
-                                                    <tr>
-                                                        <th scope="col">User ID</th>
-                                                        <th scope="col">Full Name</th>
-                                                        <th scope="col">Balance</th>
-                                                        <th scope="col">Status</th>
-                                                        <th scope="col">Date Registered</th>
-                                                        <th scope="col">Action</th>
-                                                    </tr>
-                                                </thead>
-
-                                                <tbody>
-                                                    
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                        </div>
-                        <script>
-                            let users = [];
-                            let filteredUsers = [];
-
-                            // =============================
-                            //  FETCH USERS FROM PHP
-                            // =============================
-                            function loadUsers() {
-                                fetch("<?php echo $domain ?>server/api/users.php")
-                                    .then(res => res.json())
-                                    .then(data => {
-                                        if (data.success) {
-                                            users = data.data;
-                                            filteredUsers = users;
-                                            updateUserCount();
-                                            populateStatusCategories();
-                                            renderTable();
-                                        }
-                                    })
-                                    .catch(err => console.error("API ERROR:", err));
-                            }
-
-                            // =============================
-                            //   UPDATE COUNT
-                            // =============================
-                            function updateUserCount() {
-                                document.getElementById("orderCount").textContent = users.length;
-                            }
-
-                            // =============================
-                            //   POPULATE DROPDOWN (active/inactive/warning)
-                            // =============================
-                            function populateStatusCategories() {
-                                let select = document.getElementById("categoryFilter");
-                                let statuses = ["active", "inactive", "warning"];
-
-                                statuses.forEach(status => {
-                                    let opt = document.createElement("option");
-                                    opt.value = status;
-                                    opt.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-                                    select.appendChild(opt);
-                                });
-                            }
-
-                            // =============================
-                            //   RENDER TABLE
-                            // =============================
-                            function renderTable() {
-                                let tbody = document.querySelector("table tbody");
-                                tbody.innerHTML = "";
-
-                                filteredUsers.forEach(user => {
-                                    tbody.innerHTML += `
-            <tr>
-                <td><a href="#" class="text-primary text-decoration-underline">#${user.id}</a></td>
-
-                <td>
-                    <div>
-                        <span class="d-block mb-1">${user.fullname}</span>
-                        <span class="d-block fs-12 text-muted fw-normal">${user.email}</span>
-                    </div>
-                </td>
-                 <td><a href="#" class="text-primary text-decoration-underline">$${user.balance}</a></td>
-
-                <td><span class="badge bg-${getStatusColor(user.status)}-transparent">
-                    ${user.status}
-                </span></td>
-
-                <td>
-                    <div>
-                        <span class="d-block mb-1">${user.created_at}</span>
-                        <span class="d-block fs-12 text-muted fw-normal">${user.status_message ?? ''}</span>
-                    </div>
-                </td>
-
-                <td>
-                    <button onclick="window.location.href='./view/?id=${user.id}'" class="btn btn-sm btn-ghost-light text-default border btn-wave">
-                        <i class="fe fe-eye text-muted align-middle me-1"></i> View
-                    </button>
-                </td>
-            </tr>
-        `;
-                                });
-                            }
-
-                            // status color badge
-                            function getStatusColor(status) {
-                                switch (status.toLowerCase()) {
-                                    case "active":
-                                        return "success";
-                                    case "inactive":
-                                        return "danger";
-                                    case "warning":
-                                        return "warning";
-                                    default:
-                                        return "primary";
-                                }
-                            }
-
-                            // =============================
-                            //   SORTING
-                            // =============================
-                            document.querySelectorAll(".sortOption").forEach(btn => {
-                                btn.addEventListener("click", function() {
-                                    let field = this.getAttribute("data-sort");
-
-                                    filteredUsers.sort((a, b) => {
-                                        if (field === "id") {
-                                            return Number(a.id) - Number(b.id);
-                                        }
-                                        if (field === "date") {
-                                            return new Date(a.created_at) - new Date(b.created_at);
-                                        }
-                                        return a.fullname.localeCompare(b.fullname);
-                                    });
-
-                                    renderTable();
-                                });
-                            });
-
-                            // =============================
-                            //   SEARCH (name + email)
-                            // =============================
-                            document.getElementById("searchBtn").addEventListener("click", () => {
-                                let search = document.getElementById("searchInput").value.toLowerCase();
-
-                                filteredUsers = users.filter(u =>
-                                    u.fullname.toLowerCase().includes(search) ||
-                                    u.email.toLowerCase().includes(search)
-                                );
-
-                                renderTable();
-                            });
-
-                            // =============================
-                            //   CATEGORY FILTER (status)
-                            // =============================
-                            document.getElementById("categoryFilter").addEventListener("change", function() {
-                                if (this.value === "") {
-                                    filteredUsers = users;
-                                } else {
-                                    filteredUsers = users.filter(u => u.status.toLowerCase() === this.value.toLowerCase());
-                                }
-                                renderTable();
-                            });
-
-                            // start
-                            loadUsers();
-                        </script>
-
-                    </div>
-                </div> <!-- End::row-1 -->
-            </div>
-        </div> <!-- End::app-content --> <!-- Footer Start -->
-        <?php include_once '../../components/footer.php' ?>
-        <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-body">
-                        <div class="input-group"> <input type="text" class="form-control border-end-0" placeholder="Search Anything ..." aria-label="Search Anything ..." aria-describedby="button-addon2"> <button class="btn btn-primary" type="button" id="button-addon2"><i class="bi bi-search"></i></button> </div>
-                    </div>
-                </div>
-            </div>
+  <main class="flex-1 w-full px-6 py-6">
+
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <p class="text-sm text-slate-400">All registered customers. Click a row to manage their account.</p>
+    </div>
+
+    <!-- Summary strip -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+      <div class="bg-card border border-line rounded-2xl p-5">
+        <p class="text-xs text-slate-500 mb-1">Total users</p>
+        <p id="statTotal" class="font-display text-2xl font-semibold text-white">0</p>
+      </div>
+      <div class="bg-card border border-line rounded-2xl p-5">
+        <p class="text-xs text-slate-500 mb-1">Active</p>
+        <p id="statActive" class="font-display text-2xl font-semibold text-emerald-400">0</p>
+      </div>
+      <div class="bg-card border border-line rounded-2xl p-5">
+        <p class="text-xs text-slate-500 mb-1">Suspended</p>
+        <p id="statSuspended" class="font-display text-2xl font-semibold text-rose-400">0</p>
+      </div>
+      <div class="bg-card border border-line rounded-2xl p-5">
+        <p class="text-xs text-slate-500 mb-1">Total balance</p>
+        <p id="statBalance" class="font-display text-2xl font-semibold text-blue-400">$0</p>
+      </div>
+    </div>
+
+    <!-- Table card -->
+    <section class="bg-card border border-line rounded-2xl overflow-hidden">
+
+      <div class="p-5 border-b border-line flex flex-wrap items-center gap-3">
+        <div class="relative flex-1 min-w-[200px]">
+          <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" /></svg>
+          <input id="searchInput" type="search" placeholder="Search name or email"
+            class="w-full bg-surface border border-line rounded-lg pl-9 pr-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition" />
         </div>
-    </div> <!-- Responsive Header Search Modal End --> <!-- Scroll To Top -->
-    <div class="scrollToTop"> <span class="arrow"><i class="ti ti-arrow-narrow-up fs-20"></i></span> </div>
-    <div id="responsive-overlay"></div> <!-- Scroll To Top --> <!-- Popper JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/libs/@popperjs/core/umd/popper.min.js"></script>
 
-    <script src="<?php echo $domain ?>assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <select id="statusFilter" class="bg-surface border border-line rounded-lg px-3 py-2 text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="warning">Warning</option>
+          <option value="suspended">Suspended</option>
+        </select>
 
-    <script src="<?php echo $domain ?>assets/js/defaultmenu.min.js"></script>
+        <select id="sortSelect" class="bg-surface border border-line rounded-lg px-3 py-2 text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+          <option value="id">Sort: ID</option>
+          <option value="name">Sort: Name</option>
+          <option value="date">Sort: Date</option>
+          <option value="balance">Sort: Balance</option>
+        </select>
+      </div>
 
-    <script src="<?php echo $domain ?>assets/libs/node-waves/waves.min.js"></script>
+      <div class="overflow-x-auto scrollbar-thin">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-line text-left text-xs uppercase tracking-wider text-slate-500">
+              <th class="px-5 py-3 font-medium font-mono">ID</th>
+              <th class="px-3 py-3 font-medium">User</th>
+              <th class="px-3 py-3 font-medium">Balance</th>
+              <th class="px-3 py-3 font-medium">Status</th>
+              <th class="px-3 py-3 font-medium">Registered</th>
+              <th class="px-3 py-3 font-medium text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-line">
+            <!-- rows injected by JS -->
+          </tbody>
+        </table>
 
-    <script src="<?php echo $domain ?>assets/js/sticky.js"></script>
+        <div id="emptyState" class="hidden flex-col items-center justify-center text-center py-20 px-6">
+          <div class="w-12 h-12 rounded-full bg-surface border border-line flex items-center justify-center mb-3 mx-auto">
+            <svg class="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" /></svg>
+          </div>
+          <p class="text-slate-300 font-medium">No users match this search</p>
+          <p class="text-slate-500 text-sm mt-1">Try a different name, email, or status filter.</p>
+        </div>
+      </div>
 
-    <script src="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.js"></script>
+      <div class="border-t border-line px-5 py-3 text-xs text-slate-500 font-mono" id="rowCount">
+        0 users loaded
+      </div>
+    </section>
+  </main>
 
-    <script src="<?php echo $domain ?>assets/js/simplebar.js"></script>
+  <!-- ===================== SLIDE-OVER: USER DETAIL ===================== -->
+  <div id="panelOverlay" class="hidden fixed inset-0 z-50">
+    <div class="absolute inset-0 bg-black/60" id="panelBackdrop"></div>
 
-    <script src="<?php echo $domain ?>assets/libs/apexcharts/apexcharts.min.js"></script>
+    <aside id="userPanel" class="absolute right-0 top-0 h-full w-full sm:w-[520px] bg-card border-l border-line flex flex-col"
+           style="transform: translateX(100%); transition: transform .25s ease-out;">
 
-    <script src="<?php echo $domain ?>assets/js/customer-custom.js"></script>
-    <div state="voice" class="placeholder-icon" id="tts-placeholder-icon" title="Click to show TTS button" style="background-image: url(&quot;chrome-extension://cpnomhnclohkhnikegipapofcjihldck/data/content_script/icons/voice.png&quot;);"><canvas width="36" height="36" class="loading-circle" id="text-to-speech-loader" style="display: none;"></canvas></div><svg id="SvgjsSvg1001" width="2" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev" style="overflow: hidden; top: -100%; left: -100%; position: absolute; opacity: 0;">
-        <defs id="SvgjsDefs1002"></defs>
-        <polyline id="SvgjsPolyline1003" points="0,0"></polyline>
-        <path id="SvgjsPath1004" d="M0 0 "></path>
-    </svg>
+      <div class="flex items-start justify-between gap-3 px-6 py-5 border-b border-line">
+        <div class="min-w-0">
+          <p class="text-xs text-slate-500 font-mono mb-1" id="panelUserId">User #—</p>
+          <h2 class="font-display font-semibold text-white text-base truncate" id="panelName">—</h2>
+          <p class="text-xs text-slate-500 truncate" id="panelEmail">—</p>
+        </div>
+        <button id="closePanel" class="w-8 h-8 rounded-lg hover:bg-surface flex items-center justify-center text-slate-400 hover:text-white transition shrink-0">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto scrollbar-thin px-6 py-5 space-y-6">
+
+        <!-- Profile summary -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-surface border border-line rounded-xl p-4">
+            <p class="text-xs text-slate-500 mb-1">Balance</p>
+            <p class="font-display text-lg font-semibold text-emerald-400" id="panelBalance">$0.00</p>
+          </div>
+          <div class="bg-surface border border-line rounded-xl p-4">
+            <p class="text-xs text-slate-500 mb-1">Status</p>
+            <span id="panelStatusBadge" class="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full mt-0.5"></span>
+          </div>
+        </div>
+
+        <div class="text-xs text-slate-500" id="panelRegistered">Registered —</div>
+
+        <div id="panelSuspensionWrap" class="hidden bg-rose-500/5 border border-rose-500/20 rounded-xl p-4">
+          <p class="text-xs font-semibold uppercase tracking-wider text-rose-400 mb-1.5">Suspension reason</p>
+          <p class="text-sm text-slate-300" id="panelSuspensionReason">—</p>
+        </div>
+
+        <!-- Manage account -->
+        <div class="border-t border-line pt-5">
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">Manage account</p>
+
+          <form method="POST" id="balanceForm" class="mb-4">
+            <input type="hidden" name="user_id" id="balanceUserId" value="">
+            <label class="text-xs text-slate-400 mb-1.5 block">Set balance</label>
+            <div class="flex gap-2">
+              <input type="number" step="0.01" name="balance" id="balanceInput" required placeholder="0.00"
+                class="flex-1 bg-surface border border-line rounded-lg px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition font-mono" />
+              <button type="submit" name="change_balance"
+                class="px-4 py-2.5 rounded-lg bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 text-sm font-semibold transition shrink-0">
+                Update
+              </button>
+            </div>
+          </form>
+
+          <form method="POST" id="suspendForm">
+            <input type="hidden" name="user_id" id="suspendUserId" value="">
+            <label class="text-xs text-slate-400 mb-1.5 block">Suspend user</label>
+            <textarea name="status_message" id="suspendReasonInput" rows="2" placeholder="Reason for suspension…"
+              class="w-full bg-surface border border-line rounded-lg px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500/50 transition resize-none mb-2"></textarea>
+            <button type="submit" name="suspend_user"
+              class="w-full px-4 py-2.5 rounded-lg bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 text-sm font-semibold transition flex items-center justify-center gap-2">
+              <i class="bi bi-slash-circle"></i> Suspend user
+            </button>
+          </form>
+        </div>
+
+        <!-- Deposit history -->
+        <div class="border-t border-line pt-5">
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">Deposit history</p>
+          <div id="depositList" class="space-y-2">
+            <p class="text-sm text-slate-500" id="depositLoading">Loading deposits…</p>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+  </div>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-6 right-6 z-50 hidden max-w-sm"></div>
+
+<?php include '../../components/admin/_layout_foot.php'; ?>
+
+<script>
+const domain = "<?php echo $domain ?>";
+
+let users = [];
+let filteredUsers = [];
+let activeUserId = null;
+
+// ===================================================
+//  FETCH USERS
+// ===================================================
+function loadUsers() {
+  fetch(domain + "server/api/users.php")
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        users = data.data;
+        filteredUsers = users;
+        updateStats();
+        renderTable();
+      }
+    })
+    .catch(err => console.error("API ERROR:", err));
+}
+
+// ===================================================
+//  STATS
+// ===================================================
+function updateStats() {
+  document.getElementById("statTotal").textContent = users.length;
+  document.getElementById("statActive").textContent = users.filter(u => (u.status || '').toLowerCase() === 'active').length;
+  document.getElementById("statSuspended").textContent = users.filter(u => (u.status || '').toLowerCase() === 'suspended').length;
+  const totalBalance = users.reduce((sum, u) => sum + (parseFloat(u.balance) || 0), 0);
+  document.getElementById("statBalance").textContent = '$' + totalBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+
+function statusMeta(status) {
+  switch ((status || '').toLowerCase()) {
+    case 'active':    return { label: 'Active',    cls: 'bg-emerald-500/15 text-emerald-400', dot: 'bg-emerald-400' };
+    case 'inactive':  return { label: 'Inactive',  cls: 'bg-rose-500/15 text-rose-400', dot: 'bg-rose-400' };
+    case 'warning':   return { label: 'Warning',   cls: 'bg-amber-500/15 text-amber-400', dot: 'bg-amber-400' };
+    case 'suspended': return { label: 'Suspended', cls: 'bg-rose-500/15 text-rose-400', dot: 'bg-rose-400' };
+    default:          return { label: status || 'Unknown', cls: 'bg-slate-500/15 text-slate-400', dot: 'bg-slate-400' };
+  }
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str ?? "";
+  return div.innerHTML;
+}
+
+function fmtMoney(n) {
+  const num = parseFloat(n) || 0;
+  return '$' + num.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+
+// ===================================================
+//  RENDER TABLE
+// ===================================================
+function renderTable() {
+  const tbody = document.getElementById("tableBody");
+  const emptyState = document.getElementById("emptyState");
+  tbody.innerHTML = "";
+
+  if (filteredUsers.length === 0) {
+    emptyState.classList.remove("hidden");
+    emptyState.classList.add("flex");
+  } else {
+    emptyState.classList.add("hidden");
+    emptyState.classList.remove("flex");
+  }
+
+  filteredUsers.forEach(user => {
+    const meta = statusMeta(user.status);
+    const tr = document.createElement("tr");
+    tr.className = "hover:bg-surface/60 transition-colors cursor-pointer";
+    tr.addEventListener("click", () => openPanel(user.id));
+    tr.innerHTML = `
+      <td class="px-5 py-3 font-mono text-slate-500">#${user.id}</td>
+      <td class="px-3 py-3">
+        <div class="font-medium text-slate-200">${escapeHtml(user.fullname)}</div>
+        <div class="text-xs text-slate-500">${escapeHtml(user.email)}</div>
+      </td>
+      <td class="px-3 py-3 font-mono text-slate-300">${fmtMoney(user.balance)}</td>
+      <td class="px-3 py-3">
+        <span class="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full ${meta.cls}">
+          <span class="w-1.5 h-1.5 rounded-full ${meta.dot}"></span>
+          ${meta.label}
+        </span>
+      </td>
+      <td class="px-3 py-3 text-slate-400 text-xs font-mono">${escapeHtml(user.created_at)}</td>
+      <td class="px-3 py-3 text-right">
+        <button class="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-line text-slate-300 hover:bg-surface hover:text-white transition">
+          <i class="bi bi-eye"></i> View
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("rowCount").textContent = `${users.length} user${users.length === 1 ? "" : "s"} loaded`;
+}
+
+// ===================================================
+//  SEARCH + FILTER + SORT
+// ===================================================
+function applyFilters() {
+  const term = document.getElementById("searchInput").value.toLowerCase().trim();
+  const status = document.getElementById("statusFilter").value;
+
+  filteredUsers = users.filter(u => {
+    const matchesTerm = !term || u.fullname.toLowerCase().includes(term) || u.email.toLowerCase().includes(term);
+    const matchesStatus = !status || (u.status || '').toLowerCase() === status;
+    return matchesTerm && matchesStatus;
+  });
+  applySort();
+}
+
+function applySort() {
+  const field = document.getElementById("sortSelect").value;
+  filteredUsers.sort((a, b) => {
+    if (field === "id") return Number(a.id) - Number(b.id);
+    if (field === "date") return new Date(a.created_at) - new Date(b.created_at);
+    if (field === "balance") return parseFloat(b.balance) - parseFloat(a.balance);
+    return a.fullname.localeCompare(b.fullname);
+  });
+  renderTable();
+}
+
+document.getElementById("searchInput").addEventListener("input", applyFilters);
+document.getElementById("statusFilter").addEventListener("change", applyFilters);
+document.getElementById("sortSelect").addEventListener("change", applySort);
+
+// ===================================================
+//  SLIDE-OVER PANEL
+// ===================================================
+const panelOverlay = document.getElementById("panelOverlay");
+const userPanel = document.getElementById("userPanel");
+
+function openPanel(id) {
+  const u = users.find(x => String(x.id) === String(id));
+  if (!u) return;
+
+  activeUserId = id;
+  const meta = statusMeta(u.status);
+
+  document.getElementById("panelUserId").textContent = `User #${u.id}`;
+  document.getElementById("panelName").textContent = u.fullname;
+  document.getElementById("panelEmail").textContent = u.email;
+  document.getElementById("panelBalance").textContent = fmtMoney(u.balance);
+  document.getElementById("panelRegistered").textContent = `Registered ${u.created_at}`;
+
+  const badge = document.getElementById("panelStatusBadge");
+  badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${meta.dot}"></span> ${meta.label}`;
+  badge.className = `inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full mt-0.5 ${meta.cls}`;
+
+  const suspWrap = document.getElementById("panelSuspensionWrap");
+  if (u.status_message && u.status_message.trim() !== '') {
+    suspWrap.classList.remove("hidden");
+    document.getElementById("panelSuspensionReason").textContent = u.status_message;
+  } else {
+    suspWrap.classList.add("hidden");
+  }
+
+  document.getElementById("balanceUserId").value = u.id;
+  document.getElementById("balanceInput").value = parseFloat(u.balance) || 0;
+  document.getElementById("suspendUserId").value = u.id;
+  document.getElementById("suspendReasonInput").value = '';
+
+  loadDeposits(u.id);
+
+  panelOverlay.classList.remove("hidden");
+  requestAnimationFrame(() => { userPanel.style.transform = "translateX(0)"; });
+}
+
+function closePanel() {
+  userPanel.style.transform = "translateX(100%)";
+  setTimeout(() => panelOverlay.classList.add("hidden"), 250);
+}
+
+document.getElementById("closePanel").addEventListener("click", closePanel);
+document.getElementById("panelBackdrop").addEventListener("click", closePanel);
+
+// ===================================================
+//  DEPOSIT HISTORY (per user, loaded on panel open)
+// ===================================================
+function loadDeposits(userId) {
+  const list = document.getElementById("depositList");
+  list.innerHTML = '<p class="text-sm text-slate-500" id="depositLoading">Loading deposits…</p>';
+
+  let formData = new FormData();
+  formData.append("user_id", userId);
+
+  fetch(domain + "server/api/user_deposits.php", { method: "POST", body: formData })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success || !data.data || data.data.length === 0) {
+        list.innerHTML = '<p class="text-sm text-slate-500">No deposits found.</p>';
+        return;
+      }
+      list.innerHTML = "";
+      data.data.forEach(dep => {
+        const statusCls = dep.status === 'success' ? 'bg-emerald-500/15 text-emerald-400'
+          : dep.status === 'pending' ? 'bg-amber-500/15 text-amber-400'
+          : 'bg-rose-500/15 text-rose-400';
+        const row = document.createElement("div");
+        row.className = "bg-surface border border-line rounded-lg px-3 py-2.5 flex items-center justify-between gap-3";
+        row.innerHTML = `
+          <div class="min-w-0">
+            <p class="text-sm text-slate-200 font-mono">${fmtMoney(dep.amount)}</p>
+            <p class="text-xs text-slate-500 truncate">${escapeHtml(dep.method || '—')} · ${escapeHtml(dep.reference || '—')}</p>
+            <p class="text-xs text-slate-600">${escapeHtml(dep.created_at)}</p>
+          </div>
+          <span class="text-xs px-2 py-1 rounded-full shrink-0 ${statusCls}">${escapeHtml((dep.status || '').charAt(0).toUpperCase() + (dep.status || '').slice(1))}</span>
+        `;
+        list.appendChild(row);
+      });
+    })
+    .catch(err => {
+      console.error("Deposit fetch error:", err);
+      list.innerHTML = '<p class="text-sm text-rose-400">Couldn\'t load deposits.</p>';
+    });
+}
+
+// ===================================================
+//  MANAGE ACCOUNT: BALANCE + SUSPEND (AJAX)
+// ===================================================
+document.getElementById("balanceForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  if (!activeUserId) return;
+
+  const formData = new FormData();
+  formData.append("action", "change_balance");
+  formData.append("user_id", document.getElementById("balanceUserId").value);
+  formData.append("balance", document.getElementById("balanceInput").value);
+
+  fetch(domain + "server/api/update_user_account.php", { method: "POST", body: formData })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        const u = users.find(x => String(x.id) === String(activeUserId));
+        if (u) u.balance = data.balance;
+        updateStats();
+        renderTable();
+        document.getElementById("panelBalance").textContent = fmtMoney(data.balance);
+        showToast("Balance updated.", "success");
+      } else {
+        showToast(data.error || "Couldn't update balance.", "error");
+      }
+    })
+    .catch(err => {
+      console.error("Balance update error:", err);
+      showToast("Network error — balance wasn't updated.", "error");
+    });
+});
+
+document.getElementById("suspendForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  if (!activeUserId) return;
+
+  const reason = document.getElementById("suspendReasonInput").value.trim();
+  if (reason === '') {
+    showToast("Add a reason before suspending.", "warning");
+    return;
+  }
+
+  if (!confirm("Suspend this user? They won't be able to use their account.")) return;
+
+  const formData = new FormData();
+  formData.append("action", "suspend_user");
+  formData.append("user_id", document.getElementById("suspendUserId").value);
+  formData.append("status_message", reason);
+
+  fetch(domain + "server/api/update_user_account.php", { method: "POST", body: formData })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        const u = users.find(x => String(x.id) === String(activeUserId));
+        if (u) { u.status = data.status; u.status_message = data.status_message; }
+        updateStats();
+        renderTable();
+        openPanel(activeUserId);
+        showToast("User suspended.", "success");
+      } else {
+        showToast(data.error || "Couldn't suspend user.", "error");
+      }
+    })
+    .catch(err => {
+      console.error("Suspend error:", err);
+      showToast("Network error — user wasn't suspended.", "error");
+    });
+});
+
+// ===================================================
+//  INIT
+// ===================================================
+loadUsers();
+</script>
+
 </body>
-
 </html>

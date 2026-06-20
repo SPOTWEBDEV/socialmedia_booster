@@ -18,9 +18,9 @@ function smtpmailer($to, $subject, $body)
 
          $mail->IsHTML(true);
          $mail->From = 'support@boostyard.com.yahhh44.com';
-         $mail->FromName = 'Booster Yard';
+         $mail->FromName = 'Boost Yard';
          $mail->Sender = 'support@boostyard.com.yahhh44.com';
-         $mail->AddReplyTo('support@boostyard.com.yahhh44.com', 'Booster Yard');
+         $mail->AddReplyTo('support@boostyard.com.yahhh44.com', 'Boost Yard');
          $mail->Subject = $subject;
          $mail->Body = $body;
          $mail->AddAddress($to);

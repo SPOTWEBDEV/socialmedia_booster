@@ -154,7 +154,7 @@ include_once '../../server/auth/admin.php';
 
         <div>
           <label class="text-xs text-slate-400 mb-1.5 block">Message</label>
-          <textarea id="messageInput" required rows="6" placeholder="Write your message here. It'll be dropped into the Booster Yard email template automatically — no HTML needed."
+          <textarea id="messageInput" required rows="6" placeholder="Write your message here. It'll be dropped into the Boost Yard email template automatically — no HTML needed."
             class="w-full bg-surface border border-line rounded-lg px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition resize-none"></textarea>
           <p class="text-xs text-slate-500 mt-1.5">Line breaks are preserved automatically. The greeting and footer are added for you.</p>
         </div>
@@ -184,7 +184,7 @@ include_once '../../server/auth/admin.php';
             <span class="w-2.5 h-2.5 rounded-full bg-green-400/70"></span>
           </div>
           <div class="px-4 py-3 border-b border-line text-xs space-y-1 font-mono text-slate-400">
-            <div><span class="text-slate-600">From:</span> Booster Yard &lt;support@boostyard.com.yahhh44.com&gt;</div>
+            <div><span class="text-slate-600">From:</span> Boost Yard &lt;support@boostyard.com.yahhh44.com&gt;</div>
             <div><span class="text-slate-600">To:</span> <span id="previewToLine">—</span></div>
             <div><span class="text-slate-600">Subject:</span> <span id="previewSubjectLine" class="text-slate-300">—</span></div>
           </div>
@@ -193,7 +193,7 @@ include_once '../../server/auth/admin.php';
           <div class="p-4">
             <div class="rounded-xl overflow-hidden bg-[#F8FAFC]">
               <div class="px-5 py-4" style="background:linear-gradient(135deg,#3B82F6,#6366F1);">
-                <span class="text-white font-display font-bold text-sm">Booster Yard</span>
+                <span class="text-white font-display font-bold text-sm">Boost Yard</span>
               </div>
               <div class="px-5 pt-5 pb-2">
                 <p id="previewEyebrow" class="text-[11px] font-semibold uppercase tracking-wider text-blue-600 mb-1">Subject</p>
@@ -201,7 +201,7 @@ include_once '../../server/auth/admin.php';
                 <p id="previewBody" class="text-slate-600 text-sm leading-relaxed whitespace-pre-line">Your message preview will appear here as you type.</p>
               </div>
               <div class="px-5 pt-4 pb-5 mt-3 border-t border-slate-200">
-                <p class="text-[11px] text-slate-400">This message was sent to you by Booster Yard support.</p>
+                <p class="text-[11px] text-slate-400">This message was sent to you by Boost Yard support.</p>
               </div>
             </div>
           </div>

@@ -1,80 +1,101 @@
 <?php
-// error_reporting(E_ALL);
-// ini_set('display_errors', 1);
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
+// 1. Establish absolute project paths to prevent inclusion crashes
+// dirname(__DIR__) points directly to the absolute path of your "booster" root directory
+$projectRoot = dirname(__DIR__); 
 
-require __DIR__ . '/../vendor/autoload.php';
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
-$dotenv->load();
+// 2. Load Composer Autoloader using the absolute path
+if (file_exists($projectRoot . '/vendor/autoload.php')) {
+    require_once $projectRoot . '/vendor/autoload.php';
+    
+    // 3. Initialize and load environment variables safely
+    $dotenv = Dotenv\Dotenv::createImmutable($projectRoot);
+    $dotenv->load();
+} else {
+    die(json_encode([
+        "success" => false, 
+        "message" => "Critical Error: Vendor autoloader not found. Run 'composer install'."
+    ]));
+}
 
+// 4. Assign environment values with safe fallbacks
+$api_key = $_ENV['BOOSTING_KEY'] ?? $_SERVER['BOOSTING_KEY'] ?? '';
 
+// Start session safely if it hasn't been started yet
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-$api_key = $_ENV['BOOSTING_KEY'];
-
-
-session_start();
-
+// Helper function to check URL schema
 function checkUrlProtocol($url)
 {
     $parsedUrl = parse_url($url);
     return isset($parsedUrl['scheme']) ? $parsedUrl['scheme'] : 'invalid';
 }
 
-// Automatically get the current URL
+// Automatically construct the current execution URL
 $currentUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http")
-    . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    . "://" . ($_SERVER['HTTP_HOST'] ?? 'localhost') . ($_SERVER['REQUEST_URI'] ?? '');
 
 // Get the protocol from the current URL
 $request = checkUrlProtocol($currentUrl);
 
-// Default configurations
-define("HOST", "localhost");
+// Default configurations safely protected from re-definition crashes
+if (!defined("HOST")) {
+    define("HOST", "localhost");
+}
 
-// Determine if online or offline
-$isLocalhost = ($_SERVER['HTTP_HOST'] === 'localhost');
+// Determine environment context safely
+$isLocalhost = (isset($_SERVER['HTTP_HOST']) && ($_SERVER['HTTP_HOST'] === 'localhost' || $_SERVER['HTTP_HOST'] === '127.0.0.1'));
 
-// Database connection (Only use one based on environment)
-// $connection = '';
-
+// 5. Environment Routing (Database Connections & Domains)
 if ($isLocalhost) {
-    // Offline (Localhost)
+    // Offline (Localhost Environment)
     $domain = "http://localhost/booster/";
 
-    define("USER", "root");
-    define("PASSWORD", "");
-    define("DATABASE", "boosteryard1");
+    if (!defined("USER")) define("USER", "root");
+    if (!defined("PASSWORD")) define("PASSWORD", "");
+    if (!defined("DATABASE")) define("DATABASE", "boosteryard1");
 
-    // Database connection
-    $connection = mysqli_connect(HOST, USER, PASSWORD, DATABASE);
-    if (!$connection) {
-        die("Connection failed: " . mysqli_connect_error());
+    // Connect to local database using global check to avoid redundant link mutations
+    if (!isset($connection)) {
+        $connection = mysqli_connect(HOST, USER, PASSWORD, DATABASE);
+        if (!$connection) {
+            die(json_encode([
+                "success" => false, 
+                "message" => "Local database connection failed: " . mysqli_connect_error()
+            ]));
+        }
     }
 } else {
-    // Online (Live Server)
+    // Online (Live Production Server)
     $domain = "https://boostyard.com.yahhh44.com/";
 
-    define("USER", "yahhhcom_boostyard");
-    define("PASSWORD", "yahhhcom_boostyard");
-    define("DATABASE", "yahhhcom_boostyard");
+    if (!defined("USER")) define("USER", "yahhhcom_boostyard");
+    if (!defined("PASSWORD")) define("PASSWORD", "yahhhcom_boostyard");
+    if (!defined("DATABASE")) define("DATABASE", "yahhhcom_boostyard");
 
-    // Database connection
-    $connection = mysqli_connect(HOST, USER, PASSWORD, DATABASE);
-    if (!$connection) {
-        die("Connection failed: " . mysqli_connect_error());
+    // Connect to production database
+    if (!isset($connection)) {
+        $connection = mysqli_connect(HOST, USER, PASSWORD, DATABASE);
+        if (!$connection) {
+            die(json_encode([
+                "success" => false, 
+                "message" => "Production database connection failed: " . mysqli_connect_error()
+            ]));
+        }
     }
 }
 
+// 6. Global Site Variables
+$sitename = 'Boost Yard';
+$siteemail = 'support@boostyard.com';
 
-
-$sitename = 'Booster Yard';
-$siteemail = 'support@boosteryard.com';
-
-$money = '&#36;';
+$money = '&#36;'; // Dollar sign HTML entity
 $toast = '';
-$paystack_secret = "sk_test_d4e4ff7576d171cf3f51419738023c6b1ca0bd6e"; // Replace
+$paystack_secret = "sk_test_d4e4ff7576d171cf3f51419738023c6b1ca0bd6e"; // Replace with your live key when ready
 $min_crypto_deposit = 5; // Minimum crypto deposit amount
-
-
-
 
 ?>

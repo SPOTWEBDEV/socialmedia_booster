@@ -1,15 +1,11 @@
 <?php
-
 include_once '../../server/connection.php';
 include_once '../../server/model.php';
 include_once '../../server/controller/boosting.php';
 include_once '../../server/auth/admin.php';
 
+$api = new Api($api_key);
 $balance = $api->balance();
-
-
-
-
 
 // TOTAL USERS
 $totalUsers = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM users"));
@@ -21,7 +17,7 @@ $totalOrders = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM user_or
 $totalSupport = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM support_messages"));
 
 // DEPOSITS
-$pendingDeposit = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM deposits WHERE status='pending'"));
+$pendingDeposit  = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM deposits WHERE status='pending'"));
 $approvedDeposit = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM deposits WHERE status='approved'"));
 $declinedDeposit = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM deposits WHERE status='declined'"));
 
@@ -29,637 +25,184 @@ $declinedDeposit = mysqli_num_rows(mysqli_query($connection, "SELECT id FROM dep
 $getAmount = mysqli_query($connection, "SELECT SUM(amount) AS total FROM deposits WHERE status='approved'");
 $totalDepositAmount = mysqli_fetch_assoc($getAmount)['total'] ?? 0;
 
-
-
-
-
-
 // Fetch current price
-$get = mysqli_query($connection, "SELECT sitePrice , usd_to_naria_rate FROM admin WHERE id = 1");
+$get = mysqli_query($connection, "SELECT sitePrice, usd_to_naria_rate FROM admin WHERE id = 1");
 $data = mysqli_fetch_assoc($get);
 $price = $data['sitePrice'] ?? 0;
-$usd_to_naria_rate = $data['usd_to_naria_rate'];
+$usd_to_naria_rate = $data['usd_to_naria_rate'] ?? 0;
 
-// Update price
+// Update price (traditional POST + redirect, unchanged logic)
 if (isset($_POST['update_price'])) {
-  $new_price = $_POST['price'];
-  $new_usd_to_naria_rate	= $_POST['usd_to_naria_rate'];
+    $new_price = $_POST['price'];
+    $new_usd_to_naria_rate = $_POST['usd_to_naria_rate'];
 
-  is_numeric($new_price) or die("<script>alert('Invalid price value or usd to naria rate value'); </script>");
+    if (!is_numeric($new_price)) {
+        $flashError = 'Invalid price value or USD to Naira rate value.';
+    } else {
+        $stmt = $connection->prepare("UPDATE admin SET sitePrice = ?, usd_to_naria_rate = ? WHERE id = 1");
+        $stmt->bind_param("ss", $new_price, $new_usd_to_naria_rate);
 
-  $stmt = $connection->prepare("UPDATE admin SET sitePrice = ? , usd_to_naria_rate = ?  WHERE id = 1");
-  $stmt->bind_param("ss", $new_price, $new_usd_to_naria_rate);
-
-  if ($stmt->execute()) {
-    echo "<script>alert('Price updated successfully'); window.location.href='./';</script>";
-  }
+        if ($stmt->execute()) {
+            header("Location: ./?updated=1");
+            exit;
+        } else {
+            $flashError = 'Could not update site settings.';
+        }
+    }
 }
 
-
-
-
-
+$pageTitle    = 'Dashboard';
+$pageSubtitle = 'overview · site settings';
+$activeNav    = 'Dashboard';
+include '../../components/admin/_layout_head.php';
 ?>
 
+  <main class="flex-1 w-full px-6 py-6">
 
-<!DOCTYPE html>
-<html lang="en" dir="ltr" data-nav-layout="horizontal" data-theme-mode="light" data-header-styles="light" data-menu-styles="light" loader="disable" data-nav-style="menu-click" data-bybit-channel-name="TTSbHg5jTOANoxu2zEIr9" data-bybit-is-default-wallet="true" data-toggled="close">
-<div id="in-page-channel-node-id" data-channel-name="in_page_channel_sAqFZG"></div>
+    <p class="text-sm text-slate-400 mb-6">A snapshot of your platform right now.</p>
 
-<head><!-- Meta Data -->
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title><?php echo $sitename . ' -- Order Page ' ?></title>
-  <meta name="Description" content="Bootstrap Responsive Admin Web Dashboard HTML5 Template">
-  <meta name="Author" content="Spruko Technologies Private Limited">
-  <meta name="keywords" content="admin dashboard,admin template,admin panel,bootstrap admin dashboard,html template,sales dashboard,dashboard,template dashboard,admin,html and css template,admin dashboard bootstrap,personal dashboard,crypto dashboard,stocks dashboard,admin panel template"> <!-- Favicon -->
-  <link rel="icon" href="<?php echo $domain ?>assets/images/brand-logos/favicon.ico" type="image/x-icon"> <!-- Choices JS -->
-  <script src="<?php echo $domain ?>assets/libs/choices.js/public/assets/scripts/choices.min.js"></script> <!-- Bootstrap Css -->
-  <link id="style" href="<?php echo $domain ?>assets/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet"> <!-- Style Css -->
-  <link href="<?php echo $domain ?>assets/css/styles.css" rel="stylesheet"> <!-- Icons Css -->
-  <link href="<?php echo $domain ?>assets/css/icons.css" rel="stylesheet"> <!-- Node Waves Css -->
-  <link href="<?php echo $domain ?>assets/libs/node-waves/waves.min.css" rel="stylesheet"> <!-- Simplebar Css -->
-  <link href="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.css" rel="stylesheet"> <!-- Choices Css -->
-  <link rel="stylesheet" href="<?php echo $domain ?>assets/libs/choices.js/public/assets/styles/choices.min.css">
-  <script type="text/javascript">
-    <!--
-    csn0 = document.all;
-    mmiu = csn0 && !document.getElementById;
-    gwu6 = csn0 && document.getElementById;
-    c0lf = !csn0 && document.getElementById;
-    lgl5 = document.layers;
+    <!-- ===================== OVERVIEW ===================== -->
+    <div class="mb-8">
+      <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">Overview</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
 
-    function u28s(odan) {
-      try {
-        if (mmiu) alert("");
-      } catch (e) {}
-      if (odan && odan.stopPropagation) odan.stopPropagation();
-      return false;
-    }
-
-    function pyx8() {
-      if (event.button == 2 || event.button == 3) u28s();
-    }
-
-    function yi1v(e) {
-      return (e.which == 3) ? u28s() : true;
-    }
-
-    function rydm(fwmi) {
-      for (l9xl = 0; l9xl < fwmi.images.length; l9xl++) {
-        fwmi.images[l9xl].onmousedown = yi1v;
-      }
-      for (l9xl = 0; l9xl < fwmi.layers.length; l9xl++) {
-        rydm(fwmi.layers[l9xl].document);
-      }
-    }
-
-    function bsgr() {
-      if (mmiu) {
-        for (l9xl = 0; l9xl < document.images.length; l9xl++) {
-          document.images[l9xl].onmousedown = pyx8;
-        }
-      } else if (lgl5) {
-        rydm(document);
-      }
-    }
-
-    function kqq3(e) {
-      if ((gwu6 && event && event.srcElement && event.srcElement.tagName == "IMG") || (c0lf && e && e.target && e.target.tagName == "IMG")) {
-        return u28s();
-      }
-    }
-    if (gwu6 || c0lf) {
-      document.oncontextmenu = kqq3;
-    } else if (mmiu || lgl5) {
-      window.onload = bsgr;
-    }
-
-    function nctr(e) {
-      fa5e = e && e.srcElement && e.srcElement != null ? e.srcElement.tagName : "";
-      if (fa5e != "INPUT" && fa5e != "TEXTAREA" && fa5e != "BUTTON") {
-        return false;
-      }
-    }
-
-    function vfwh() {
-      return false
-    }
-    if (csn0) {
-      document.onselectstart = nctr;
-      document.ondragstart = vfwh;
-    }
-    if (document.addEventListener) {
-      document.addEventListener('copy', function(e) {
-        fa5e = e.target.tagName;
-        if (fa5e != "INPUT" && fa5e != "TEXTAREA") {
-          e.preventDefault();
-        }
-      }, false);
-      document.addEventListener('dragstart', function(e) {
-        e.preventDefault();
-      }, false);
-    }
-
-    function w5a4(evt) {
-      if (evt.preventDefault) {
-        evt.preventDefault();
-      } else {
-        evt.keyCode = 37;
-        evt.returnValue = false;
-      }
-    }
-    var qyzq = 1;
-    var v3dq = 2;
-    var j4xk = 4;
-    var dabf = new Array();
-    dabf.push(new Array(v3dq, 65));
-    dabf.push(new Array(v3dq, 67));
-    dabf.push(new Array(v3dq, 80));
-    dabf.push(new Array(v3dq, 83));
-    dabf.push(new Array(v3dq, 85));
-    dabf.push(new Array(qyzq | v3dq, 73));
-    dabf.push(new Array(qyzq | v3dq, 74));
-    dabf.push(new Array(qyzq, 121));
-    dabf.push(new Array(0, 123));
-
-    function dl80(evt) {
-      evt = (evt) ? evt : ((event) ? event : null);
-      if (evt) {
-        var ywf8 = evt.keyCode;
-        if (!ywf8 && evt.charCode) {
-          ywf8 = String.fromCharCode(evt.charCode).toUpperCase().charCodeAt(0);
-        }
-        for (var k8n2 = 0; k8n2 < dabf.length; k8n2++) {
-          if ((evt.shiftKey == ((dabf[k8n2][0] & qyzq) == qyzq)) && ((evt.ctrlKey | evt.metaKey) == ((dabf[k8n2][0] & v3dq) == v3dq)) && (evt.altKey == ((dabf[k8n2][0] & j4xk) == j4xk)) && (ywf8 == dabf[k8n2][1] || dabf[k8n2][1] == 0)) {
-            w5a4(evt);
-            break;
-          }
-        }
-      }
-    }
-    if (document.addEventListener) {
-      document.addEventListener("keydown", dl80, true);
-      document.addEventListener("keypress", dl80, true);
-    } else if (document.attachEvent) {
-      document.attachEvent("onkeydown", dl80);
-    }
-    -->
-  </script>
-  <meta http-equiv="imagetoolbar" content="no">
-  <style type="text/css">
-    <!-- input,textarea{-webkit-touch-callout:default;-webkit-user-select:auto;-khtml-user-select:auto;-moz-user-select:text;-ms-user-select:text;user-select:text} *{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:-moz-none;-ms-user-select:none;user-select:none} 
-    -->
-  </style>
-  <style type="text/css" media="print">
-    <!-- body{display:none} 
-    -->
-  </style> <!--[if gte IE 5]><frame></frame><![endif]-->
-  <style>
-    @keyframes slide-in-one-tap {
-      from {
-        transform: translateY(80px);
-      }
-
-      to {
-        transform: translateY(0px);
-      }
-    }
-
-    .trust-hide-gracefully {
-      opacity: 0;
-    }
-
-    .trust-wallet-one-tap .hidden {
-      display: none;
-    }
-
-    .trust-wallet-one-tap .semibold {
-      font-weight: 500;
-    }
-
-    .trust-wallet-one-tap .binance-plex {
-      font-family: 'Binance';
-    }
-
-    .trust-wallet-one-tap .rounded-full {
-      border-radius: 50%;
-    }
-
-    .trust-wallet-one-tap .flex {
-      display: flex;
-    }
-
-    .trust-wallet-one-tap .flex-col {
-      flex-direction: column;
-    }
-
-    .trust-wallet-one-tap .items-center {
-      align-items: center;
-    }
-
-    .trust-wallet-one-tap .space-between {
-      justify-content: space-between;
-    }
-
-    .trust-wallet-one-tap .justify-center {
-      justify-content: center;
-    }
-
-    .trust-wallet-one-tap .w-full {
-      width: 100%;
-    }
-
-    .trust-wallet-one-tap .box {
-      transition: all 0.5s cubic-bezier(0, 0, 0, 1.43);
-      animation: slide-in-one-tap 0.5s cubic-bezier(0, 0, 0, 1.43);
-      width: 384px;
-      border-radius: 15px;
-      background: #fff;
-      box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.25);
-      position: fixed;
-      right: 30px;
-      bottom: 30px;
-      z-index: 1020;
-    }
-
-    .trust-wallet-one-tap .header {
-      gap: 15px;
-      border-bottom: 1px solid #e6e6e6;
-      padding: 10px 18px;
-    }
-
-    .trust-wallet-one-tap .header .left-items {
-      gap: 15px;
-    }
-
-    .trust-wallet-one-tap .header .title {
-      color: #1e2329;
-      font-size: 18px;
-      font-weight: 600;
-      line-height: 28px;
-    }
-
-    .trust-wallet-one-tap .header .subtitle {
-      color: #474d57;
-      font-size: 14px;
-      line-height: 20px;
-    }
-
-    .trust-wallet-one-tap .header .close {
-      color: #1e2329;
-      cursor: pointer;
-    }
-
-    .trust-wallet-one-tap .body {
-      padding: 9px 18px;
-      gap: 10px;
-    }
-
-    .trust-wallet-one-tap .body .right-items {
-      gap: 10px;
-      width: 100%;
-    }
-
-    .trust-wallet-one-tap .body .right-items .wallet-title {
-      color: #1e2329;
-      font-size: 16px;
-      font-weight: 600;
-      line-height: 20px;
-    }
-
-    .trust-wallet-one-tap .body .right-items .wallet-subtitle {
-      color: #474d57;
-      font-size: 14px;
-      line-height: 20px;
-    }
-
-    .trust-wallet-one-tap .connect-indicator {
-      gap: 15px;
-      padding: 8px 0;
-    }
-
-    .trust-wallet-one-tap .connect-indicator .flow-icon {
-      color: #474d57;
-    }
-
-    .trust-wallet-one-tap .loading-color {
-      color: #fff;
-    }
-
-    .trust-wallet-one-tap .button {
-      border-radius: 50px;
-      outline: 2px solid transparent;
-      outline-offset: 2px;
-      background-color: rgb(5, 0, 255);
-      border-color: rgb(229, 231, 235);
-      cursor: pointer;
-      text-align: center;
-      height: 45px;
-    }
-
-    .trust-wallet-one-tap .button .button-text {
-      color: #fff;
-      font-size: 16px;
-      font-weight: 600;
-      line-height: 20px;
-    }
-
-    .trust-wallet-one-tap .footer {
-      margin: 20px 30px;
-    }
-
-    .trust-wallet-one-tap .check-icon {
-      color: #fff;
-    }
-
-    @font-face {
-      font-family: 'Binance';
-      src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-Regular.otf) format('opentype');
-      font-weight: 400;
-      font-style: normal;
-    }
-
-    @font-face {
-      font-family: 'Binance';
-      src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-Medium.otf) format('opentype');
-      font-weight: 500;
-      font-style: normal;
-    }
-
-    @font-face {
-      font-family: 'Binance';
-      src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-SemiBold.otf) format('opentype');
-      font-weight: 600;
-      font-style: normal;
-    }
-  </style>
-</head>
-
-<body class="customer-dashboard" cz-shortcut-listen="true">
-
-  <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
-  <div class="page"> <!-- app-header -->
-    <?php include_once '../../components/admin/navbar.php'  ?>
-
-    <div class="main-content app-content">
-      <div class="container-fluid"> <!-- Start::page-header -->
-        <div class="d-flex align-items-center justify-content-between my-4 page-header-breadcrumb flex-wrap gap-2">
-
-
-        </div> <!-- End::page-header --> <!-- Start::row-1 -->
-        <div class="row">
-          <?php include_once '../../components/admin/sidenavbar.php' ?>
-          <div class="col-xl-9">
-            <div class="row">
-              <div class="row">
-
-                <!-- Total Balance From Third Party -->
-                <div class="col-xl-4">
-                  <div class="card custom-card">
-                    <div class="card-body">
-                      <a href="#" class="stretched-link"></a>
-                      <div class="d-flex align-items-center gap-3">
-                        <div>
-                          <span class="avatar avatar-xl bg-primary-transparent">
-                            <i class="bi bi-wallet2 fs-4"></i>
-                          </span>
-                        </div>
-                        <div>
-                          <span class="d-block text-muted mb-1">Total Balance From Third Party</span>
-                          <h4 class="mb-0">₦<?php echo $balance->balance; ?></h4>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Total Users -->
-                <div class="col-xl-4">
-                  <div class="card custom-card">
-                    <div class="card-body">
-                      <a href="#" class="stretched-link"></a>
-                      <div class="d-flex align-items-center gap-3">
-                        <div>
-                          <span class="avatar avatar-xl bg-primary-transparent">
-                            <i class="bi bi-people fs-4"></i>
-                          </span>
-                        </div>
-                        <div>
-                          <span class="d-block text-muted mb-1">Total Users</span>
-                          <h4 class="mb-0"><?php echo $totalUsers; ?></h4>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Total Orders -->
-                <div class="col-xl-4">
-                  <div class="card custom-card">
-                    <div class="card-body">
-                      <a href="#" class="stretched-link"></a>
-                      <div class="d-flex align-items-center gap-3">
-                        <div>
-                          <span class="avatar avatar-xl bg-success-transparent">
-                            <i class="bi bi-bag-check fs-4"></i>
-                          </span>
-                        </div>
-                        <div>
-                          <span class="d-block text-muted mb-1">Total Orders</span>
-                          <h4 class="mb-0"><?php echo $totalOrders; ?></h4>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Support Messages -->
-                <div class="col-xl-4">
-                  <div class="card custom-card">
-                    <div class="card-body">
-                      <a href="#" class="stretched-link"></a>
-                      <div class="d-flex align-items-center gap-3">
-                        <div>
-                          <span class="avatar avatar-xl bg-info-transparent">
-                            <i class="bi bi-chat-dots fs-4"></i>
-                          </span>
-                        </div>
-                        <div>
-                          <span class="d-block text-muted mb-1">Support Messages</span>
-                          <h4 class="mb-0"><?php echo $totalSupport; ?></h4>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Pending Deposits -->
-                <div class="col-xl-4">
-                  <div class="card custom-card">
-                    <div class="card-body">
-                      <a href="#" class="stretched-link"></a>
-                      <div class="d-flex align-items-center gap-3">
-                        <div>
-                          <span class="avatar avatar-xl bg-warning-transparent">
-                            <i class="bi bi-hourglass-split fs-4"></i>
-                          </span>
-                        </div>
-                        <div>
-                          <span class="d-block text-muted mb-1">Pending Deposits</span>
-                          <h4 class="mb-0"><?php echo $pendingDeposit; ?></h4>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Approved Deposits -->
-                <div class="col-xl-4">
-                  <div class="card custom-card">
-                    <div class="card-body">
-                      <a href="#" class="stretched-link"></a>
-                      <div class="d-flex align-items-center gap-3">
-                        <div>
-                          <span class="avatar avatar-xl bg-success-transparent">
-                            <i class="bi bi-check-circle fs-4"></i>
-                          </span>
-                        </div>
-                        <div>
-                          <span class="d-block text-muted mb-1">Approved Deposits</span>
-                          <h4 class="mb-0"><?php echo $approvedDeposit; ?></h4>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Declined Deposits -->
-                <div class="col-xl-4">
-                  <div class="card custom-card">
-                    <div class="card-body">
-                      <a href="#" class="stretched-link"></a>
-                      <div class="d-flex align-items-center gap-3">
-                        <div>
-                          <span class="avatar avatar-xl bg-danger-transparent">
-                            <i class="bi bi-x-circle fs-4"></i>
-                          </span>
-                        </div>
-                        <div>
-                          <span class="d-block text-muted mb-1">Declined Deposits</span>
-                          <h4 class="mb-0"><?php echo $declinedDeposit; ?></h4>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Total Deposit Amount -->
-                <div class="col-xl-4">
-                  <div class="card custom-card">
-                    <div class="card-body">
-                      <a href="#" class="stretched-link"></a>
-                      <div class="d-flex align-items-center gap-3">
-                        <div>
-                          <span class="avatar avatar-xl bg-primary-transparent">
-                            <i class="bi bi-wallet2 fs-4"></i>
-                          </span>
-                        </div>
-                        <div>
-                          <span class="d-block text-muted mb-1">Total Deposit Amount</span>
-                          <h4 class="mb-0">₦<?php echo number_format($totalDepositAmount); ?></h4>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-
-              <div class="col-xl-12">
-                <form method="POST" class="card custom-card">
-                  <div class="card-header">
-                    <div class="card-title">
-                      Site Edit
-                    </div>
-                  </div>
-
-                  <div class="card-body">
-                    <div class="row gy-3">
-
-                      <div class="col-xl-6">
-                        <label class="form-label">Site Order Price</label>
-                        <input
-                          type="text"
-                          class="form-control form-control-light"
-                          name="price"
-                          value="<?php echo $price; ?>">
-                      </div>
-                      <div class="col-xl-6">
-                        <label class="form-label">USD To Naria Rate</label>
-                        <input
-                          type="text"
-                          class="form-control form-control-light"
-                          name="usd_to_naria_rate"
-                          value="<?php echo $usd_to_naria_rate ?>">
-                      </div>
-
-                    </div>
-                  </div>
-
-                  <div class="card-footer">
-                    <button type="submit" name="update_price"
-                      class="btn btn-primary btn-wave float-end waves-effect waves-light">
-                      Set
-                    </button>
-                  </div>
-                </form>
-              </div>
-
-
-            </div>
+        <div class="bg-card border border-line rounded-2xl p-5 flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-blue-500/15 flex items-center justify-center shrink-0">
+            <i class="bi bi-wallet2 text-lg text-blue-400"></i>
           </div>
-        </div> <!-- End::row-1 -->
-      </div>
-    </div> <!-- End::app-content --> <!-- Footer Start -->
-    <?php include_once '../../components/footer.php' ?>
-    <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-body">
-            <div class="input-group"> <input type="text" class="form-control border-end-0" placeholder="Search Anything ..." aria-label="Search Anything ..." aria-describedby="button-addon2"> <button class="btn btn-primary" type="button" id="button-addon2"><i class="bi bi-search"></i></button> </div>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-500 mb-1 truncate">Third-party balance</p>
+            <p class="font-display text-xl font-semibold text-white">$<?php echo htmlspecialchars($balance->balance); ?></p>
           </div>
         </div>
+
+        <div class="bg-card border border-line rounded-2xl p-5 flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-blue-500/15 flex items-center justify-center shrink-0">
+            <i class="bi bi-people text-lg text-blue-400"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-500 mb-1 truncate">Total users</p>
+            <p class="font-display text-xl font-semibold text-white"><?php echo (int) $totalUsers; ?></p>
+          </div>
+        </div>
+
+        <div class="bg-card border border-line rounded-2xl p-5 flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-emerald-500/15 flex items-center justify-center shrink-0">
+            <i class="bi bi-bag-check text-lg text-emerald-400"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-500 mb-1 truncate">Total orders</p>
+            <p class="font-display text-xl font-semibold text-white"><?php echo (int) $totalOrders; ?></p>
+          </div>
+        </div>
+
+        <div class="bg-card border border-line rounded-2xl p-5 flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-sky-500/15 flex items-center justify-center shrink-0">
+            <i class="bi bi-chat-dots text-lg text-sky-400"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-500 mb-1 truncate">Support messages</p>
+            <p class="font-display text-xl font-semibold text-white"><?php echo (int) $totalSupport; ?></p>
+          </div>
+        </div>
+
       </div>
     </div>
-  </div> <!-- Responsive Header Search Modal End --> <!-- Scroll To Top -->
-  <div class="scrollToTop"> <span class="arrow"><i class="ti ti-arrow-narrow-up fs-20"></i></span> </div>
-  <div id="responsive-overlay"></div> <!-- Scroll To Top --> <!-- Popper JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
-  <script src="<?php echo $domain ?>assets/libs/@popperjs/core/umd/popper.min.js"></script>
 
-  <script src="<?php echo $domain ?>assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- ===================== DEPOSITS ===================== -->
+    <div class="mb-8">
+      <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">Deposits</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
 
-  <script src="<?php echo $domain ?>assets/js/defaultmenu.min.js"></script>
+        <div class="bg-card border border-line rounded-2xl p-5 flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-amber-500/15 flex items-center justify-center shrink-0">
+            <i class="bi bi-hourglass-split text-lg text-amber-400"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-500 mb-1 truncate">Pending</p>
+            <p class="font-display text-xl font-semibold text-white"><?php echo (int) $pendingDeposit; ?></p>
+          </div>
+        </div>
 
-  <script src="<?php echo $domain ?>assets/libs/node-waves/waves.min.js"></script>
+        <div class="bg-card border border-line rounded-2xl p-5 flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-emerald-500/15 flex items-center justify-center shrink-0">
+            <i class="bi bi-check-circle text-lg text-emerald-400"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-500 mb-1 truncate">Approved</p>
+            <p class="font-display text-xl font-semibold text-white"><?php echo (int) $approvedDeposit; ?></p>
+          </div>
+        </div>
 
-  <script src="<?php echo $domain ?>assets/js/sticky.js"></script>
+        <div class="bg-card border border-line rounded-2xl p-5 flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-rose-500/15 flex items-center justify-center shrink-0">
+            <i class="bi bi-x-circle text-lg text-rose-400"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-500 mb-1 truncate">Declined</p>
+            <p class="font-display text-xl font-semibold text-white"><?php echo (int) $declinedDeposit; ?></p>
+          </div>
+        </div>
 
-  <script src="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.js"></script>
+        <div class="bg-card border border-line rounded-2xl p-5 flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-blue-500/15 flex items-center justify-center shrink-0">
+            <i class="bi bi-cash-stack text-lg text-blue-400"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-500 mb-1 truncate">Total approved amount</p>
+            <p class="font-display text-xl font-semibold text-white">₦<?php echo number_format($totalDepositAmount); ?></p>
+          </div>
+        </div>
 
-  <script src="<?php echo $domain ?>assets/js/simplebar.js"></script>
+      </div>
+    </div>
 
-  <script src="<?php echo $domain ?>assets/libs/apexcharts/apexcharts.min.js"></script>
+    <!-- ===================== SITE SETTINGS ===================== -->
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">Site settings</p>
+      <form method="POST" class="bg-card border border-line rounded-2xl overflow-hidden max-w-2xl">
+        <div class="px-6 py-5 border-b border-line">
+          <h2 class="font-display font-semibold text-white text-sm">Pricing</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Used to calculate order costs across the platform.</p>
+        </div>
 
-  <script src="<?php echo $domain ?>assets/js/customer-custom.js"></script>
-  <div state="voice" class="placeholder-icon" id="tts-placeholder-icon" title="Click to show TTS button" style="background-image: url(&quot;chrome-extension://cpnomhnclohkhnikegipapofcjihldck/data/content_script/icons/voice.png&quot;);"><canvas width="36" height="36" class="loading-circle" id="text-to-speech-loader" style="display: none;"></canvas></div><svg id="SvgjsSvg1001" width="2" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev" style="overflow: hidden; top: -100%; left: -100%; position: absolute; opacity: 0;">
-    <defs id="SvgjsDefs1002"></defs>
-    <polyline id="SvgjsPolyline1003" points="0,0"></polyline>
-    <path id="SvgjsPath1004" d="M0 0 "></path>
-  </svg>
+        <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="text-xs text-slate-400 mb-1.5 block">Site order price</label>
+            <input type="text" name="price" value="<?php echo htmlspecialchars($price); ?>"
+              class="w-full bg-surface border border-line rounded-lg px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition font-mono" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-400 mb-1.5 block">USD to Naira rate</label>
+            <input type="text" name="usd_to_naria_rate" value="<?php echo htmlspecialchars($usd_to_naria_rate); ?>"
+              class="w-full bg-surface border border-line rounded-lg px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition font-mono" />
+          </div>
+        </div>
+
+        <div class="px-6 py-4 border-t border-line flex justify-end">
+          <button type="submit" name="update_price"
+            class="text-sm font-semibold px-4 py-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white transition">
+            Save settings
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </main>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-6 right-6 z-50 hidden max-w-sm"></div>
+
+<?php include '../../components/admin/_layout_foot.php'; ?>
+
+<script>
+<?php if (isset($_GET['updated'])): ?>
+  showToast("Site settings updated successfully.", "success");
+<?php endif; ?>
+<?php if (isset($flashError)): ?>
+  showToast(<?php echo json_encode($flashError); ?>, "error");
+<?php endif; ?>
+</script>
+
 </body>
-
 </html>

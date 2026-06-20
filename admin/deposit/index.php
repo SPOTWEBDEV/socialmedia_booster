@@ -1,651 +1,451 @@
 <?php
-
 include_once '../../server/connection.php';
 include_once '../../server/model.php';
 include_once '../../server/auth/admin.php';
 
-
-
-
-
-
+$pageTitle    = 'Deposits';
+$pageSubtitle = 'fund requests · approvals';
+$activeNav    = 'Deposit';
+include '../../components/admin/_layout_head.php';
 ?>
 
-
-<!DOCTYPE html>
-<html lang="en" dir="ltr" data-nav-layout="horizontal" data-theme-mode="light" data-header-styles="light" data-menu-styles="light" loader="disable" data-nav-style="menu-click" data-bybit-channel-name="TTSbHg5jTOANoxu2zEIr9" data-bybit-is-default-wallet="true" data-toggled="close">
-<div id="in-page-channel-node-id" data-channel-name="in_page_channel_sAqFZG"></div>
-
-<head><!-- Meta Data -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title><?php echo $sitename . ' -- Order Page ' ?></title>
-    <meta name="Description" content="Bootstrap Responsive Admin Web Dashboard HTML5 Template">
-    <meta name="Author" content="Spruko Technologies Private Limited">
-    <meta name="keywords" content="admin dashboard,admin template,admin panel,bootstrap admin dashboard,html template,sales dashboard,dashboard,template dashboard,admin,html and css template,admin dashboard bootstrap,personal dashboard,crypto dashboard,stocks dashboard,admin panel template"> <!-- Favicon -->
-    <link rel="icon" href="<?php echo $domain ?>assets/images/brand-logos/favicon.ico" type="image/x-icon"> <!-- Choices JS -->
-    <script src="<?php echo $domain ?>assets/libs/choices.js/public/assets/scripts/choices.min.js"></script> <!-- Bootstrap Css -->
-    <link id="style" href="<?php echo $domain ?>assets/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet"> <!-- Style Css -->
-    <link href="<?php echo $domain ?>assets/css/styles.css" rel="stylesheet"> <!-- Icons Css -->
-    <link href="<?php echo $domain ?>assets/css/icons.css" rel="stylesheet"> <!-- Node Waves Css -->
-    <link href="<?php echo $domain ?>assets/libs/node-waves/waves.min.css" rel="stylesheet"> <!-- Simplebar Css -->
-    <link href="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.css" rel="stylesheet"> <!-- Choices Css -->
-    <link rel="stylesheet" href="<?php echo $domain ?>assets/libs/choices.js/public/assets/styles/choices.min.css">
-    <script type="text/javascript">
-        <!--
-        csn0 = document.all;
-        mmiu = csn0 && !document.getElementById;
-        gwu6 = csn0 && document.getElementById;
-        c0lf = !csn0 && document.getElementById;
-        lgl5 = document.layers;
-
-        function u28s(odan) {
-            try {
-                if (mmiu) alert("");
-            } catch (e) {}
-            if (odan && odan.stopPropagation) odan.stopPropagation();
-            return false;
-        }
-
-        function pyx8() {
-            if (event.button == 2 || event.button == 3) u28s();
-        }
-
-        function yi1v(e) {
-            return (e.which == 3) ? u28s() : true;
-        }
-
-        function rydm(fwmi) {
-            for (l9xl = 0; l9xl < fwmi.images.length; l9xl++) {
-                fwmi.images[l9xl].onmousedown = yi1v;
-            }
-            for (l9xl = 0; l9xl < fwmi.layers.length; l9xl++) {
-                rydm(fwmi.layers[l9xl].document);
-            }
-        }
-
-        function bsgr() {
-            if (mmiu) {
-                for (l9xl = 0; l9xl < document.images.length; l9xl++) {
-                    document.images[l9xl].onmousedown = pyx8;
-                }
-            } else if (lgl5) {
-                rydm(document);
-            }
-        }
-
-        function kqq3(e) {
-            if ((gwu6 && event && event.srcElement && event.srcElement.tagName == "IMG") || (c0lf && e && e.target && e.target.tagName == "IMG")) {
-                return u28s();
-            }
-        }
-        if (gwu6 || c0lf) {
-            document.oncontextmenu = kqq3;
-        } else if (mmiu || lgl5) {
-            window.onload = bsgr;
-        }
-
-        function nctr(e) {
-            fa5e = e && e.srcElement && e.srcElement != null ? e.srcElement.tagName : "";
-            if (fa5e != "INPUT" && fa5e != "TEXTAREA" && fa5e != "BUTTON") {
-                return false;
-            }
-        }
-
-        function vfwh() {
-            return false
-        }
-        if (csn0) {
-            document.onselectstart = nctr;
-            document.ondragstart = vfwh;
-        }
-        if (document.addEventListener) {
-            document.addEventListener('copy', function(e) {
-                fa5e = e.target.tagName;
-                if (fa5e != "INPUT" && fa5e != "TEXTAREA") {
-                    e.preventDefault();
-                }
-            }, false);
-            document.addEventListener('dragstart', function(e) {
-                e.preventDefault();
-            }, false);
-        }
-
-        function w5a4(evt) {
-            if (evt.preventDefault) {
-                evt.preventDefault();
-            } else {
-                evt.keyCode = 37;
-                evt.returnValue = false;
-            }
-        }
-        var qyzq = 1;
-        var v3dq = 2;
-        var j4xk = 4;
-        var dabf = new Array();
-        dabf.push(new Array(v3dq, 65));
-        dabf.push(new Array(v3dq, 67));
-        dabf.push(new Array(v3dq, 80));
-        dabf.push(new Array(v3dq, 83));
-        dabf.push(new Array(v3dq, 85));
-        dabf.push(new Array(qyzq | v3dq, 73));
-        dabf.push(new Array(qyzq | v3dq, 74));
-        dabf.push(new Array(qyzq, 121));
-        dabf.push(new Array(0, 123));
-
-        function dl80(evt) {
-            evt = (evt) ? evt : ((event) ? event : null);
-            if (evt) {
-                var ywf8 = evt.keyCode;
-                if (!ywf8 && evt.charCode) {
-                    ywf8 = String.fromCharCode(evt.charCode).toUpperCase().charCodeAt(0);
-                }
-                for (var k8n2 = 0; k8n2 < dabf.length; k8n2++) {
-                    if ((evt.shiftKey == ((dabf[k8n2][0] & qyzq) == qyzq)) && ((evt.ctrlKey | evt.metaKey) == ((dabf[k8n2][0] & v3dq) == v3dq)) && (evt.altKey == ((dabf[k8n2][0] & j4xk) == j4xk)) && (ywf8 == dabf[k8n2][1] || dabf[k8n2][1] == 0)) {
-                        w5a4(evt);
-                        break;
-                    }
-                }
-            }
-        }
-        if (document.addEventListener) {
-            document.addEventListener("keydown", dl80, true);
-            document.addEventListener("keypress", dl80, true);
-        } else if (document.attachEvent) {
-            document.attachEvent("onkeydown", dl80);
-        }
-        -->
-    </script>
-    <meta http-equiv="imagetoolbar" content="no">
-    <style type="text/css">
-        <!-- input,textarea{-webkit-touch-callout:default;-webkit-user-select:auto;-khtml-user-select:auto;-moz-user-select:text;-ms-user-select:text;user-select:text} *{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:-moz-none;-ms-user-select:none;user-select:none} 
-        -->
-    </style>
-    <style type="text/css" media="print">
-        <!-- body{display:none} 
-        -->
-    </style> <!--[if gte IE 5]><frame></frame><![endif]-->
-    <style>
-        @keyframes slide-in-one-tap {
-            from {
-                transform: translateY(80px);
-            }
-
-            to {
-                transform: translateY(0px);
-            }
-        }
-
-        .trust-hide-gracefully {
-            opacity: 0;
-        }
-
-        .trust-wallet-one-tap .hidden {
-            display: none;
-        }
-
-        .trust-wallet-one-tap .semibold {
-            font-weight: 500;
-        }
-
-        .trust-wallet-one-tap .binance-plex {
-            font-family: 'Binance';
-        }
-
-        .trust-wallet-one-tap .rounded-full {
-            border-radius: 50%;
-        }
-
-        .trust-wallet-one-tap .flex {
-            display: flex;
-        }
-
-        .trust-wallet-one-tap .flex-col {
-            flex-direction: column;
-        }
-
-        .trust-wallet-one-tap .items-center {
-            align-items: center;
-        }
-
-        .trust-wallet-one-tap .space-between {
-            justify-content: space-between;
-        }
-
-        .trust-wallet-one-tap .justify-center {
-            justify-content: center;
-        }
-
-        .trust-wallet-one-tap .w-full {
-            width: 100%;
-        }
-
-        .trust-wallet-one-tap .box {
-            transition: all 0.5s cubic-bezier(0, 0, 0, 1.43);
-            animation: slide-in-one-tap 0.5s cubic-bezier(0, 0, 0, 1.43);
-            width: 384px;
-            border-radius: 15px;
-            background: #fff;
-            box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.25);
-            position: fixed;
-            right: 30px;
-            bottom: 30px;
-            z-index: 1020;
-        }
-
-        .trust-wallet-one-tap .header {
-            gap: 15px;
-            border-bottom: 1px solid #e6e6e6;
-            padding: 10px 18px;
-        }
-
-        .trust-wallet-one-tap .header .left-items {
-            gap: 15px;
-        }
-
-        .trust-wallet-one-tap .header .title {
-            color: #1e2329;
-            font-size: 18px;
-            font-weight: 600;
-            line-height: 28px;
-        }
-
-        .trust-wallet-one-tap .header .subtitle {
-            color: #474d57;
-            font-size: 14px;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .header .close {
-            color: #1e2329;
-            cursor: pointer;
-        }
-
-        .trust-wallet-one-tap .body {
-            padding: 9px 18px;
-            gap: 10px;
-        }
-
-        .trust-wallet-one-tap .body .right-items {
-            gap: 10px;
-            width: 100%;
-        }
-
-        .trust-wallet-one-tap .body .right-items .wallet-title {
-            color: #1e2329;
-            font-size: 16px;
-            font-weight: 600;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .body .right-items .wallet-subtitle {
-            color: #474d57;
-            font-size: 14px;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .connect-indicator {
-            gap: 15px;
-            padding: 8px 0;
-        }
-
-        .trust-wallet-one-tap .connect-indicator .flow-icon {
-            color: #474d57;
-        }
-
-        .trust-wallet-one-tap .loading-color {
-            color: #fff;
-        }
-
-        .trust-wallet-one-tap .button {
-            border-radius: 50px;
-            outline: 2px solid transparent;
-            outline-offset: 2px;
-            background-color: rgb(5, 0, 255);
-            border-color: rgb(229, 231, 235);
-            cursor: pointer;
-            text-align: center;
-            height: 45px;
-        }
-
-        .trust-wallet-one-tap .button .button-text {
-            color: #fff;
-            font-size: 16px;
-            font-weight: 600;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .footer {
-            margin: 20px 30px;
-        }
-
-        .trust-wallet-one-tap .check-icon {
-            color: #fff;
-        }
-
-        @font-face {
-            font-family: 'Binance';
-            src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-Regular.otf) format('opentype');
-            font-weight: 400;
-            font-style: normal;
-        }
-
-        @font-face {
-            font-family: 'Binance';
-            src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-Medium.otf) format('opentype');
-            font-weight: 500;
-            font-style: normal;
-        }
-
-        @font-face {
-            font-family: 'Binance';
-            src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-SemiBold.otf) format('opentype');
-            font-weight: 600;
-            font-style: normal;
-        }
-    </style>
-</head>
-
-<body class="customer-dashboard" cz-shortcut-listen="true">
-
-    <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
-    <div class="page"> <!-- app-header -->
-
-        <?php include_once '../../components/admin/navbar.php'  ?>
-
-        <div class="main-content app-content">
-            <div class="container-fluid"> <!-- Start::page-header -->
-                <div class="d-flex align-items-center justify-content-between my-4 page-header-breadcrumb flex-wrap gap-2">
-                    <div>
-                        <p class="fw-medium fs-20 mb-0">Deposit History</p>
-                        <p class="fs-13 text-muted mb-0">Let's check your today's stats!</p>
-                    </div>
-                    <div class="btn-list">
-                        <a href="../"><button class="btn btn-primary-light btn-wave waves-effect waves-light">
-                                <i class="bx bx-plus-circle align-middle me-1"></i>
-                                Fund Account
-                            </button></a>
-                    </div>
-                </div> <!-- End::page-header --> <!-- Start::row-1 -->
-                <div class="row">
-                    <?php include_once '../../components/admin/sidenavbar.php' ?>
-                    <div class="col-xl-9">
-                        <div class="row">
-                            <div class="col-xl-12">
-                                <div class="card custom-card overflow-hidden">
-                                    <div class="card-header justify-content-between">
-                                        <div class="card-body d-flex align-items-center flex-wrap">
-
-                                            <div class="flex-fill">
-                                                <span class="mb-0 fs-14 text-muted">
-                                                    Total number of orders placed upto now :
-                                                    <span class="fw-medium text-success" id="orderCount">0</span>
-                                                </span>
-                                            </div>
-
-                                            <!-- Sort -->
-                                            <div class="dropdown">
-                                                <button class="btn btn-light dropdown-toggle m-1" type="button"
-                                                    id="sortBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    Sort By
-                                                </button>
-                                                <ul class="dropdown-menu">
-                                                    <li><a class="dropdown-item sortOption" data-sort="order_id" href="#">ID</a></li>
-                                                    <li><a class="dropdown-item sortOption" data-sort="amount" href="#">Amount</a></li>
-                                                    <li><a class="dropdown-item sortOption" data-sort="method" href="#">Payment Method</a></li>
-                                                    <li><a class="dropdown-item sortOption" data-sort="created_at" href="#">Date</a></li>
-
-                                                </ul>
-                                            </div>
-
-                                            <!-- Category Filter -->
-                                            <select id="categoryFilter" class="form-select m-1" style="width:200px;">
-                                                <option value="">All Categories</option>
-                                            </select>
-
-                                            <!-- Search -->
-                                            <div class="d-flex align-items-center m-1" role="search">
-                                                <input class="form-control" id="searchInput" type="search" placeholder="Search">
-                                                <button class="btn btn-light ms-2" id="searchBtn">Search</button>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                    <div class="card-body px-0 pt-2 pb-0">
-                                        <div class="table-responsive">
-                                            <table class="table text-nowrap">
-                                                <thead>
-                                                    <tr>
-                                                        <th scope="col">ID</th>
-                                                        <th scope="col">Name / Email</th>
-                                                        <th scope="col">Reference</th>
-                                                        <th scope="col">Payment Method</th>
-                                                        <th scope="col">Amount</th>
-                                                        <th scope="col">Date</th>
-                                                        <th scope="col">Status</th>
-                                                        <th scope="col">Action</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody style="overflow-x: scroll;">
-
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                                <script>
-                                    let orders = [];
-                                    let filteredOrders = [];
-
-                                    // =============================
-                                    //  FETCH ORDERS FROM PHP
-                                    // =============================
-                                    function loadOrders() {
-                                        let formData = new FormData();
-                                        formData.append("action", "admin");
-                                        
-
-                                        fetch("<?php echo $domain ?>server/api/deposit.php", {
-                                                method: "POST",
-                                                body: formData
-                                            })
-                                            .then(res => res.json())
-                                            .then(data => {
-                                                console.log("API RESPONSE:", data);
-                                                if (data.success) {
-                                                    orders = data.data;
-                                                    filteredOrders = orders;
-                                                    updateOrderCount();
-                                                    populateStatusCategory();
-                                                    renderTable();
-                                                }
-                                            })
-                                            .catch(err => console.error("API ERROR:", err));
-                                    }
-
-                                    // =============================
-                                    // UPDATE COUNT
-                                    // =============================
-                                    function updateOrderCount() {
-                                        document.getElementById("orderCount").textContent = orders.length;
-                                    }
-
-                                    // =============================
-                                    // POPULATE STATUS DROPDOWN
-                                    // =============================
-                                    function populateStatusCategory() {
-                                        const statuses = ["completed", "processing", "pending", "canceled"];
-                                        let select = document.getElementById("categoryFilter");
-
-                                        statuses.forEach(status => {
-                                            let opt = document.createElement("option");
-                                            opt.value = status;
-                                            opt.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-                                            select.appendChild(opt);
-                                        });
-                                    }
-
-                                    // =============================
-                                    // RENDER TABLE
-                                    // =============================
-                                    function renderTable() {
-                                        let tbody = document.querySelector("table tbody");
-                                        tbody.innerHTML = "";
-
-                                        filteredOrders.forEach((deposit, index) => {
-                                            tbody.innerHTML += `
-                          <tr>
-                            <td>#${index + 1}</td>
-                            <td>
-                                <span class="d-block">${deposit.fullname}</span>
-                                 <span class="d-block">${deposit.email}</span>
-                            </td>
-                            <td>${deposit.reference}</td>
-                            
-                            <td>
-                              <span class="d-block">${deposit.method}</span>
-                              
-                            </td>
-                            <td>
-                              <span class="d-block">${deposit.amount} Naria || ${deposit.amount_in_dollar} USD  </span>
-                              
-                            </td>
-                             <td>
-                              <span class="d-block">${deposit.created_at}</span>
-                             
-                            </td>
-
-                            <td>
-                              <span class="badge p-2 text-lg capitalize bg-${getStatusColor(deposit.status)}">
-                                  ${deposit.status}
-                              </span>
-                            </td>
-
-                            <td>
-                              <button onclick="window.location.href='./status/?id=${deposit.id}'" class="btn btn-sm btn-ghost-light border">
-                                  <i class="fe fe-eye text-muted me-1"></i> View
-                              </button>
-                            </td>
-                          </tr>
-                        `;
-                                        });
-                                    }
-
-                                    // =============================
-                                    // GET BADGE COLOR
-                                    // =============================
-                                    function getStatusColor(status) {
-                                        switch (status.toLowerCase()) {
-                                            case "completed":
-                                                return "success";
-                                            case "processing":
-                                                return "warning";
-                                            case "declined":
-                                                return "warning";
-                                            case "pending":
-                                                return "danger";
-                                            case "canceled":
-                                                return "warning";
-                                            default:
-                                                return "secondary";
-                                        }
-                                    }
-
-                                    // =============================
-                                    // SORTING
-                                    // =============================
-                                    document.querySelectorAll(".sortOption").forEach(btn => {
-                                        btn.addEventListener("click", function() {
-                                            let field = this.getAttribute("data-sort");
-
-                                            filteredOrders.sort((a, b) => {
-                                                if (field === "order_id") return Number(a.id) - Number(b.id);
-                                                if (field === "created_at") return new Date(a.created_at) - new Date(b.created_at);
-                                                if (field === "method") return a.method.localeCompare(b.method);
-                                                if (field === "amount") return Number(a.amount) - Number(b.amount);
-                                                return 0;
-                                            });
-
-                                            renderTable();
-                                        });
-                                    });
-
-                                    // =============================
-                                    // SEARCH (user + social_url)
-                                    // =============================
-                                    document.getElementById("searchBtn").addEventListener("click", () => {
-                                        let search = document.getElementById("searchInput").value.toLowerCase();
-
-                                        filteredOrders = orders.filter(o =>
-                                            o.user.toLowerCase().includes(search) ||
-                                            o.social_url.toLowerCase().includes(search) ||
-                                            o.order_id.toLowerCase().includes(search) ||
-                                            o.status.toLowerCase().includes(search)
-                                        );
-
-                                        renderTable();
-                                    });
-
-                                    // =============================
-                                    // CATEGORY FILTER (status)
-                                    // =============================
-                                    document.getElementById("categoryFilter").addEventListener("change", function() {
-                                        if (this.value === "") {
-                                            filteredOrders = orders;
-                                        } else {
-                                            filteredOrders = orders.filter(o =>
-                                                o.status.toLowerCase() === this.value.toLowerCase()
-                                            );
-                                        }
-                                        renderTable();
-                                    });
-
-                                    // Start
-                                    loadOrders();
-                                </script>
-
-
-                            </div>
-                        </div>
-                    </div>
-                </div> <!-- End::row-1 -->
-            </div>
-        </div> <!-- End::app-content --> <!-- Footer Start -->
-        <?php include_once '../../components/footer.php' ?>
-        <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-body">
-                        <div class="input-group"> <input type="text" class="form-control border-end-0" placeholder="Search Anything ..." aria-label="Search Anything ..." aria-describedby="button-addon2"> <button class="btn btn-primary" type="button" id="button-addon2"><i class="bi bi-search"></i></button> </div>
-                    </div>
-                </div>
-            </div>
+  <main class="flex-1 w-full px-6 py-6">
+
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <p class="text-sm text-slate-400">Customer deposit requests. Click a row to review and approve or decline.</p>
+    </div>
+
+    <!-- Summary strip -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+      <div class="bg-card border border-line rounded-2xl p-5">
+        <p class="text-xs text-slate-500 mb-1">Total deposits</p>
+        <p id="statTotal" class="font-display text-2xl font-semibold text-white">0</p>
+      </div>
+      <div class="bg-card border border-line rounded-2xl p-5">
+        <p class="text-xs text-slate-500 mb-1">Pending</p>
+        <p id="statPending" class="font-display text-2xl font-semibold text-amber-400">0</p>
+      </div>
+      <div class="bg-card border border-line rounded-2xl p-5">
+        <p class="text-xs text-slate-500 mb-1">Approved</p>
+        <p id="statApproved" class="font-display text-2xl font-semibold text-emerald-400">0</p>
+      </div>
+      <div class="bg-card border border-line rounded-2xl p-5">
+        <p class="text-xs text-slate-500 mb-1">Declined</p>
+        <p id="statDeclined" class="font-display text-2xl font-semibold text-rose-400">0</p>
+      </div>
+    </div>
+
+    <!-- Table card -->
+    <section class="bg-card border border-line rounded-2xl overflow-hidden">
+
+      <div class="p-5 border-b border-line flex flex-wrap items-center gap-3">
+        <div class="relative flex-1 min-w-[200px]">
+          <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" /></svg>
+          <input id="searchInput" type="search" placeholder="Search name, email, or reference"
+            class="w-full bg-surface border border-line rounded-lg pl-9 pr-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition" />
         </div>
-    </div> <!-- Responsive Header Search Modal End --> <!-- Scroll To Top -->
-    <div class="scrollToTop"> <span class="arrow"><i class="ti ti-arrow-narrow-up fs-20"></i></span> </div>
-    <div id="responsive-overlay"></div>
-    <script src="<?php echo $domain ?>assets/libs/@popperjs/core/umd/popper.min.js"></script>
 
-    <script src="<?php echo $domain ?>assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <select id="statusFilter" class="bg-surface border border-line rounded-lg px-3 py-2 text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+          <option value="">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="declined">Declined</option>
+        </select>
 
-    <script src="<?php echo $domain ?>assets/js/defaultmenu.min.js"></script>
+        <select id="sortSelect" class="bg-surface border border-line rounded-lg px-3 py-2 text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+          <option value="date">Sort: Date</option>
+          <option value="amount">Sort: Amount</option>
+          <option value="method">Sort: Method</option>
+        </select>
+      </div>
 
-    <script src="<?php echo $domain ?>assets/libs/node-waves/waves.min.js"></script>
+      <div class="overflow-x-auto scrollbar-thin">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-line text-left text-xs uppercase tracking-wider text-slate-500">
+              <th class="px-5 py-3 font-medium font-mono">#</th>
+              <th class="px-3 py-3 font-medium">Customer</th>
+              <th class="px-3 py-3 font-medium">Reference</th>
+              <th class="px-3 py-3 font-medium">Method</th>
+              <th class="px-3 py-3 font-medium">Amount</th>
+              <th class="px-3 py-3 font-medium">Date</th>
+              <th class="px-3 py-3 font-medium">Status</th>
+              <th class="px-3 py-3 font-medium text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-line">
+            <!-- rows injected by JS -->
+          </tbody>
+        </table>
 
-    <script src="<?php echo $domain ?>assets/js/sticky.js"></script>
+        <div id="emptyState" class="hidden flex-col items-center justify-center text-center py-20 px-6">
+          <div class="w-12 h-12 rounded-full bg-surface border border-line flex items-center justify-center mb-3 mx-auto">
+            <i class="bi bi-wallet2 text-lg text-slate-500"></i>
+          </div>
+          <p class="text-slate-300 font-medium">No deposits match this search</p>
+          <p class="text-slate-500 text-sm mt-1">Try a different search term or status filter.</p>
+        </div>
 
-    <script src="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.js"></script>
+        <div id="loadingState" class="flex flex-col items-center justify-center text-center py-20 px-6">
+          <div class="w-8 h-8 rounded-full border-2 border-line border-t-blue-400 animate-spin mb-3"></div>
+          <p class="text-slate-400 text-sm">Loading deposits…</p>
+        </div>
+      </div>
 
-    <script src="<?php echo $domain ?>assets/js/simplebar.js"></script>
-    <script src="<?php echo $domain ?>assets/libs/apexcharts/apexcharts.min.js"></script>
+      <div class="border-t border-line px-5 py-3 text-xs text-slate-500 font-mono" id="rowCount">
+        Loading…
+      </div>
+    </section>
+  </main>
 
-    <script src="<?php echo $domain ?>assets/js/customer-custom.js"></script>
-    <div state="voice" class="placeholder-icon" id="tts-placeholder-icon" title="Click to show TTS button" style="background-image: url(&quot;chrome-extension://cpnomhnclohkhnikegipapofcjihldck/data/content_script/icons/voice.png&quot;);"><canvas width="36" height="36" class="loading-circle" id="text-to-speech-loader" style="display: none;"></canvas></div><svg id="SvgjsSvg1001" width="2" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev" style="overflow: hidden; top: -100%; left: -100%; position: absolute; opacity: 0;">
-        <defs id="SvgjsDefs1002"></defs>
-        <polyline id="SvgjsPolyline1003" points="0,0"></polyline>
-        <path id="SvgjsPath1004" d="M0 0 "></path>
-    </svg>
+  <!-- ===================== SLIDE-OVER: DEPOSIT DETAIL ===================== -->
+  <div id="panelOverlay" class="hidden fixed inset-0 z-50">
+    <div class="absolute inset-0 bg-black/60" id="panelBackdrop"></div>
+
+    <aside id="depositPanel" class="absolute right-0 top-0 h-full w-full sm:w-[480px] bg-card border-l border-line flex flex-col"
+           style="transform: translateX(100%); transition: transform .25s ease-out;">
+
+      <div class="flex items-start justify-between gap-3 px-6 py-5 border-b border-line">
+        <div class="min-w-0">
+          <p class="text-xs text-slate-500 font-mono mb-1" id="panelRef">Ref —</p>
+          <h2 class="font-display font-semibold text-white text-base truncate" id="panelCustomer">—</h2>
+          <p class="text-xs text-slate-500 truncate" id="panelEmail">—</p>
+        </div>
+        <button id="closePanel" class="w-8 h-8 rounded-lg hover:bg-surface flex items-center justify-center text-slate-400 hover:text-white transition shrink-0">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto scrollbar-thin px-6 py-5 space-y-6">
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-surface border border-line rounded-xl p-4">
+            <p class="text-xs text-slate-500 mb-1">Amount</p>
+            <p class="font-display text-lg font-semibold text-emerald-400" id="panelAmountUsd">$0.00</p>
+            <p class="text-xs text-slate-500 font-mono" id="panelAmountNgn">₦0.00</p>
+          </div>
+          <div class="bg-surface border border-line rounded-xl p-4">
+            <p class="text-xs text-slate-500 mb-1">Status</p>
+            <span id="panelStatusBadge" class="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full mt-0.5"></span>
+          </div>
+        </div>
+
+        <div class="text-xs text-slate-500" id="panelDate">Requested —</div>
+
+        <div class="border-t border-line pt-5">
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Payment details</p>
+          <div id="panelPaymentDetails" class="bg-surface border border-line rounded-xl p-4 text-sm text-slate-200 space-y-2">
+            —
+          </div>
+        </div>
+
+        <!-- Approve / decline -->
+        <div class="border-t border-line pt-5">
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">Decision</p>
+          <div class="flex gap-2">
+            <button id="approveBtn" class="flex-1 px-4 py-2.5 rounded-lg bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 text-sm font-semibold transition flex items-center justify-center gap-2">
+              <i class="bi bi-check-circle"></i> Approve
+            </button>
+            <button id="declineBtn" class="flex-1 px-4 py-2.5 rounded-lg bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 text-sm font-semibold transition flex items-center justify-center gap-2">
+              <i class="bi bi-x-circle"></i> Decline
+            </button>
+          </div>
+          <p class="text-xs text-slate-500 mt-2" id="panelDecisionHint"></p>
+        </div>
+
+      </div>
+    </aside>
+  </div>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-6 right-6 z-50 hidden max-w-sm"></div>
+
+<?php include '../../components/admin/_layout_foot.php'; ?>
+
+<script>
+const domain = "<?php echo $domain ?>";
+
+let deposits = [];
+let filteredDeposits = [];
+let depositsLoaded = false;
+let activeDeposit = null;
+
+// ===================================================
+//  FETCH DEPOSITS
+// ===================================================
+function loadDeposits() {
+  document.getElementById("loadingState").classList.remove("hidden");
+  document.getElementById("emptyState").classList.add("hidden");
+  document.getElementById("tableBody").innerHTML = "";
+
+  let formData = new FormData();
+  formData.append("action", "admin");
+
+  fetch(domain + "server/api/deposit.php", { method: "POST", body: formData })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        deposits = data.data;
+        filteredDeposits = deposits;
+        updateStats();
+        applySort();
+      }
+    })
+    .catch(err => console.error("API ERROR:", err))
+    .finally(() => {
+      depositsLoaded = true;
+      document.getElementById("loadingState").classList.add("hidden");
+    });
+}
+
+// ===================================================
+//  STATS
+// ===================================================
+function updateStats() {
+  document.getElementById("statTotal").textContent = deposits.length;
+  document.getElementById("statPending").textContent = deposits.filter(d => (d.status || '').toLowerCase() === 'pending').length;
+  document.getElementById("statApproved").textContent = deposits.filter(d => (d.status || '').toLowerCase() === 'approved').length;
+  document.getElementById("statDeclined").textContent = deposits.filter(d => (d.status || '').toLowerCase() === 'declined').length;
+}
+
+// Note: pending should read as neutral/cautionary (amber), approved as
+// success (emerald), declined as a clear rejection (rose) — the original
+// page had pending mapped to red and declined to yellow, which read backwards.
+function statusMeta(status) {
+  switch ((status || '').toLowerCase()) {
+    case 'approved': return { label: 'Approved', cls: 'bg-emerald-500/15 text-emerald-400' };
+    case 'declined': return { label: 'Declined', cls: 'bg-rose-500/15 text-rose-400' };
+    case 'pending':  return { label: 'Pending',  cls: 'bg-amber-500/15 text-amber-400' };
+    default:         return { label: status || 'Unknown', cls: 'bg-slate-500/15 text-slate-400' };
+  }
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str ?? "";
+  return div.innerHTML;
+}
+
+function fmtUsd(n) {
+  const num = parseFloat(n) || 0;
+  return '$' + num.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+function fmtNgn(n) {
+  const num = parseFloat(n) || 0;
+  return '₦' + num.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+
+// ===================================================
+//  RENDER TABLE
+// ===================================================
+function renderTable() {
+  const tbody = document.getElementById("tableBody");
+  const emptyState = document.getElementById("emptyState");
+  tbody.innerHTML = "";
+
+  if (depositsLoaded && filteredDeposits.length === 0) {
+    emptyState.classList.remove("hidden");
+    emptyState.classList.add("flex");
+  } else {
+    emptyState.classList.add("hidden");
+    emptyState.classList.remove("flex");
+  }
+
+  filteredDeposits.forEach((dep, index) => {
+    const meta = statusMeta(dep.status);
+    const tr = document.createElement("tr");
+    tr.className = "hover:bg-surface/60 transition-colors cursor-pointer";
+    tr.addEventListener("click", () => openPanel(dep));
+    tr.innerHTML = `
+      <td class="px-5 py-3 font-mono text-slate-500">#${index + 1}</td>
+      <td class="px-3 py-3">
+        <div class="text-slate-200">${escapeHtml(dep.fullname)}</div>
+        <div class="text-xs text-slate-500">${escapeHtml(dep.email)}</div>
+      </td>
+      <td class="px-3 py-3 font-mono text-xs text-slate-400">${escapeHtml(dep.reference)}</td>
+      <td class="px-3 py-3 text-slate-300 capitalize">${escapeHtml(dep.method)}</td>
+      <td class="px-3 py-3">
+        <div class="text-slate-200 font-mono">${fmtNgn(dep.amount)}</div>
+        <div class="text-xs text-slate-500 font-mono">${fmtUsd(dep.amount_in_dollar)}</div>
+      </td>
+      <td class="px-3 py-3 text-slate-400 text-xs font-mono">${escapeHtml(dep.created_at)}</td>
+      <td class="px-3 py-3">
+        <span class="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full ${meta.cls}">
+          ${meta.label}
+        </span>
+      </td>
+      <td class="px-3 py-3 text-right">
+        <button class="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-line text-slate-300 hover:bg-surface hover:text-white transition">
+          <i class="bi bi-eye"></i> View
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("rowCount").textContent = `${deposits.length} deposit${deposits.length === 1 ? "" : "s"} loaded`;
+}
+
+// ===================================================
+//  SEARCH + FILTER + SORT
+// ===================================================
+function applyFilters() {
+  const term = document.getElementById("searchInput").value.toLowerCase().trim();
+  const status = document.getElementById("statusFilter").value;
+
+  filteredDeposits = deposits.filter(d => {
+    const haystack = `${d.fullname} ${d.email} ${d.reference}`.toLowerCase();
+    const matchesTerm = !term || haystack.includes(term);
+    const matchesStatus = !status || (d.status || '').toLowerCase() === status;
+    return matchesTerm && matchesStatus;
+  });
+  applySort();
+}
+
+function applySort() {
+  const field = document.getElementById("sortSelect").value;
+  filteredDeposits.sort((a, b) => {
+    if (field === "amount") return parseFloat(b.amount) - parseFloat(a.amount);
+    if (field === "method") return String(a.method).localeCompare(String(b.method));
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+  renderTable();
+}
+
+document.getElementById("searchInput").addEventListener("input", applyFilters);
+document.getElementById("statusFilter").addEventListener("change", applyFilters);
+document.getElementById("sortSelect").addEventListener("change", applySort);
+
+// ===================================================
+//  SLIDE-OVER PANEL
+// ===================================================
+const panelOverlay = document.getElementById("panelOverlay");
+const depositPanel = document.getElementById("depositPanel");
+
+function renderPaymentDetails(dep) {
+  const rows = [];
+  rows.push(['Payment method', dep.type === 'crypto' ? 'Crypto' : 'Bank']);
+
+  if (dep.type === 'crypto') {
+    if (dep.wallet_name) rows.push(['Wallet name', dep.wallet_name]);
+    if (dep.wallet_network) rows.push(['Wallet network', dep.wallet_network]);
+    if (dep.wallet_address) rows.push(['Wallet address', dep.wallet_address]);
+  } else {
+    if (dep.bank_name) rows.push(['Bank name', dep.bank_name]);
+    if (dep.account_name) rows.push(['Account name', dep.account_name]);
+    if (dep.account_number) rows.push(['Account number', dep.account_number]);
+  }
+
+  return rows.map(([label, value]) => `
+    <div class="flex items-center justify-between gap-3">
+      <span class="text-xs text-slate-500">${escapeHtml(label)}</span>
+      <span class="text-sm text-slate-200 font-mono text-right break-all">${escapeHtml(value)}</span>
+    </div>
+  `).join('');
+}
+
+function openPanel(dep) {
+  activeDeposit = dep;
+  const meta = statusMeta(dep.status);
+
+  document.getElementById("panelRef").textContent = `Ref ${dep.reference}`;
+  document.getElementById("panelCustomer").textContent = dep.fullname;
+  document.getElementById("panelEmail").textContent = dep.email;
+  document.getElementById("panelAmountUsd").textContent = fmtUsd(dep.amount_in_dollar);
+  document.getElementById("panelAmountNgn").textContent = fmtNgn(dep.amount);
+  document.getElementById("panelDate").textContent = `Requested ${dep.created_at}`;
+  document.getElementById("panelPaymentDetails").innerHTML = renderPaymentDetails(dep);
+
+  const badge = document.getElementById("panelStatusBadge");
+  badge.textContent = meta.label;
+  badge.className = `inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full mt-0.5 ${meta.cls}`;
+
+  const status = (dep.status || '').toLowerCase();
+  const approveBtn = document.getElementById("approveBtn");
+  const declineBtn = document.getElementById("declineBtn");
+  const hint = document.getElementById("panelDecisionHint");
+
+  approveBtn.disabled = status === 'approved';
+  approveBtn.classList.toggle("opacity-40", status === 'approved');
+  approveBtn.classList.toggle("cursor-not-allowed", status === 'approved');
+
+  declineBtn.disabled = status === 'declined';
+  declineBtn.classList.toggle("opacity-40", status === 'declined');
+  declineBtn.classList.toggle("cursor-not-allowed", status === 'declined');
+
+  if (status === 'approved') {
+    hint.textContent = "This deposit is already approved. Declining now will remove the credited amount from the user's balance.";
+  } else if (status === 'declined') {
+    hint.textContent = "This deposit is already declined.";
+  } else {
+    hint.textContent = "Approving credits the user's balance immediately.";
+  }
+
+  panelOverlay.classList.remove("hidden");
+  requestAnimationFrame(() => { depositPanel.style.transform = "translateX(0)"; });
+}
+
+function closePanel() {
+  depositPanel.style.transform = "translateX(100%)";
+  setTimeout(() => panelOverlay.classList.add("hidden"), 250);
+}
+
+document.getElementById("closePanel").addEventListener("click", closePanel);
+document.getElementById("panelBackdrop").addEventListener("click", closePanel);
+
+// ===================================================
+//  APPROVE / DECLINE (AJAX)
+// ===================================================
+function submitDecision(action) {
+  if (!activeDeposit) return;
+
+  const formData = new FormData();
+  formData.append("action", action);
+  formData.append("deposit_id", activeDeposit.id);
+
+  fetch(domain + "server/api/update_deposit_status.php", { method: "POST", body: formData })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        activeDeposit.status = data.status;
+        const dep = deposits.find(d => d.id === activeDeposit.id);
+        if (dep) dep.status = data.status;
+        updateStats();
+        renderTable();
+        openPanel(activeDeposit);
+        showToast(data.message || "Deposit updated.", "success");
+      } else {
+        showToast(data.error || "Couldn't update this deposit.", "error");
+      }
+    })
+    .catch(err => {
+      console.error("Decision error:", err);
+      showToast("Network error — deposit wasn't updated.", "error");
+    });
+}
+
+document.getElementById("approveBtn").addEventListener("click", () => {
+  if (!activeDeposit || activeDeposit.status === 'approved') return;
+  submitDecision('approve_deposit');
+});
+
+document.getElementById("declineBtn").addEventListener("click", () => {
+  if (!activeDeposit || activeDeposit.status === 'declined') return;
+
+  const wasApproved = activeDeposit.status === 'approved';
+  const warning = wasApproved
+    ? "This deposit was already approved. Declining it now will remove the credited amount from the user's balance. Continue?"
+    : "Decline this deposit request?";
+
+  if (!confirm(warning)) return;
+  submitDecision('decline_deposit');
+});
+
+// ===================================================
+//  INIT
+// ===================================================
+loadDeposits();
+</script>
+
 </body>
-
 </html>

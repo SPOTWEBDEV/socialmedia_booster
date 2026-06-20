@@ -1,21 +1,27 @@
 <?php
-include_once __DIR__ . '/../connection.php';
-
+/**
+ * API Controller Class Blueprint
+ * Location: localhost\booster\server\controller\boosting.php
+ * * NOTE: Do not instantiate this class or include connection files here.
+ * Always initialize via context handlers down inside your execution points.
+ */
 
 class Api
 {
-    /** API URL */
+    /** @var string API Endpoint URL */
     public $api_url = 'https://honestsmm.com/api/v2';
 
+    /** @var string Secure API Key Storage */
     private string $api_key;
 
+    /**
+     * Api Constructor
+     * @param string $api_key Cryptographic key validated via environment configurations
+     */
     public function __construct(string $api_key)
     {
         $this->api_key = $api_key;
     }
-
-
-
 
     /** Add order */
     public function order($data)
@@ -133,6 +139,11 @@ class Api
         );
     }
 
+    /**
+     * Executes secure cURL connections to the provider API
+     * @param array $post Payload dictionary maps
+     * @return string|bool Response string payload or false on total transport loss
+     */
     private function connect($post)
     {
         $_post = [];
@@ -151,10 +162,11 @@ class Api
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 
         if (is_array($post)) {
-            curl_setopt($ch, CURLOPT_POSTFIELDS, join('&', $_post));
+            curl_setopt($ch, CURLOPT_POSTFIELDS, implode('&', $_post));
         }
         curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)');
         $result = curl_exec($ch);
+        
         if (curl_errno($ch) != 0 && empty($result)) {
             $result = false;
         }
@@ -162,7 +174,4 @@ class Api
         return $result;
     }
 }
-
-// Examples
-
-$api = new Api($api_key);
+?>
