@@ -8,7 +8,6 @@
  */
 
 include_once '../../server/connection.php';
-include_once '../../server/model.php';
 include_once '../../server/auth/admin.php';
 
 header('Content-Type: application/json');
