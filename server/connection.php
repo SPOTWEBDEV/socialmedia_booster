@@ -1,4 +1,10 @@
 <?php
+
+// Start session safely if it hasn't been started yet
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -22,10 +28,7 @@ if (file_exists($projectRoot . '/vendor/autoload.php')) {
 // 4. Assign environment values with safe fallbacks
 $api_key = $_ENV['BOOSTING_KEY'] ?? $_SERVER['BOOSTING_KEY'] ?? '';
 
-// Start session safely if it hasn't been started yet
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+
 
 // Helper function to check URL schema
 function checkUrlProtocol($url)
