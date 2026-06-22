@@ -6,6 +6,8 @@ include_once '../../../server/auth/user.php';
 
 require_once '../../../server/controller/boosting.php';
 
+$api = new Api($api_key);
+
 // ===============================
 // Fetch site price
 // ===============================

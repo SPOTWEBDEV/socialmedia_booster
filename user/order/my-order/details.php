@@ -13,6 +13,8 @@ if (!isset($_GET['order_id'])) {
 
 $order_id = $_GET['order_id'];
 
+$api = new Api($api_key);
+
 // $status = $api->status($order_id );
 // print_r($status);
 
