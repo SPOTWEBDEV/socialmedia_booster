@@ -1,6 +1,7 @@
 
 <?php
-require '../connection.php'; // include your database connection
+// header('Content-Type: application/json');
+require '../connection.php';
 if (isset($_POST['action'])) {
 
     $action = $_POST['action'];
