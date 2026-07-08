@@ -121,7 +121,9 @@ if (isset($_POST['confirm_payment']) && $deposit) {
     mysqli_stmt_bind_param($stmt3, "is", $paidto_id, $ref);
 
     if (mysqli_stmt_execute($stmt3)) {
-        header("Location: ./history/?confirmed=1");
+        echo "<script>
+          window.location.href = './history/';
+        </script>";
         exit;
     } else {
         $flashError = "Error updating your deposit. Please try again.";

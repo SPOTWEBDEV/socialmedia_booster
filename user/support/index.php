@@ -17,7 +17,10 @@ if (isset($_POST['send_message'])) {
         mysqli_stmt_bind_param($insert, "is", $id, $message);
 
         if (mysqli_stmt_execute($insert)) {
-            header("Location: ./?sent=1");
+           echo "<script>
+             window.location.href = './?sent=1';
+           </script>";
+           
             exit;
         } else {
             $flashError = "Database error. Please try again.";
