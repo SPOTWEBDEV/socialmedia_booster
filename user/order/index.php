@@ -7,6 +7,17 @@ include_once '../../server/auth/user.php';
 $pageTitle    = 'Boost Services';
 $pageSubtitle = 'Grow your social media presence';
 $activeNav    = 'Boosting';
+
+
+// Fetch site price
+$get = mysqli_query($connection, "SELECT sitePrice FROM admin WHERE id = 1");
+$data = mysqli_fetch_assoc($get);
+$site_price = floatval($data['sitePrice'] ?? 0);
+
+
+
+
+
 include '../../components/client/_user_layout_head.php';
 ?>
 
@@ -114,12 +125,23 @@ function renderOrders(data) {
   grid.innerHTML = "";
 
   data.forEach(item => {
+    const sitePrice = Number(<?php echo (float) $site_price; ?>);
+    const quantity = 1000;
+     const thirdPartyPrice = (quantity / 1000) * item.rate;
+    
+    const siteFee = (quantity / 1000) * sitePrice;
+
+     console.log(siteFee)
+    const total = thirdPartyPrice + siteFee;
+
+    
+
     const card = document.createElement("div");
     card.className = "bg-u-card border border-u-line rounded-2xl overflow-hidden shadow-sm flex flex-col";
     card.innerHTML = `
       <div class="px-5 pt-5 pb-3 border-b border-u-line">
         <p class="text-sm font-semibold text-u-text">${item.name}</p>
-        <p class="text-xs text-emerald-600 font-medium mt-1">Rate per 1000: $${item.rate}</p>
+        <p class="text-xs text-emerald-600 font-medium mt-1">Rate Per 1000: $${total}</p>
       </div>
       <div class="px-5 py-4 flex-1">
         <p class="text-xs font-semibold text-u-muted uppercase tracking-wider mb-1">Category</p>
