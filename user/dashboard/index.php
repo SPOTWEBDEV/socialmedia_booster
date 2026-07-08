@@ -189,7 +189,7 @@ function renderTable() {
     `;
 
     row.addEventListener("click", () => {
-      window.location.href = "./boosting/details.php?order_id=" + encodeURIComponent(order.order_id);
+      window.location.href = "../order/my-order?order_id=" + encodeURIComponent(order.order_id);
     });
 
     rows.appendChild(row);

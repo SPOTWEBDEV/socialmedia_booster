@@ -163,8 +163,8 @@ include '../../../components/client/_user_layout_head.php';
         <div id="priceBreakdown" class="bg-blue-50 border border-blue-100 rounded-xl p-4 hidden">
           <p class="text-xs font-semibold text-blue-600 mb-2">Price breakdown</p>
           <div class="text-xs text-blue-700 space-y-1">
-            <p>Third-party fee: <span id="thirdPartyFee" class="font-mono">$0.00</span></p>
-            <p>Site fee: <span id="siteFeeDisplay" class="font-mono">$0.00</span></p>
+            <p style="display:none">Third-party fee: <span id="thirdPartyFee" class="font-mono">$0.00</span></p>
+            <p style="display:none">Site fee: <span id="siteFeeDisplay" class="font-mono">$0.00</span></p>
             <p class="font-semibold text-sm text-blue-800 pt-1">Total: <span id="totalDisplay" class="font-mono">$0.00</span></p>
           </div>
           <input type="hidden" id="totalPrice" name="totalprice">

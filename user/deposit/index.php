@@ -96,13 +96,17 @@ if (isset($_POST['deposit'])) {
         if ($amount < $min_crypto_deposit) {
             $flashError = "Minimum deposit for crypto is \$$min_crypto_deposit.";
         } else {
-            header("Location: ./?ref=$reference");
+            echo "<script>
+              window.location.href = './?ref=$reference';
+            </script>";
             exit;
         }
     }
 
     if ($method === "manual") {
-        header("Location: ./?ref=$reference");
+        echo "<script>
+          window.location.href = './?ref=$reference';
+        </script>";
         exit;
     }
 }

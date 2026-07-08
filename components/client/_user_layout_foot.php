@@ -106,7 +106,7 @@ function showToast(message, type = "success") {
    <div class="support-tooltip" id="tooltip-text">Join WhatsApp Community</div>
 
    <!-- WhatsApp Button -->
-   <a href="https://wa.me/+12103304771"
+   <a href="https://wa.me/+2349164687839"
      target="_blank"
      class="support-btn whatsapp"
      onmouseover="showTooltip('Send us a message on WhatsApp')"
@@ -115,7 +115,7 @@ function showToast(message, type = "success") {
    </a>
 
    <!-- Telegram Button -->
-   <a href="https://t.me/https://t.me/Boostyard01"
+   <a href="https://t.me/Boostyard01"
      target="_blank"
      class="support-btn telegram"
      onmouseover="showTooltip('Join Telegram Community')"
