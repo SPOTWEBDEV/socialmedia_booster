@@ -3,7 +3,7 @@
 $userNavItems = [
     ['label' => 'Dashboard',   'icon' => 'bi-house',          'href' => $domain . 'user/dashboard/'],
     ['label' => 'New Order',   'icon' => 'bi-plus-circle',    'href' => $domain . 'user/order/'],
-    ['label' => 'My Orders',   'icon' => 'bi-bag',            'href' => $domain . 'user/order/order-details/'],
+    ['label' => 'My Orders',   'icon' => 'bi-bag',            'href' => $domain . 'user/order/my-order/'],
     ['label' => 'Deposit',     'icon' => 'bi-wallet2',        'href' => $domain . 'user/deposit/'],
     ['label' => 'Support',     'icon' => 'bi-headset',        'href' => $domain . 'user/support/'],
     ['label' => 'Deposit',     'icon' => 'bi-wallet2',        'href' => $domain . 'user/deposit/'],
