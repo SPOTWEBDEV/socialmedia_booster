@@ -4,784 +4,231 @@ include_once '../../server/connection.php';
 include_once '../../server/model.php';
 include_once '../../server/auth/user.php';
 
-
-
-$totalOrder = mysqli_num_rows(mysqli_query($connection, "SELECT `id` FROM user_orders WHERE user='$id'"));
+$totalOrder   = mysqli_num_rows(mysqli_query($connection, "SELECT `id` FROM user_orders WHERE user='$id'"));
 $totalSupport = mysqli_num_rows(mysqli_query($connection, "SELECT `id` FROM support_messages WHERE user='$id'"));
 
+$pageTitle    = 'Dashboard';
+$pageSubtitle = 'Your account at a glance';
+$activeNav    = 'Dashboard';
+include '../../components/client/_user_layout_head.php';
 ?>
 
-
-<!DOCTYPE html>
-<html lang="en" dir="ltr" data-nav-layout="horizontal" data-theme-mode="light" data-header-styles="light" data-menu-styles="light" loader="disable" data-nav-style="menu-click" data-bybit-channel-name="TTSbHg5jTOANoxu2zEIr9" data-bybit-is-default-wallet="true" data-toggled="close">
-<div id="in-page-channel-node-id" data-channel-name="in_page_channel_sAqFZG"></div>
-
-<head><!-- Meta Data -->
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title><?php echo $sitename . ' -- Order Page ' ?></title>
-  <meta name="Description" content="Bootstrap Responsive Admin Web Dashboard HTML5 Template">
-  <meta name="Author" content="Spruko Technologies Private Limited">
-  <meta name="keywords" content="admin dashboard,admin template,admin panel,bootstrap admin dashboard,html template,sales dashboard,dashboard,template dashboard,admin,html and css template,admin dashboard bootstrap,personal dashboard,crypto dashboard,stocks dashboard,admin panel template"> <!-- Favicon -->
-  <link rel="icon" href="<?php echo $domain ?>assets/images/brand-logos/favicon.ico" type="image/x-icon"> <!-- Choices JS -->
-  <script src="<?php echo $domain ?>assets/libs/choices.js/public/assets/scripts/choices.min.js"></script> <!-- Bootstrap Css -->
-  <link id="style" href="<?php echo $domain ?>assets/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet"> <!-- Style Css -->
-  <link href="<?php echo $domain ?>assets/css/styles.css" rel="stylesheet"> <!-- Icons Css -->
-  <link href="<?php echo $domain ?>assets/css/icons.css" rel="stylesheet"> <!-- Node Waves Css -->
-  <link href="<?php echo $domain ?>assets/libs/node-waves/waves.min.css" rel="stylesheet"> <!-- Simplebar Css -->
-  <link href="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.css" rel="stylesheet"> <!-- Choices Css -->
-  <link rel="stylesheet" href="<?php echo $domain ?>assets/libs/choices.js/public/assets/styles/choices.min.css">
-  <script type="text/javascript">
-    <!--
-    csn0 = document.all;
-    mmiu = csn0 && !document.getElementById;
-    gwu6 = csn0 && document.getElementById;
-    c0lf = !csn0 && document.getElementById;
-    lgl5 = document.layers;
-
-    function u28s(odan) {
-      try {
-        if (mmiu) alert("");
-      } catch (e) {}
-      if (odan && odan.stopPropagation) odan.stopPropagation();
-      return false;
-    }
-
-    function pyx8() {
-      if (event.button == 2 || event.button == 3) u28s();
-    }
-
-    function yi1v(e) {
-      return (e.which == 3) ? u28s() : true;
-    }
-
-    function rydm(fwmi) {
-      for (l9xl = 0; l9xl < fwmi.images.length; l9xl++) {
-        fwmi.images[l9xl].onmousedown = yi1v;
-      }
-      for (l9xl = 0; l9xl < fwmi.layers.length; l9xl++) {
-        rydm(fwmi.layers[l9xl].document);
-      }
-    }
-
-    function bsgr() {
-      if (mmiu) {
-        for (l9xl = 0; l9xl < document.images.length; l9xl++) {
-          document.images[l9xl].onmousedown = pyx8;
-        }
-      } else if (lgl5) {
-        rydm(document);
-      }
-    }
-
-    function kqq3(e) {
-      if ((gwu6 && event && event.srcElement && event.srcElement.tagName == "IMG") || (c0lf && e && e.target && e.target.tagName == "IMG")) {
-        return u28s();
-      }
-    }
-    if (gwu6 || c0lf) {
-      document.oncontextmenu = kqq3;
-    } else if (mmiu || lgl5) {
-      window.onload = bsgr;
-    }
-
-    function nctr(e) {
-      fa5e = e && e.srcElement && e.srcElement != null ? e.srcElement.tagName : "";
-      if (fa5e != "INPUT" && fa5e != "TEXTAREA" && fa5e != "BUTTON") {
-        return false;
-      }
-    }
-
-    function vfwh() {
-      return false
-    }
-    if (csn0) {
-      document.onselectstart = nctr;
-      document.ondragstart = vfwh;
-    }
-    if (document.addEventListener) {
-      document.addEventListener('copy', function(e) {
-        fa5e = e.target.tagName;
-        if (fa5e != "INPUT" && fa5e != "TEXTAREA") {
-          e.preventDefault();
-        }
-      }, false);
-      document.addEventListener('dragstart', function(e) {
-        e.preventDefault();
-      }, false);
-    }
-
-    function w5a4(evt) {
-      if (evt.preventDefault) {
-        evt.preventDefault();
-      } else {
-        evt.keyCode = 37;
-        evt.returnValue = false;
-      }
-    }
-    var qyzq = 1;
-    var v3dq = 2;
-    var j4xk = 4;
-    var dabf = new Array();
-    dabf.push(new Array(v3dq, 65));
-    dabf.push(new Array(v3dq, 67));
-    dabf.push(new Array(v3dq, 80));
-    dabf.push(new Array(v3dq, 83));
-    dabf.push(new Array(v3dq, 85));
-    dabf.push(new Array(qyzq | v3dq, 73));
-    dabf.push(new Array(qyzq | v3dq, 74));
-    dabf.push(new Array(qyzq, 121));
-    dabf.push(new Array(0, 123));
-
-    function dl80(evt) {
-      evt = (evt) ? evt : ((event) ? event : null);
-      if (evt) {
-        var ywf8 = evt.keyCode;
-        if (!ywf8 && evt.charCode) {
-          ywf8 = String.fromCharCode(evt.charCode).toUpperCase().charCodeAt(0);
-        }
-        for (var k8n2 = 0; k8n2 < dabf.length; k8n2++) {
-          if ((evt.shiftKey == ((dabf[k8n2][0] & qyzq) == qyzq)) && ((evt.ctrlKey | evt.metaKey) == ((dabf[k8n2][0] & v3dq) == v3dq)) && (evt.altKey == ((dabf[k8n2][0] & j4xk) == j4xk)) && (ywf8 == dabf[k8n2][1] || dabf[k8n2][1] == 0)) {
-            w5a4(evt);
-            break;
-          }
-        }
-      }
-    }
-    if (document.addEventListener) {
-      document.addEventListener("keydown", dl80, true);
-      document.addEventListener("keypress", dl80, true);
-    } else if (document.attachEvent) {
-      document.attachEvent("onkeydown", dl80);
-    }
-    -->
-  </script>
-  <meta http-equiv="imagetoolbar" content="no">
-  <style type="text/css">
-    <!-- input,textarea{-webkit-touch-callout:default;-webkit-user-select:auto;-khtml-user-select:auto;-moz-user-select:text;-ms-user-select:text;user-select:text} *{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:-moz-none;-ms-user-select:none;user-select:none} 
-    -->
-  </style>
-  <style type="text/css" media="print">
-    <!-- body{display:none} 
-    -->
-  </style> <!--[if gte IE 5]><frame></frame><![endif]-->
-  <style>
-    @keyframes slide-in-one-tap {
-      from {
-        transform: translateY(80px);
-      }
-
-      to {
-        transform: translateY(0px);
-      }
-    }
-
-    .trust-hide-gracefully {
-      opacity: 0;
-    }
-
-    .trust-wallet-one-tap .hidden {
-      display: none;
-    }
-
-    .trust-wallet-one-tap .semibold {
-      font-weight: 500;
-    }
-
-    .trust-wallet-one-tap .binance-plex {
-      font-family: 'Binance';
-    }
-
-    .trust-wallet-one-tap .rounded-full {
-      border-radius: 50%;
-    }
-
-    .trust-wallet-one-tap .flex {
-      display: flex;
-    }
-
-    .trust-wallet-one-tap .flex-col {
-      flex-direction: column;
-    }
-
-    .trust-wallet-one-tap .items-center {
-      align-items: center;
-    }
-
-    .trust-wallet-one-tap .space-between {
-      justify-content: space-between;
-    }
-
-    .trust-wallet-one-tap .justify-center {
-      justify-content: center;
-    }
-
-    .trust-wallet-one-tap .w-full {
-      width: 100%;
-    }
-
-    .trust-wallet-one-tap .box {
-      transition: all 0.5s cubic-bezier(0, 0, 0, 1.43);
-      animation: slide-in-one-tap 0.5s cubic-bezier(0, 0, 0, 1.43);
-      width: 384px;
-      border-radius: 15px;
-      background: #fff;
-      box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.25);
-      position: fixed;
-      right: 30px;
-      bottom: 30px;
-      z-index: 1020;
-    }
-
-    .trust-wallet-one-tap .header {
-      gap: 15px;
-      border-bottom: 1px solid #e6e6e6;
-      padding: 10px 18px;
-    }
-
-    .trust-wallet-one-tap .header .left-items {
-      gap: 15px;
-    }
-
-    .trust-wallet-one-tap .header .title {
-      color: #1e2329;
-      font-size: 18px;
-      font-weight: 600;
-      line-height: 28px;
-    }
-
-    .trust-wallet-one-tap .header .subtitle {
-      color: #474d57;
-      font-size: 14px;
-      line-height: 20px;
-    }
-
-    .trust-wallet-one-tap .header .close {
-      color: #1e2329;
-      cursor: pointer;
-    }
-
-    .trust-wallet-one-tap .body {
-      padding: 9px 18px;
-      gap: 10px;
-    }
-
-    .trust-wallet-one-tap .body .right-items {
-      gap: 10px;
-      width: 100%;
-    }
-
-    .trust-wallet-one-tap .body .right-items .wallet-title {
-      color: #1e2329;
-      font-size: 16px;
-      font-weight: 600;
-      line-height: 20px;
-    }
-
-    .trust-wallet-one-tap .body .right-items .wallet-subtitle {
-      color: #474d57;
-      font-size: 14px;
-      line-height: 20px;
-    }
-
-    .trust-wallet-one-tap .connect-indicator {
-      gap: 15px;
-      padding: 8px 0;
-    }
-
-    .trust-wallet-one-tap .connect-indicator .flow-icon {
-      color: #474d57;
-    }
-
-    .trust-wallet-one-tap .loading-color {
-      color: #fff;
-    }
-
-    .trust-wallet-one-tap .button {
-      border-radius: 50px;
-      outline: 2px solid transparent;
-      outline-offset: 2px;
-      background-color: rgb(5, 0, 255);
-      border-color: rgb(229, 231, 235);
-      cursor: pointer;
-      text-align: center;
-      height: 45px;
-    }
-
-    .trust-wallet-one-tap .button .button-text {
-      color: #fff;
-      font-size: 16px;
-      font-weight: 600;
-      line-height: 20px;
-    }
-
-    .trust-wallet-one-tap .footer {
-      margin: 20px 30px;
-    }
-
-    .trust-wallet-one-tap .check-icon {
-      color: #fff;
-    }
-
-    @font-face {
-      font-family: 'Binance';
-      src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-Regular.otf) format('opentype');
-      font-weight: 400;
-      font-style: normal;
-    }
-
-    @font-face {
-      font-family: 'Binance';
-      src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-Medium.otf) format('opentype');
-      font-weight: 500;
-      font-style: normal;
-    }
-
-    @font-face {
-      font-family: 'Binance';
-      src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-SemiBold.otf) format('opentype');
-      font-weight: 600;
-      font-style: normal;
-    }
-  </style>
-</head>
-
-<body class="customer-dashboard" cz-shortcut-listen="true">
-
-  <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
-  <div class="page"> <!-- app-header -->
-    <?php include_once '../../components/client/navbar.php'  ?>
-
-    <div class="main-content app-content">
-      <div class="container-fluid"> <!-- Start::page-header -->
-        <div class="d-flex align-items-center justify-content-between my-4 page-header-breadcrumb flex-wrap gap-2">
-
-
-        </div> <!-- End::page-header --> <!-- Start::row-1 -->
-        <div class="row">
-          <?php include_once '../../components/client/sidenavbar.php' ?>
-          <div class="col-xl-9">
-            <div class="row">
-
-              <div class="col-xl-6">
-                <div class="card custom-card">
-                  <div class="card-body"> <a href="javascript:void(0);" class="stretched-link"></a>
-                    <div class="d-flex align-items-center gap-3">
-                      <div> <span class="avatar avatar-xl bg-success-transparent"> <i class="bi bi-currency-dollar fs-4"></i> </span> </div>
-                      <div> <span class="d-block text-muted mb-1">Balance</span>
-                        <h4 class="mb-0"><?php echo number_format($balance,2) ?></h4>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-xl-6">
-                <div class="card custom-card">
-                  <div class="card-body"> <a href="javascript:void(0);" class="stretched-link"></a>
-                    <div class="d-flex align-items-center gap-3">
-                      <div> <span class="avatar avatar-xl bg-info-transparent"> <i class="bi bi-ticket-perforated fs-4"></i> </span> </div>
-                      <div> <span class="d-block text-muted mb-1">Total Orders</span>
-                        <h4 class="mb-0"><?php echo number_format($totalOrder) ?></h4>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-xl-6">
-                <div class="card custom-card">
-                  <div class="card-body"> <a href="javascript:void(0);" class="stretched-link"></a>
-                    <div class="d-flex align-items-center gap-3">
-                      <div> <span class="avatar avatar-xl bg-info-transparent"> <i class="bi bi-ticket-perforated fs-4"></i> </span> </div>
-                      <div> <span class="d-block text-muted mb-1">Support Ticket</span>
-                        <h4 class="mb-0"><?php echo number_format($totalSupport) ?></h4>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="col-xl-12">
-                <div class="card custom-card overflow-hidden">
-                  <div class="card-header justify-content-between">
-                    <div class="card-body d-flex align-items-center flex-wrap">
-
-                      <div class="flex-fill">
-                        <span class="mb-0 fs-14 text-muted">
-                          Total number of orders placed upto now :
-                          <span class="fw-medium text-success" id="orderCount">0</span>
-                        </span>
-                      </div>
-
-                      <!-- Sort -->
-                      <div class="dropdown">
-                        <button class="btn btn-light dropdown-toggle m-1" type="button"
-                          id="sortBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                          Sort By
-                        </button>
-                        <ul class="dropdown-menu">
-                          <li><a class="dropdown-item sortOption" data-sort="order_id" href="#">ID</a></li>
-                          <li><a class="dropdown-item sortOption" data-sort="price" href="#">Name</a></li>
-                          <li><a class="dropdown-item sortOption" data-sort="date" href="#">Date</a></li>
-
-                        </ul>
-                      </div>
-
-                      <!-- Category Filter -->
-                      <select id="categoryFilter" class="form-select m-1" style="width:200px;">
-                        <option value="">All Categories</option>
-                      </select>
-
-                      <!-- Search -->
-                      <div class="d-flex align-items-center m-1" role="search">
-                        <input class="form-control" id="searchInput" type="search" placeholder="Search">
-                        <button class="btn btn-light ms-2" id="searchBtn">Search</button>
-                      </div>
-
-                    </div>
-                  </div>
-                  <div class="card-body px-0 pt-2 pb-0">
-                    <div class="table-responsive">
-                      <table class="table text-nowrap">
-                        <thead>
-                          <tr>
-                            <th scope="col">ID</th>
-                            <th scope="col">Order ID</th>
-                            <th scope="col">Link</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Amount Paid</th>
-                            <th scope="col">Action</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-                <script>
-                  let orders = [];
-                  let filteredOrders = [];
-
-                  // =============================
-                  //  FETCH ORDERS FROM PHP
-                  // =============================
-                  function loadOrders() {
-                    let formData = new FormData();
-                    formData.append("action", "fetchUserOrders");
-                    formData.append("userId", "<?php echo $id ?>");
-
-                    fetch("<?php echo $domain ?>server/api/orders.php", {
-                        method: "POST",
-                        body: formData
-                      })
-                      .then(res => res.json())
-                      .then(data => {
-                        console.log("API RESPONSE:", data);
-                        if (data.success) {
-                          orders = data.data;
-                          filteredOrders = orders;
-                          updateOrderCount();
-                          populateStatusCategory();
-                          renderTable();
-                        }
-                      })
-                      .catch(err => console.error("API ERROR:", err));
-                  }
-
-                  // =============================
-                  // UPDATE COUNT
-                  // =============================
-                  function updateOrderCount() {
-                    document.getElementById("orderCount").textContent = orders.length;
-                  }
-
-                  // =============================
-                  // POPULATE STATUS DROPDOWN
-                  // =============================
-                  function populateStatusCategory() {
-                    const statuses = ["completed", "processing", "pending", "canceled"];
-                    let select = document.getElementById("categoryFilter");
-
-                    statuses.forEach(status => {
-                      let opt = document.createElement("option");
-                      opt.value = status;
-                      opt.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-                      select.appendChild(opt);
-                    });
-                  }
-
-                  // =============================
-                  // RENDER TABLE
-                  // =============================
-                  function renderTable() {
-                    let tbody = document.querySelector("table tbody");
-                    tbody.innerHTML = "";
-
-                    let rowsToShow = filteredOrders.slice(0, 3);
-
-                    rowsToShow.forEach((order, index) => {
-                      tbody.innerHTML += `
-                          <tr>
-                            <td>#${index + 1}</td>
-                            <td>${order.order_id}</td>
-
-                            <td>
-                              <span class="d-block">${order.social_url}</span>
-                              
-                            </td>
-
-                            <td>
-                              <span class="badge capitalize bg-${getStatusColor(order.status)}-transparent">
-                                  ${order.status}
-                              </span>
-                            </td>
-
-                            <td>
-                              <span class="d-block mb-1">$${order.order_price}</span>
-                              <span class="d-block fs-12 text-muted">${order.created_at}</span>
-                            </td>
-
-                            <td>
-                              <button onclick="window.location.href='./details.php?order_id=${order.order_id}'" class="btn btn-sm btn-ghost-light border">
-                                  <i class="fe fe-eye text-muted me-1"></i> View
-                              </button>
-                            </td>
-                          </tr>
-                        `;
-                    });
-                  }
-
-                  // =============================
-                  // GET BADGE COLOR
-                  // =============================
-                  function getStatusColor(status) {
-                    switch (status.toLowerCase()) {
-                      case "completed":
-                        return "success";
-                      case "processing":
-                        return "warning";
-                      case "pending":
-                        return "primary";
-                      case "canceled":
-                        return "danger";
-                      default:
-                        return "secondary";
-                    }
-                  }
-
-                  // =============================
-                  // SORTING
-                  // =============================
-                  document.querySelectorAll(".sortOption").forEach(btn => {
-                    btn.addEventListener("click", function() {
-                      let field = this.getAttribute("data-sort");
-
-                      filteredOrders.sort((a, b) => {
-                        if (field === "order_id") return Number(a.id) - Number(b.id);
-                        if (field === "date") return new Date(a.created_at) - new Date(b.created_at);
-                        if (field === "price") return Number(a.order_price) - Number(b.order_price);
-                        return 0;
-                      });
-
-                      renderTable();
-                    });
-                  });
-
-                  // =============================
-                  // SEARCH (user + social_url)
-                  // =============================
-                  document.getElementById("searchBtn").addEventListener("click", () => {
-                    let search = document.getElementById("searchInput").value.toLowerCase();
-
-                    filteredOrders = orders.filter(o =>
-                      o.user.toLowerCase().includes(search) ||
-                      o.social_url.toLowerCase().includes(search) ||
-                      o.order_id.toLowerCase().includes(search) ||
-                      o.status.toLowerCase().includes(search)
-                    );
-
-                    renderTable();
-                  });
-
-                  // =============================
-                  // CATEGORY FILTER (status)
-                  // =============================
-                  document.getElementById("categoryFilter").addEventListener("change", function() {
-                    if (this.value === "") {
-                      filteredOrders = orders;
-                    } else {
-                      filteredOrders = orders.filter(o =>
-                        o.status.toLowerCase() === this.value.toLowerCase()
-                      );
-                    }
-                    renderTable();
-                  });
-
-                  // Start
-                  loadOrders();
-                </script>
-
-
-              </div>
-            </div>
-          </div>
-        </div> <!-- End::row-1 -->
-      </div>
-    </div> <!-- End::app-content --> <!-- Footer Start -->
-    <?php include_once '../../components/footer.php' ?>
-    <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-body">
-            <div class="input-group"> <input type="text" class="form-control border-end-0" placeholder="Search Anything ..." aria-label="Search Anything ..." aria-describedby="button-addon2"> <button class="btn btn-primary" type="button" id="button-addon2"><i class="bi bi-search"></i></button> </div>
-          </div>
+  <main class="flex-1 w-full px-6 py-8">
+
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-sm text-u-muted mb-6">
+      <span class="text-u-text font-medium">Dashboard</span>
+    </div>
+
+    <!-- Hero prompt -->
+    <div class="mb-8">
+      <h2 class="font-display text-2xl font-bold text-u-text mb-2">Welcome back, <?php echo htmlspecialchars($fullname); ?></h2>
+      <p class="text-u-muted text-sm leading-relaxed">Here's a quick look at your account.</p>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+
+      <div class="bg-u-card border border-u-line rounded-2xl px-5 py-5 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 text-lg shrink-0">
+          <i class="bi bi-currency-dollar"></i>
+        </div>
+        <div>
+          <p class="text-xs text-u-muted mb-0.5">Balance</p>
+          <p class="text-lg font-bold text-u-text">$<?php echo number_format($balance, 2); ?></p>
         </div>
       </div>
-    </div>
-  </div> <!-- Responsive Header Search Modal End --> <!-- Scroll To Top -->
-  <div class="scrollToTop"> <span class="arrow"><i class="ti ti-arrow-narrow-up fs-20"></i></span> </div>
-  <div id="responsive-overlay"></div> <!-- Scroll To Top --> <!-- Popper JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
-  <script src="<?php echo $domain ?>assets/libs/@popperjs/core/umd/popper.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#hb6|n!WYr<2:hB/z4o");
-    -->
-  </script> <!-- Bootstrap JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
-  <script src="<?php echo $domain ?>assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#h aj©l4#h(vLUaTK;YSv");
-    -->
-  </script> <!-- Defaultmenu JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
-  <script src="<?php echo $domain ?>assets/js/defaultmenu.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#hC6.xWo2O(4rw-/z4o");
-    -->
-  </script> <!-- Node Waves JS--> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
-  <script src="<?php echo $domain ?>assets/libs/node-waves/waves.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#he-ce\"R©qa2,v\"g");
-    -->
-  </script> <!-- Sticky JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
-  <script src="<?php echo $domain ?>assets/js/sticky.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#heJ:Cc-Or|2:hB/z4o");
-    -->
-  </script> <!-- Simplebar JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
-  <script src="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":");
-    -->
-  </script> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
-  <script src="<?php echo $domain ?>assets/js/simplebar.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#h<A1IWkBr|I?UaTK;YSv");
-    -->
-  </script> <!-- Apex Charts JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
-  <script src="<?php echo $domain ?>assets/libs/apexcharts/apexcharts.min.js"></script>
-  <script type="text/javascript">
-    <!--
-    mpa0(":GJW#hGXPn91©qa2,v\"g");
-    -->
-  </script> <!-- Custom JS --> <noscript>
-    <p>To display this page you need a browser that supports JavaScript.</p>
-  </noscript>
-  <script src="<?php echo $domain ?>assets/js/customer-custom.js"></script>
-  <div state="voice" class="placeholder-icon" id="tts-placeholder-icon" title="Click to show TTS button" style="background-image: url(&quot;chrome-extension://cpnomhnclohkhnikegipapofcjihldck/data/content_script/icons/voice.png&quot;);"><canvas width="36" height="36" class="loading-circle" id="text-to-speech-loader" style="display: none;"></canvas></div><svg id="SvgjsSvg1001" width="2" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev" style="overflow: hidden; top: -100%; left: -100%; position: absolute; opacity: 0;">
-    <defs id="SvgjsDefs1002"></defs>
-    <polyline id="SvgjsPolyline1003" points="0,0"></polyline>
-    <path id="SvgjsPath1004" d="M0 0 "></path>
 
-    <div class="modal fade" id="maintenanceModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered" style="max-width:550px;">
-        <div class="modal-content" style="border:none;border-radius:20px;overflow:hidden;">
-
-```
-        <div style="padding:35px 30px;text-align:center;">
-
-            <div style="width:70px;height:70px;background:#f4f7ff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
-                <span style="font-size:32px;">⚡</span>
-            </div>
-
-            <h3 style="font-weight:700;color:#111;margin-bottom:10px;">
-                Platform Upgrade in Progress
-            </h3>
-
-            <p style="color:#666;font-size:15px;margin-bottom:25px;">
-                We're improving parts of the platform to provide a better experience.
-            </p>
-
-            <div style="background:#f8fafc;border-radius:12px;padding:18px;text-align:left;margin-bottom:20px;">
-
-                <div style="margin-bottom:10px;">
-                    ✓ Email Receiver
-                </div>
-
-                <div style="margin-bottom:10px;">
-                    ✓ Dashboard
-                </div>
-
-                <div>
-                    ✓ Welcome Page
-                </div>
-
-            </div>
-
-            <div style="background:#ecfdf5;border:1px solid #d1fae5;padding:15px;border-radius:12px;margin-bottom:25px;">
-                <strong style="color:#065f46;">
-                    Your funds and account data remain fully secure.
-                </strong>
-                <div style="font-size:14px;color:#047857;margin-top:5px;">
-                    No balances, transactions, or personal information will be affected.
-                </div>
-            </div>
-
-            <button
-                type="button"
-                data-bs-dismiss="modal"
-                style="background:#111827;color:#fff;border:none;padding:12px 30px;border-radius:10px;font-weight:600;">
-                Continue
-            </button>
-
+      <div class="bg-u-card border border-u-line rounded-2xl px-5 py-5 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 rounded-full bg-sky-50 flex items-center justify-center text-sky-600 text-lg shrink-0">
+          <i class="bi bi-bag-check"></i>
         </div>
+        <div>
+          <p class="text-xs text-u-muted mb-0.5">Total orders</p>
+          <p class="text-lg font-bold text-u-text"><?php echo number_format($totalOrder); ?></p>
+        </div>
+      </div>
+
+      <div class="bg-u-card border border-u-line rounded-2xl px-5 py-5 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 text-lg shrink-0">
+          <i class="bi bi-life-preserver"></i>
+        </div>
+        <div>
+          <p class="text-xs text-u-muted mb-0.5">Support tickets</p>
+          <p class="text-lg font-bold text-u-text"><?php echo number_format($totalSupport); ?></p>
+        </div>
+      </div>
 
     </div>
-</div>
-```
 
-</div>
+    <!-- Recent orders -->
+    <div class="mb-4 flex items-center justify-between flex-wrap gap-3">
+      <h3 class="font-display text-lg font-bold text-u-text">Recent orders</h3>
+      <a href="./boosting/my-order/" class="text-sm text-blue-500 hover:underline font-medium">View all orders</a>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="bg-u-card border border-u-line rounded-2xl px-5 py-4 mb-4 flex flex-wrap items-center gap-3">
+
+      <select id="sortSelect"
+        class="border border-u-line rounded-xl px-3 py-2 text-sm text-u-text bg-u-bg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition">
+        <option value="">Sort by</option>
+        <option value="order_id">ID</option>
+        <option value="price">Price</option>
+        <option value="date">Date</option>
+      </select>
+
+      <select id="categoryFilter"
+        class="border border-u-line rounded-xl px-3 py-2 text-sm text-u-text bg-u-bg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition">
+        <option value="">All statuses</option>
+      </select>
+
+      <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+        <input type="search" id="searchInput" placeholder="Search orders"
+          class="flex-1 border border-u-line rounded-xl px-3 py-2 text-sm text-u-text placeholder-u-muted/60 bg-u-bg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition">
+      </div>
+
+    </div>
+
+    <!-- List -->
+    <div id="listWrap" class="bg-u-card border border-u-line rounded-2xl overflow-hidden shadow-sm divide-y divide-u-line">
+      <div class="px-6 py-10 text-center text-sm text-u-muted" id="emptyState">
+        <i class="bi bi-hourglass-split text-2xl mb-2 block"></i>
+        Loading your orders…
+      </div>
+      <div id="rows"></div>
+    </div>
+
+  </main>
+
+<?php include '../../components/client/_user_layout_foot.php'; ?>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    new bootstrap.Modal(document.getElementById('maintenanceModal')).show();
+let orders = [];
+let filteredOrders = [];
+
+const STATUS_STYLES = {
+  pending:    { label: "Pending",     classes: "bg-sky-50 text-sky-600 border-sky-200" },
+  processing: { label: "Processing", classes: "bg-amber-50 text-amber-600 border-amber-200" },
+  completed:  { label: "Completed",  classes: "bg-emerald-50 text-emerald-600 border-emerald-200" },
+  canceled:   { label: "Canceled",   classes: "bg-rose-50 text-rose-600 border-rose-200" },
+};
+
+function statusStyle(status) {
+  const key = (status || "").toLowerCase();
+  return STATUS_STYLES[key] || { label: status || "Unknown", classes: "bg-slate-100 text-slate-500 border-slate-200" };
+}
+
+function loadOrders() {
+  const formData = new FormData();
+  formData.append("action", "fetchUserOrders");
+  formData.append("userId", "<?php echo (int) $id; ?>");
+
+  fetch("<?php echo $domain; ?>server/api/orders.php", { method: "POST", body: formData })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        orders = data.data;
+        filteredOrders = orders;
+        populateStatusCategory();
+        renderTable();
+      } else {
+        showEmpty("Could not load your orders.");
+      }
+    })
+    .catch(() => showEmpty("Could not load your orders."));
+}
+
+function populateStatusCategory() {
+  const statuses = [...new Set(orders.map(o => (o.status || "").toLowerCase()))].filter(Boolean);
+  const select = document.getElementById("categoryFilter");
+  statuses.forEach(status => {
+    const opt = document.createElement("option");
+    opt.value = status;
+    opt.textContent = statusStyle(status).label;
+    select.appendChild(opt);
+  });
+}
+
+function showEmpty(message) {
+  document.getElementById("emptyState").classList.remove("hidden");
+  document.getElementById("emptyState").innerHTML = `<i class="bi bi-inbox text-2xl mb-2 block"></i>${message}`;
+  document.getElementById("rows").innerHTML = "";
+}
+
+function renderTable() {
+  const rows = document.getElementById("rows");
+  const emptyState = document.getElementById("emptyState");
+
+  const rowsToShow = filteredOrders.slice(0, 3);
+
+  if (!rowsToShow.length) {
+    showEmpty("No orders yet.");
+    return;
+  }
+
+  emptyState.classList.add("hidden");
+  rows.innerHTML = "";
+
+  rowsToShow.forEach((order) => {
+    const style = statusStyle(order.status);
+
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = "w-full text-left px-6 py-4 flex items-center gap-4 hover:bg-u-surface/60 transition";
+
+    row.innerHTML = `
+      <span class="text-xs font-mono text-u-muted shrink-0 w-24 truncate">${order.order_id}</span>
+      <span class="flex-1 min-w-0">
+        <span class="block text-sm text-u-text truncate">${order.social_url}</span>
+        <span class="block text-xs text-u-muted">${order.created_at}</span>
+      </span>
+      <span class="shrink-0 text-sm text-u-text font-medium hidden sm:block">$${Number(order.order_price).toFixed(2)}</span>
+      <span class="shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full border ${style.classes}">${style.label}</span>
+      <i class="bi bi-chevron-right text-u-muted text-xs shrink-0"></i>
+    `;
+
+    row.addEventListener("click", () => {
+      window.location.href = "./boosting/details.php?order_id=" + encodeURIComponent(order.order_id);
+    });
+
+    rows.appendChild(row);
+  });
+}
+
+document.getElementById("sortSelect").addEventListener("change", function () {
+  const field = this.value;
+  if (!field) return;
+
+  filteredOrders = [...filteredOrders].sort((a, b) => {
+    if (field === "order_id") return Number(a.id) - Number(b.id);
+    if (field === "date") return new Date(a.created_at) - new Date(b.created_at);
+    if (field === "price") return Number(a.order_price) - Number(b.order_price);
+    return 0;
+  });
+
+  renderTable();
 });
+
+document.getElementById("searchInput").addEventListener("input", function () {
+  const search = this.value.toLowerCase();
+  filteredOrders = orders.filter(o =>
+    (o.social_url || "").toLowerCase().includes(search) ||
+    (o.order_id || "").toLowerCase().includes(search) ||
+    (o.status || "").toLowerCase().includes(search)
+  );
+  renderTable();
+});
+
+document.getElementById("categoryFilter").addEventListener("change", function () {
+  filteredOrders = this.value === ""
+    ? orders
+    : orders.filter(o => (o.status || "").toLowerCase() === this.value.toLowerCase());
+  renderTable();
+});
+
+loadOrders();
 </script>
 
-  </svg>
 </body>
-
 </html>

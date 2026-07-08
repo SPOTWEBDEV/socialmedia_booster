@@ -8,18 +8,15 @@ require_once '../../../server/controller/boosting.php';
 
 $api = new Api($api_key);
 
-// ===============================
+$flashError = '';
+
 // Fetch site price
-// ===============================
 $get = mysqli_query($connection, "SELECT sitePrice FROM admin WHERE id = 1");
 $data = mysqli_fetch_assoc($get);
 $site_price = floatval($data['sitePrice'] ?? 0);
 
 if (isset($_POST['send_message'])) {
 
-    // ===============================
-    // Sanitize & Get form values
-    // ===============================
     $service_id     = intval($_POST['service']);
     $order_name     = trim($_POST['order_name']);
     $order_rate     = floatval(str_replace('$', '', $_POST['orderRate']));
@@ -28,538 +25,229 @@ if (isset($_POST['send_message'])) {
     $message        = trim($_POST['message']);
     $quantity       = floatval($_POST['quanity']);
 
-    // ===============================
-    // Basic validation
-    // ===============================
     if ($quantity <= 0 || $order_rate <= 0 || $service_id <= 0) {
-        echo "<script>alert('Invalid order details.');</script>";
-        exit;
-    }
+        $flashError = "Please check your order details and try again.";
+    } else {
 
-    // ===============================
-    // 🔥 Price Calculation (Correct)
-    // ===============================
-    $thirdPartyPrice = ($quantity / 1000) * $order_rate;
-    $siteFee         = ($quantity / 1000) * $site_price;
+        $thirdPartyPrice = ($quantity / 1000) * $order_rate;
+        $siteFee         = ($quantity / 1000) * $site_price;
 
-    $sub_price   = round($thirdPartyPrice, 4);
-    $order_price = round($thirdPartyPrice + $siteFee, 4);
+        $sub_price   = round($thirdPartyPrice, 4);
+        $order_price = round($thirdPartyPrice + $siteFee, 4);
 
-    // ===============================
-    // Check user balance
-    // ===============================
-    if ($order_price <= $balance) {
+        if ($order_price <= $balance) {
 
-        // ===============================
-        // 📡 Send order to API
-        // ===============================
-        $order = $api->order([
-            'service'  => $service_id,
-            'link'     => $social_url,
-            'quantity' => $quantity
-        ]);
+            $order = $api->order([
+                'service'  => $service_id,
+                'link'     => $social_url,
+                'quantity' => $quantity
+            ]);
 
-        // ===============================
-        // API Error
-        // ===============================
-        if (isset($order->error)) {
+            if (isset($order->error)) {
 
-            $msg = htmlspecialchars($order->error);
-            echo "<script>alert('API Error: $msg');</script>";
-            exit;
+                $flashError = "API error: " . htmlspecialchars($order->error);
 
-        } elseif (isset($order->order)) {
+            } elseif (isset($order->order)) {
 
-            $orderId = htmlspecialchars($order->order);
+                $orderId = $order->order;
 
-            // ===============================
-            // Save order to database
-            // ===============================
-            $stmt = $connection->prepare("
-                INSERT INTO user_orders (
-                    user, service_id, order_name, sub_price, order_price, 
-                    order_category, social_url, message, quanity, order_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ");
+                $stmt = $connection->prepare("
+                    INSERT INTO user_orders (
+                        user, service_id, order_name, sub_price, order_price, 
+                        order_category, social_url, message, quanity, order_id
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ");
 
-            $stmt->bind_param(
-                "sissdssssi",
-                $id,
-                $service_id,
-                $order_name,
-                $sub_price,
-                $order_price,
-                $order_category,
-                $social_url,
-                $message,
-                $quantity,
-                $orderId
-            );
-
-            if ($stmt->execute()) {
-
-                // ===============================
-                // Deduct user balance
-                // ===============================
-                $deduct = $connection->prepare(
-                    "UPDATE users SET balance = balance - ? WHERE id = ?"
+                $stmt->bind_param(
+                    "sissdssssi",
+                    $id,
+                    $service_id,
+                    $order_name,
+                    $sub_price,
+                    $order_price,
+                    $order_category,
+                    $social_url,
+                    $message,
+                    $quantity,
+                    $orderId
                 );
-                $deduct->bind_param("ds", $order_price, $id);
-                $deduct->execute();
 
-                echo "<script>
-                    alert('Order Placed Successfully! Order ID: $orderId');
-                    setTimeout(function(){
-                        window.location.href = '../my-order/';
-                    }, 1000);
-                </script>";
+                if ($stmt->execute()) {
+
+                    $deduct = $connection->prepare("UPDATE users SET balance = balance - ? WHERE id = ?");
+                    $deduct->bind_param("ds", $order_price, $id);
+                    $deduct->execute();
+
+                    header("Location: ../my-order/?placed=" . urlencode($orderId));
+                    exit;
+
+                } else {
+                    $flashError = "Error saving your order. Please try again.";
+                }
 
             } else {
-                echo "<script>alert('Error saving order.');</script>";
+                $flashError = "We received an unexpected response from the provider. Please try again.";
             }
 
         } else {
-
-            // ===============================
-            // Unexpected API response
-            // ===============================
-            $unknown = htmlspecialchars(json_encode($order));
-            echo "<script>alert('Unexpected API Response: $unknown');</script>";
+            $flashError = "Insufficient balance. Please fund your wallet first.";
         }
-
-    } else {
-        // ===============================
-        // Insufficient balance
-        // ===============================
-        echo "<script>alert('Insufficient balance. Please fund your wallet.');</script>";
     }
 }
 
-
-
+$pageTitle    = 'New Order';
+$pageSubtitle = 'Boost your social media handle';
+$activeNav    = 'Boosting';
+include '../../../components/client/_user_layout_head.php';
 ?>
 
-
-<!DOCTYPE html>
-<html lang="en" dir="ltr" data-nav-layout="horizontal" data-theme-mode="light" data-header-styles="light" data-menu-styles="light" loader="disable" data-nav-style="menu-click" data-bybit-channel-name="TTSbHg5jTOANoxu2zEIr9" data-bybit-is-default-wallet="true" data-toggled="close">
-<div id="in-page-channel-node-id" data-channel-name="in_page_channel_sAqFZG"></div>
-
-<head><!-- Meta Data -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title><?php echo $sitename . ' -- Order Page ' ?></title>
-    <meta name="Description" content="Bootstrap Responsive Admin Web Dashboard HTML5 Template">
-    <meta name="Author" content="Spruko Technologies Private Limited">
-    <meta name="keywords" content="admin dashboard,admin template,admin panel,bootstrap admin dashboard,html template,sales dashboard,dashboard,template dashboard,admin,html and css template,admin dashboard bootstrap,personal dashboard,crypto dashboard,stocks dashboard,admin panel template"> <!-- Favicon -->
-    <link rel="icon" href="<?php echo $domain ?>assets/images/brand-logos/favicon.ico" type="image/x-icon"> <!-- Choices JS -->
-    <script src="<?php echo $domain ?>assets/libs/choices.js/public/assets/scripts/choices.min.js"></script> <!-- Bootstrap Css -->
-    <link id="style" href="<?php echo $domain ?>assets/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet"> <!-- Style Css -->
-    <link href="<?php echo $domain ?>assets/css/styles.css" rel="stylesheet"> <!-- Icons Css -->
-    <link href="<?php echo $domain ?>assets/css/icons.css" rel="stylesheet"> <!-- Node Waves Css -->
-    <link href="<?php echo $domain ?>assets/libs/node-waves/waves.min.css" rel="stylesheet"> <!-- Simplebar Css -->
-    <link href="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.css" rel="stylesheet"> <!-- Choices Css -->
-    <link rel="stylesheet" href="<?php echo $domain ?>assets/libs/choices.js/public/assets/styles/choices.min.css">
-
-    <meta http-equiv="imagetoolbar" content="no">
-    <style type="text/css">
-        <!-- input,textarea{-webkit-touch-callout:default;-webkit-user-select:auto;-khtml-user-select:auto;-moz-user-select:text;-ms-user-select:text;user-select:text} *{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:-moz-none;-ms-user-select:none;user-select:none} 
-        -->
-    </style>
-    <style type="text/css" media="print">
-        <!-- body{display:none} 
-        -->
-    </style> <!--[if gte IE 5]><frame></frame><![endif]-->
-    <style>
-        @keyframes slide-in-one-tap {
-            from {
-                transform: translateY(80px);
-            }
-
-            to {
-                transform: translateY(0px);
-            }
-        }
-
-        .trust-hide-gracefully {
-            opacity: 0;
-        }
-
-        .trust-wallet-one-tap .hidden {
-            display: none;
-        }
-
-        .trust-wallet-one-tap .semibold {
-            font-weight: 500;
-        }
-
-        .trust-wallet-one-tap .binance-plex {
-            font-family: 'Binance';
-        }
-
-        .trust-wallet-one-tap .rounded-full {
-            border-radius: 50%;
-        }
-
-        .trust-wallet-one-tap .flex {
-            display: flex;
-        }
-
-        .trust-wallet-one-tap .flex-col {
-            flex-direction: column;
-        }
-
-        .trust-wallet-one-tap .items-center {
-            align-items: center;
-        }
-
-        .trust-wallet-one-tap .space-between {
-            justify-content: space-between;
-        }
-
-        .trust-wallet-one-tap .justify-center {
-            justify-content: center;
-        }
-
-        .trust-wallet-one-tap .w-full {
-            width: 100%;
-        }
-
-        .trust-wallet-one-tap .box {
-            transition: all 0.5s cubic-bezier(0, 0, 0, 1.43);
-            animation: slide-in-one-tap 0.5s cubic-bezier(0, 0, 0, 1.43);
-            width: 384px;
-            border-radius: 15px;
-            background: #fff;
-            box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.25);
-            position: fixed;
-            right: 30px;
-            bottom: 30px;
-            z-index: 1020;
-        }
-
-        .trust-wallet-one-tap .header {
-            gap: 15px;
-            border-bottom: 1px solid #e6e6e6;
-            padding: 10px 18px;
-        }
-
-        .trust-wallet-one-tap .header .left-items {
-            gap: 15px;
-        }
-
-        .trust-wallet-one-tap .header .title {
-            color: #1e2329;
-            font-size: 18px;
-            font-weight: 600;
-            line-height: 28px;
-        }
-
-        .trust-wallet-one-tap .header .subtitle {
-            color: #474d57;
-            font-size: 14px;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .header .close {
-            color: #1e2329;
-            cursor: pointer;
-        }
-
-        .trust-wallet-one-tap .body {
-            padding: 9px 18px;
-            gap: 10px;
-        }
-
-        .trust-wallet-one-tap .body .right-items {
-            gap: 10px;
-            width: 100%;
-        }
-
-        .trust-wallet-one-tap .body .right-items .wallet-title {
-            color: #1e2329;
-            font-size: 16px;
-            font-weight: 600;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .body .right-items .wallet-subtitle {
-            color: #474d57;
-            font-size: 14px;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .connect-indicator {
-            gap: 15px;
-            padding: 8px 0;
-        }
-
-        .trust-wallet-one-tap .connect-indicator .flow-icon {
-            color: #474d57;
-        }
-
-        .trust-wallet-one-tap .loading-color {
-            color: #fff;
-        }
-
-        .trust-wallet-one-tap .button {
-            border-radius: 50px;
-            outline: 2px solid transparent;
-            outline-offset: 2px;
-            background-color: rgb(5, 0, 255);
-            border-color: rgb(229, 231, 235);
-            cursor: pointer;
-            text-align: center;
-            height: 45px;
-        }
-
-        .trust-wallet-one-tap .button .button-text {
-            color: #fff;
-            font-size: 16px;
-            font-weight: 600;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .footer {
-            margin: 20px 30px;
-        }
-
-        .trust-wallet-one-tap .check-icon {
-            color: #fff;
-        }
-
-        @font-face {
-            font-family: 'Binance';
-            src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-Regular.otf) format('opentype');
-            font-weight: 400;
-            font-style: normal;
-        }
-
-        @font-face {
-            font-family: 'Binance';
-            src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-Medium.otf) format('opentype');
-            font-weight: 500;
-            font-style: normal;
-        }
-
-        @font-face {
-            font-family: 'Binance';
-            src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-SemiBold.otf) format('opentype');
-            font-weight: 600;
-            font-style: normal;
-        }
-    </style>
-</head>
-
-<body class="customer-dashboard" cz-shortcut-listen="true">
-
-    <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
-    <div class="page"> <!-- app-header -->
-
-        <?php include_once '../../../components/client/navbar.php'  ?>
-
-        <div class="main-content app-content">
-            <div class="container-fluid"> <!-- Start::page-header -->
-                <div class="d-flex align-items-center justify-content-between my-4 page-header-breadcrumb flex-wrap gap-2">
-                    <div>
-                        <p class="fw-medium fs-20 mb-0">Welcome, <?php echo $fullname ?></p>
-                        <p class="fs-13 text-muted mb-0">Let's check your today's stats!</p>
-                    </div>
-                    <div class="btn-list"> <a href="../">
-                            <button class="btn btn-primary-light btn-wave waves-effect waves-light">
-                                <i class="bx bx-ticket align-middle me-1"></i>
-                                <i class="bx bx-plus-circle align-middle me-1"></i>
-                                Create New Order
-                            </button>
-                        </a> <a href="../my-order/">
-                            <button class="btn btn-primary-light btn-wave waves-effect waves-light">
-                                <i class="bx bx-ticket align-middle me-1"></i>
-                                <i class="bx bx-show align-middle me-1"></i>
-                                View Orders
-                            </button>
-                        </a> </div>
-                </div> <!-- End::page-header --> <!-- Start::row-1 -->
-                <div class="row">
-                    <?php include_once '../../../components/client/sidenavbar.php' ?>
-                    <div class="col-xl-9">
-                        <div class="row">
-                            <div class="col-xl-12">
-                                <form method="POST" class="card custom-card">
-
-                                    <div class="card-header">
-                                        <div class="card-title">
-                                            Boost Your Social Media Handle
-                                            <span class="subtitle fw-normal text-muted d-block fs-12">
-                                                Review your selected order and provide the required details.
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div class="card-body">
-                                        <div class="row gy-3">
-
-                                            <!-- Order Name -->
-                                            <div class="col-xl-12">
-                                                <label class="form-label">Order Name</label>
-                                                <input type="text" id="orderName" name="order_name" class="form-control form-control-light" readonly>
-                                            </div>
-
-                                            <!-- Order Price -->
-                                            <div class="col-xl-6 hidden">
-                                                <label class="form-label">Order Rate</label>
-                                                <input type="text" id="orderRate" name="orderRate" class="form-control orderRate form-control-light" readonly>
-                                            </div>
-
-                                            <!-- Order Category -->
-                                            <div class="col-xl-6">
-                                                <label class="form-label">Category</label>
-                                                <input type="text" id="orderCategory" name="order_category" class="form-control form-control-light" readonly>
-                                            </div>
-
-                                            <!-- Service ID -->
-                                            <div class="col-xl-6">
-                                                <label class="form-label">Quantity</label>
-                                                <input type="hidden" id="orderService" name="service" class="form-control form-control-light" readonly>
-                                                <input type="text" id="quanity" name="quanity" class="form-control form-control-light">
-                                            </div>
-
-                                            <!-- Order Price -->
-                                            <div class="col-xl-12">
-                                                <label class="form-label">Total Price</label>
-                                                <input type="text" id="totalPrice" name="totalprice" class="form-control form-control-light" readonly>
-                                                <!-- <input type="text" id="totalPrice1" name="totalprice1" class="form-control form-control-light" readonly> -->
-                                                <div style="display: none;" id="totalPrice1" class="totalPrice1"></div>
-                                            </div>
-
-
-
-                                            <!-- NEW: URL Input -->
-                                            <div class="col-xl-12">
-                                                <label for="order-url" class="form-label">Your Social Media URL</label>
-                                                <input type="text" class="form-control form-control-light"
-                                                    id="order-url" name="order_url"
-                                                    placeholder="Enter the profile/post URL you want to boost">
-                                            </div>
-
-                                            <!-- Notes -->
-                                            <div class="col-xl-12">
-                                                <label for="text-area" class="form-label">Additional Notes</label>
-                                                <textarea class="form-control form-control-light"
-                                                    placeholder="Enter any additional instructions here"
-                                                    id="text-area" name="message" rows="2"></textarea>
-                                            </div>
-
-                                        </div>
-                                    </div>
-
-
-                                    <div class="card-footer">
-                                        <button type="submit" name="send_message"
-                                            class="btn btn-primary btn-wave float-end waves-effect waves-light">
-                                            Submit Order
-                                        </button>
-                                    </div>
-                                </form>
-
-                                <script>
-                                    document.addEventListener("DOMContentLoaded", function() {
-                                        let order = localStorage.getItem("selectedOrder");
-
-                                        if (!order) {
-                                            alert("No order selected.");
-                                            return;
-                                        }
-
-                                        order = JSON.parse(order);
-
-                                        // Fill inputs
-                                        document.getElementById("orderName").value = order.name;
-                                        document.getElementById("orderRate").value = order.rate;
-                                        document.getElementById("orderCategory").value = order.category;
-                                        document.getElementById("quanity").placeholder = `Min: ${order.min} - Max: ${order.max}`;
-                                        document.getElementById("orderService").value = order.service;
-
-
-                                    });
-
-                                    document.getElementById("quanity").addEventListener("input", function() {
-
-                                        let quantity = parseFloat(document.getElementById("quanity").value);
-                                        let rate = parseFloat(document.getElementById("orderRate").value);
-                                        let sitePrice = Number(<?php echo $site_price; ?>);
-
-                                        if (!isNaN(quantity) && !isNaN(rate)) {
-
-                                            let thirdPartyPrice = (quantity / 1000) * rate;
-                                            let siteFee = (quantity / 1000) * sitePrice;
-
-                                            let total = thirdPartyPrice + siteFee;
-
-                                            document.getElementById("totalPrice").value = total.toFixed(4);
-
-                                            document.getElementById("totalPrice1").innerHTML = `
-                                                Third-party fee: $${thirdPartyPrice.toFixed(4)} <br>
-                                                Site fee: $${siteFee.toFixed(4)} <br>
-                                                <strong>Total: $${total.toFixed(4)}</strong>
-                                            `;
-                                        } else {
-                                            document.getElementById("totalPrice").value = "";
-                                            document.getElementById("totalPrice1").innerHTML = "";
-                                        }
-                                    });
-                                </script>
-
-
-
-                            </div>
-
-
-
-
-                        </div>
-                    </div>
-
-                </div>
-            </div> <!-- End::row-1 -->
-        </div>
-    </div> <!-- End::app-content --> <!-- Footer Start -->
-    <?php include_once '../../../components/footer.php' ?>
-    <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <div class="input-group"> <input type="text" class="form-control border-end-0" placeholder="Search Anything ..." aria-label="Search Anything ..." aria-describedby="button-addon2"> <button class="btn btn-primary" type="button" id="button-addon2"><i class="bi bi-search"></i></button> </div>
-                </div>
-            </div>
-        </div>
+  <main class="flex-1 w-full px-6 py-8">
+
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-sm text-u-muted mb-6">
+      <a href="../" class="hover:text-u-text transition-colors">Boost services</a>
+      <i class="bi bi-chevron-right text-xs"></i>
+      <span class="text-u-text font-medium">New order</span>
     </div>
-    </div> <!-- Responsive Header Search Modal End --> <!-- Scroll To Top -->
-    <div class="scrollToTop"> <span class="arrow"><i class="ti ti-arrow-narrow-up fs-20"></i></span> </div>
-    <div id="responsive-overlay"></div> <!-- Scroll To Top --> <!-- Popper JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/libs/@popperjs/core/umd/popper.min.js"></script>
 
-    <script src="<?php echo $domain ?>assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Hero prompt -->
+    <div class="mb-8">
+      <h2 class="font-display text-2xl font-bold text-u-text mb-2">Boost your social media handle</h2>
+      <p class="text-u-muted text-sm leading-relaxed">
+        Review the service you picked and fill in the details below. You can track this order on your
+        <a href="../my-order/" class="text-blue-500 hover:underline font-medium">order list</a>.
+      </p>
+    </div>
 
-    <script src="<?php echo $domain ?>assets/js/defaultmenu.min.js"></script>
+    <?php if (!empty($flashError)): ?>
+      <div class="mb-4 flex items-center gap-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl px-4 py-3 text-sm">
+        <i class="bi bi-exclamation-circle-fill text-rose-500 shrink-0"></i>
+        <span><?php echo $flashError; ?></span>
+      </div>
+    <?php endif; ?>
 
-    <script src="<?php echo $domain ?>assets/libs/node-waves/waves.min.js"></script>
+    <div id="noOrderState" class="hidden mb-4 flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-700 rounded-2xl px-4 py-3 text-sm">
+      <i class="bi bi-exclamation-triangle-fill text-amber-500 shrink-0"></i>
+      <span>No service was selected. Please <a href="../" class="underline font-medium">pick a service</a> first.</span>
+    </div>
 
-    <script src="<?php echo $domain ?>assets/js/sticky.js"></script>
+    <form method="POST" id="orderForm" class="bg-u-card border border-u-line rounded-2xl overflow-hidden shadow-sm">
 
-    <script src="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.js"></script>
+      <!-- Service context -->
+      <div class="px-6 pt-6 pb-2 border-b border-u-line">
+        <p class="text-xs font-semibold uppercase tracking-wider text-u-muted mb-3">Service</p>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+            <i class="bi bi-rocket-takeoff"></i>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-u-text" id="orderNameDisplay">—</p>
+            <p class="text-xs text-u-muted" id="orderCategoryDisplay">—</p>
+          </div>
+        </div>
+        <input type="hidden" id="orderName" name="order_name">
+        <input type="hidden" id="orderRate" name="orderRate">
+        <input type="hidden" id="orderCategory" name="order_category">
+        <input type="hidden" id="orderService" name="service">
+      </div>
 
-    <script src="<?php echo $domain ?>assets/js/simplebar.js"></script>
+      <!-- Compose -->
+      <div class="px-6 py-5 space-y-5">
 
-    <script src="<?php echo $domain ?>assets/libs/apexcharts/apexcharts.min.js"></script>
+        <div>
+          <label class="text-xs font-semibold text-u-muted uppercase tracking-wider mb-2 block">Quantity</label>
+          <input type="number" id="quanity" name="quanity" min="0" step="1" required
+            class="w-full border border-u-line rounded-xl px-4 py-3 text-sm text-u-text placeholder-u-muted/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition bg-u-bg">
+        </div>
 
-    <script src="<?php echo $domain ?>assets/js/customer-custom.js"></script>
-    <div state="voice" class="placeholder-icon" id="tts-placeholder-icon" title="Click to show TTS button" style="background-image: url(&quot;chrome-extension://cpnomhnclohkhnikegipapofcjihldck/data/content_script/icons/voice.png&quot;);"><canvas width="36" height="36" class="loading-circle" id="text-to-speech-loader" style="display: none;"></canvas></div><svg id="SvgjsSvg1001" width="2" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev" style="overflow: hidden; top: -100%; left: -100%; position: absolute; opacity: 0;">
-        <defs id="SvgjsDefs1002"></defs>
-        <polyline id="SvgjsPolyline1003" points="0,0"></polyline>
-        <path id="SvgjsPath1004" d="M0 0 "></path>
-    </svg>
+        <div id="priceBreakdown" class="bg-blue-50 border border-blue-100 rounded-xl p-4 hidden">
+          <p class="text-xs font-semibold text-blue-600 mb-2">Price breakdown</p>
+          <div class="text-xs text-blue-700 space-y-1">
+            <p>Third-party fee: <span id="thirdPartyFee" class="font-mono">$0.00</span></p>
+            <p>Site fee: <span id="siteFeeDisplay" class="font-mono">$0.00</span></p>
+            <p class="font-semibold text-sm text-blue-800 pt-1">Total: <span id="totalDisplay" class="font-mono">$0.00</span></p>
+          </div>
+          <input type="hidden" id="totalPrice" name="totalprice">
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-u-muted uppercase tracking-wider mb-2 block">Your social media URL</label>
+          <input type="text" id="order-url" name="order_url" required
+            placeholder="Enter the profile/post URL you want to boost"
+            class="w-full border border-u-line rounded-xl px-4 py-3 text-sm text-u-text placeholder-u-muted/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition bg-u-bg">
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-u-muted uppercase tracking-wider mb-2 block">Additional notes</label>
+          <textarea id="text-area" name="message" rows="3"
+            placeholder="Enter any additional instructions here"
+            class="w-full border border-u-line rounded-xl px-4 py-3 text-sm text-u-text placeholder-u-muted/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition resize-none bg-u-bg"></textarea>
+        </div>
+
+      </div>
+
+      <div class="px-6 py-4 border-t border-u-line flex items-center justify-between gap-3 bg-u-surface/40">
+        <a href="../" class="text-sm text-u-muted hover:text-u-text transition-colors flex items-center gap-1.5">
+          <i class="bi bi-arrow-left text-xs"></i> Choose another service
+        </a>
+        <button type="submit" name="send_message"
+          class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition shadow-sm">
+          <i class="bi bi-send"></i>
+          Submit order
+        </button>
+      </div>
+    </form>
+
+  </main>
+
+<?php include '../../../components/client/_user_layout_foot.php'; ?>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const raw = localStorage.getItem("selectedOrder");
+
+  if (!raw) {
+    document.getElementById("noOrderState").classList.remove("hidden");
+    document.getElementById("orderForm").classList.add("hidden");
+    return;
+  }
+
+  const order = JSON.parse(raw);
+
+  document.getElementById("orderName").value = order.name;
+  document.getElementById("orderRate").value = order.rate;
+  document.getElementById("orderCategory").value = order.category;
+  document.getElementById("orderService").value = order.service;
+
+  document.getElementById("orderNameDisplay").textContent = order.name;
+  document.getElementById("orderCategoryDisplay").textContent = order.category;
+
+  const qtyInput = document.getElementById("quanity");
+  qtyInput.placeholder = `Min: ${order.min} - Max: ${order.max}`;
+});
+
+document.getElementById("quanity").addEventListener("input", function () {
+  const quantity = parseFloat(this.value);
+  const rate = parseFloat(document.getElementById("orderRate").value);
+  const sitePrice = Number(<?php echo (float) $site_price; ?>);
+  const breakdown = document.getElementById("priceBreakdown");
+
+  if (!isNaN(quantity) && !isNaN(rate) && quantity > 0) {
+    const thirdPartyPrice = (quantity / 1000) * rate;
+    const siteFee = (quantity / 1000) * sitePrice;
+    const total = thirdPartyPrice + siteFee;
+
+    document.getElementById("totalPrice").value = total.toFixed(4);
+    document.getElementById("thirdPartyFee").textContent = "$" + thirdPartyPrice.toFixed(4);
+    document.getElementById("siteFeeDisplay").textContent = "$" + siteFee.toFixed(4);
+    document.getElementById("totalDisplay").textContent = "$" + total.toFixed(4);
+    breakdown.classList.remove("hidden");
+  } else {
+    document.getElementById("totalPrice").value = "";
+    breakdown.classList.add("hidden");
+  }
+});
+</script>
+
 </body>
-
 </html>
