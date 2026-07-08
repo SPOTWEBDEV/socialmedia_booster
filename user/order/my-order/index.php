@@ -318,7 +318,7 @@ function openPanel(order) {
   let hasExtra = false;
 
   // charge api , currncy Api , charge => i don't want to display this in the extra details section, so we will skip these fields
-  const SKIP_FIELDS = new Set(['charge', 'currency', 'charge_api']);
+  const SKIP_FIELDS = new Set(['charge', 'currency', 'charge_api' , 'charge Api' , 'charge api']);
   Object.keys(order).forEach(key => {
     if (KNOWN_FIELDS.has(key)) return;
     if (SKIP_FIELDS.has(key)) return;
