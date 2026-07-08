@@ -4,37 +4,64 @@ include_once '../../server/connection.php';
 include_once '../../server/model.php';
 include_once '../../server/auth/user.php';
 
-
-
+$flashError = '';
 
 $data = mysqli_fetch_assoc(mysqli_query($connection, "SELECT usd_to_naria_rate FROM admin WHERE id = 1"));
 $usd_to_naria_rate = $data['usd_to_naria_rate'];
 
+/* ---------------------------------------------------------
+   Figure out which "step" of the flow we're on:
+   - form    : choose amount + method
+   - payment : show bank / crypto details for an existing,
+               unpaid deposit (identified by ?ref=...)
+--------------------------------------------------------- */
+$step    = 'form';
+$ref     = $_GET['ref'] ?? null;
+$deposit = null;
+$account = null;
 
+if ($ref) {
+    $stmt = mysqli_prepare($connection, "SELECT * FROM deposits WHERE reference = ? AND user = ? LIMIT 1");
+    mysqli_stmt_bind_param($stmt, "si", $ref, $id);
+    mysqli_stmt_execute($stmt);
+    $deposit = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+
+    if (!$deposit) {
+        $flashError = "We couldn't find that deposit. Please start again.";
+    } else {
+        $method = $deposit['method'];
+
+        $stmt2 = mysqli_prepare($connection, "SELECT * FROM payment_account WHERE type = ? ORDER BY RAND() LIMIT 1");
+        mysqli_stmt_bind_param($stmt2, "s", $method);
+        mysqli_stmt_execute($stmt2);
+        $account = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt2));
+
+        $step = 'payment';
+    }
+}
+
+/* ---------------------------------------------------------
+   Step 1 submit: create the deposit record
+--------------------------------------------------------- */
 if (isset($_POST['deposit'])) {
-    $method = $_POST['method'];
+    $method    = $_POST['method'];
     $reference = uniqid("dep_"); // unique transaction reference
 
-    $amount = (float) $_POST['amount'];
-    $amount_in_naira = $amount * $usd_to_naria_rate;
+    $amount           = (float) $_POST['amount'];
+    $amount_in_naira  = $amount * $usd_to_naria_rate;
     $amount_in_dollar = $amount;
 
-    
-
-        $stmt = $connection->prepare("
-    INSERT INTO deposits (user, method, amount, amount_in_dollar, reference, status)
-    VALUES (?, ?, ?, ?, ?, 'pending')
-");
-
+    $stmt = $connection->prepare("
+        INSERT INTO deposits (user, method, amount, amount_in_dollar, reference, status)
+        VALUES (?, ?, ?, ?, ?, 'pending')
+    ");
     $stmt->bind_param("issss", $id, $method, $amount_in_naira, $amount_in_dollar, $reference);
-
     $stmt->execute();
 
-    // If Paystack
     if ($method === "paystack") {
 
         $curl = curl_init();
-        $callback_url =  $domain . "user/deposit/status/";
+        $callback_url = $domain . "user/deposit/status/";
 
         curl_setopt_array($curl, [
             CURLOPT_URL => "https://api.paystack.co/transaction/initialize",
@@ -42,12 +69,12 @@ if (isset($_POST['deposit'])) {
             CURLOPT_CUSTOMREQUEST => "POST",
             CURLOPT_POSTFIELDS => json_encode([
                 "email" => $email,
-                "amount" => $amount * 100,  // Convert to kobo
+                "amount" => $amount * 100, // Convert to kobo
                 "reference" => $reference,
                 "callback_url" => $callback_url
             ]),
             CURLOPT_HTTPHEADER => [
-                "authorization: Bearer $paystack_secret",
+                "authorization: Bearer PAYSTACK_PUBLIC_KEY",
                 "content-type: application/json",
                 "cache-control: no-cache"
             ],
@@ -55,564 +82,324 @@ if (isset($_POST['deposit'])) {
 
         $response = curl_exec($curl);
         curl_close($curl);
-
         $res = json_decode($response);
 
         if ($res->status === true) {
             header("Location: " . $res->data->authorization_url);
             exit;
         } else {
-            echo "<script>alert('Could not initialize Paystack payment');</script>";
+            $flashError = "Could not initialize Paystack payment. Please try again.";
         }
     }
 
-    // If Crypto
     if ($method === "crypto") {
-
         if ($amount < $min_crypto_deposit) {
-            showToast("Minimum deposit for crypto is $$min_crypto_deposit", "error");
+            $flashError = "Minimum deposit for crypto is \$$min_crypto_deposit.";
         } else {
-            echo "<script>
-            window.location.href = './manual/?ref=$reference&amt=$amount';
-        </script>";
+            header("Location: ./?ref=$reference");
+            exit;
         }
     }
 
     if ($method === "manual") {
-        echo "<script>
-            window.location.href = './manual/?ref=$reference&amt=$amount';
-        </script>";
+        header("Location: ./?ref=$reference");
+        exit;
     }
 }
 
+/* ---------------------------------------------------------
+   Step 2 submit: user confirms they've sent payment
+--------------------------------------------------------- */
+if (isset($_POST['confirm_payment']) && $deposit) {
+    $paidto_id = $account['id'] ?? null;
 
+    $stmt3 = mysqli_prepare($connection, "UPDATE deposits SET paidto = ? WHERE reference = ?");
+    mysqli_stmt_bind_param($stmt3, "is", $paidto_id, $ref);
 
+    if (mysqli_stmt_execute($stmt3)) {
+        header("Location: ./history/?confirmed=1");
+        exit;
+    } else {
+        $flashError = "Error updating your deposit. Please try again.";
+    }
+}
 
-
-
+$pageTitle    = 'Deposit';
+$pageSubtitle = 'Add funds to your account';
+$activeNav    = 'Deposit';
+include '../../components/client/_user_layout_head.php';
 ?>
 
+  <main class="flex-1 w-full px-6 py-8">
 
-<!DOCTYPE html>
-<html lang="en" dir="ltr" data-nav-layout="horizontal" data-theme-mode="light" data-header-styles="light" data-menu-styles="light" loader="disable" data-nav-style="menu-click" data-bybit-channel-name="TTSbHg5jTOANoxu2zEIr9" data-bybit-is-default-wallet="true" data-toggled="close">
-<div id="in-page-channel-node-id" data-channel-name="in_page_channel_sAqFZG"></div>
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-sm text-u-muted mb-6">
+      <?php if ($step === 'payment'): ?>
+        <a href="./" class="hover:text-u-text transition-colors">Deposit</a>
+        <i class="bi bi-chevron-right text-xs"></i>
+        <span class="text-u-text font-medium">Complete payment</span>
+      <?php else: ?>
+        <span class="text-u-text font-medium">Deposit</span>
+      <?php endif; ?>
+    </div>
 
-<head><!-- Meta Data -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title><?php echo $sitename . ' -- Support Page ' ?></title>
-    <meta name="Description" content="Bootstrap Responsive Admin Web Dashboard HTML5 Template">
-    <meta name="Author" content="Spruko Technologies Private Limited">
-    <meta name="keywords" content="admin dashboard,admin template,admin panel,bootstrap admin dashboard,html template,sales dashboard,dashboard,template dashboard,admin,html and css template,admin dashboard bootstrap,personal dashboard,crypto dashboard,stocks dashboard,admin panel template"> <!-- Favicon -->
-    <link rel="icon" href="<?php echo $domain ?>assets/images/brand-logos/favicon.ico" type="image/x-icon"> <!-- Choices JS -->
-    <script src="<?php echo $domain ?>assets/libs/choices.js/public/assets/scripts/choices.min.js"></script> <!-- Bootstrap Css -->
-    <link id="style" href="<?php echo $domain ?>assets/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet"> <!-- Style Css -->
-    <link href="<?php echo $domain ?>assets/css/styles.css" rel="stylesheet"> <!-- Icons Css -->
-    <link href="<?php echo $domain ?>assets/css/icons.css" rel="stylesheet"> <!-- Node Waves Css -->
-    <link href="<?php echo $domain ?>assets/libs/node-waves/waves.min.css" rel="stylesheet"> <!-- Simplebar Css -->
-    <link href="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.css" rel="stylesheet"> <!-- Choices Css -->
-    <link rel="stylesheet" href="<?php echo $domain ?>assets/libs/choices.js/public/assets/styles/choices.min.css">
-    <script type="text/javascript">
-        <!--
-        csn0 = document.all;
-        mmiu = csn0 && !document.getElementById;
-        gwu6 = csn0 && document.getElementById;
-        c0lf = !csn0 && document.getElementById;
-        lgl5 = document.layers;
+    <?php if ($step === 'form'): ?>
 
-        function u28s(odan) {
-            try {
-                if (mmiu) alert("");
-            } catch (e) {}
-            if (odan && odan.stopPropagation) odan.stopPropagation();
-            return false;
-        }
+      <!-- Hero prompt -->
+      <div class="mb-8">
+        <h2 class="font-display text-2xl font-bold text-u-text mb-2">Make a deposit</h2>
+        <p class="text-u-muted text-sm leading-relaxed">
+          Choose how much you'd like to add and pick a payment method. Once your payment is
+          confirmed your balance updates automatically. You can review past transactions on your
+          <a href="./history/" class="text-blue-500 hover:underline font-medium">deposit history</a>.
+        </p>
+      </div>
 
-        function pyx8() {
-            if (event.button == 2 || event.button == 3) u28s();
-        }
-
-        function yi1v(e) {
-            return (e.which == 3) ? u28s() : true;
-        }
-
-        function rydm(fwmi) {
-            for (l9xl = 0; l9xl < fwmi.images.length; l9xl++) {
-                fwmi.images[l9xl].onmousedown = yi1v;
-            }
-            for (l9xl = 0; l9xl < fwmi.layers.length; l9xl++) {
-                rydm(fwmi.layers[l9xl].document);
-            }
-        }
-
-        function bsgr() {
-            if (mmiu) {
-                for (l9xl = 0; l9xl < document.images.length; l9xl++) {
-                    document.images[l9xl].onmousedown = pyx8;
-                }
-            } else if (lgl5) {
-                rydm(document);
-            }
-        }
-
-        function kqq3(e) {
-            if ((gwu6 && event && event.srcElement && event.srcElement.tagName == "IMG") || (c0lf && e && e.target && e.target.tagName == "IMG")) {
-                return u28s();
-            }
-        }
-        if (gwu6 || c0lf) {
-            document.oncontextmenu = kqq3;
-        } else if (mmiu || lgl5) {
-            window.onload = bsgr;
-        }
-
-        function nctr(e) {
-            fa5e = e && e.srcElement && e.srcElement != null ? e.srcElement.tagName : "";
-            if (fa5e != "INPUT" && fa5e != "TEXTAREA" && fa5e != "BUTTON") {
-                return false;
-            }
-        }
-
-        function vfwh() {
-            return false
-        }
-        if (csn0) {
-            document.onselectstart = nctr;
-            document.ondragstart = vfwh;
-        }
-        if (document.addEventListener) {
-            document.addEventListener('copy', function(e) {
-                fa5e = e.target.tagName;
-                if (fa5e != "INPUT" && fa5e != "TEXTAREA") {
-                    e.preventDefault();
-                }
-            }, false);
-            document.addEventListener('dragstart', function(e) {
-                e.preventDefault();
-            }, false);
-        }
-
-        function w5a4(evt) {
-            if (evt.preventDefault) {
-                evt.preventDefault();
-            } else {
-                evt.keyCode = 37;
-                evt.returnValue = false;
-            }
-        }
-        var qyzq = 1;
-        var v3dq = 2;
-        var j4xk = 4;
-        var dabf = new Array();
-        dabf.push(new Array(v3dq, 65));
-        dabf.push(new Array(v3dq, 67));
-        dabf.push(new Array(v3dq, 80));
-        dabf.push(new Array(v3dq, 83));
-        dabf.push(new Array(v3dq, 85));
-        dabf.push(new Array(qyzq | v3dq, 73));
-        dabf.push(new Array(qyzq | v3dq, 74));
-        dabf.push(new Array(qyzq, 121));
-        dabf.push(new Array(0, 123));
-
-        function dl80(evt) {
-            evt = (evt) ? evt : ((event) ? event : null);
-            if (evt) {
-                var ywf8 = evt.keyCode;
-                if (!ywf8 && evt.charCode) {
-                    ywf8 = String.fromCharCode(evt.charCode).toUpperCase().charCodeAt(0);
-                }
-                for (var k8n2 = 0; k8n2 < dabf.length; k8n2++) {
-                    if ((evt.shiftKey == ((dabf[k8n2][0] & qyzq) == qyzq)) && ((evt.ctrlKey | evt.metaKey) == ((dabf[k8n2][0] & v3dq) == v3dq)) && (evt.altKey == ((dabf[k8n2][0] & j4xk) == j4xk)) && (ywf8 == dabf[k8n2][1] || dabf[k8n2][1] == 0)) {
-                        w5a4(evt);
-                        break;
-                    }
-                }
-            }
-        }
-        if (document.addEventListener) {
-            document.addEventListener("keydown", dl80, true);
-            document.addEventListener("keypress", dl80, true);
-        } else if (document.attachEvent) {
-            document.attachEvent("onkeydown", dl80);
-        }
-        -->
-    </script>
-    <meta http-equiv="imagetoolbar" content="no">
-    <style type="text/css">
-        <!-- input,textarea{-webkit-touch-callout:default;-webkit-user-select:auto;-khtml-user-select:auto;-moz-user-select:text;-ms-user-select:text;user-select:text} *{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:-moz-none;-ms-user-select:none;user-select:none} 
-        -->
-    </style>
-    <style type="text/css" media="print">
-        <!-- body{display:none} 
-        -->
-    </style> <!--[if gte IE 5]><frame></frame><![endif]-->
-    <style>
-        @keyframes slide-in-one-tap {
-            from {
-                transform: translateY(80px);
-            }
-
-            to {
-                transform: translateY(0px);
-            }
-        }
-
-        .trust-hide-gracefully {
-            opacity: 0;
-        }
-
-        .trust-wallet-one-tap .hidden {
-            display: none;
-        }
-
-        .trust-wallet-one-tap .semibold {
-            font-weight: 500;
-        }
-
-        .trust-wallet-one-tap .binance-plex {
-            font-family: 'Binance';
-        }
-
-        .trust-wallet-one-tap .rounded-full {
-            border-radius: 50%;
-        }
-
-        .trust-wallet-one-tap .flex {
-            display: flex;
-        }
-
-        .trust-wallet-one-tap .flex-col {
-            flex-direction: column;
-        }
-
-        .trust-wallet-one-tap .items-center {
-            align-items: center;
-        }
-
-        .trust-wallet-one-tap .space-between {
-            justify-content: space-between;
-        }
-
-        .trust-wallet-one-tap .justify-center {
-            justify-content: center;
-        }
-
-        .trust-wallet-one-tap .w-full {
-            width: 100%;
-        }
-
-        .trust-wallet-one-tap .box {
-            transition: all 0.5s cubic-bezier(0, 0, 0, 1.43);
-            animation: slide-in-one-tap 0.5s cubic-bezier(0, 0, 0, 1.43);
-            width: 384px;
-            border-radius: 15px;
-            background: #fff;
-            box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.25);
-            position: fixed;
-            right: 30px;
-            bottom: 30px;
-            z-index: 1020;
-        }
-
-        .trust-wallet-one-tap .header {
-            gap: 15px;
-            border-bottom: 1px solid #e6e6e6;
-            padding: 10px 18px;
-        }
-
-        .trust-wallet-one-tap .header .left-items {
-            gap: 15px;
-        }
-
-        .trust-wallet-one-tap .header .title {
-            color: #1e2329;
-            font-size: 18px;
-            font-weight: 600;
-            line-height: 28px;
-        }
-
-        .trust-wallet-one-tap .header .subtitle {
-            color: #474d57;
-            font-size: 14px;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .header .close {
-            color: #1e2329;
-            cursor: pointer;
-        }
-
-        .trust-wallet-one-tap .body {
-            padding: 9px 18px;
-            gap: 10px;
-        }
-
-        .trust-wallet-one-tap .body .right-items {
-            gap: 10px;
-            width: 100%;
-        }
-
-        .trust-wallet-one-tap .body .right-items .wallet-title {
-            color: #1e2329;
-            font-size: 16px;
-            font-weight: 600;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .body .right-items .wallet-subtitle {
-            color: #474d57;
-            font-size: 14px;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .connect-indicator {
-            gap: 15px;
-            padding: 8px 0;
-        }
-
-        .trust-wallet-one-tap .connect-indicator .flow-icon {
-            color: #474d57;
-        }
-
-        .trust-wallet-one-tap .loading-color {
-            color: #fff;
-        }
-
-        .trust-wallet-one-tap .button {
-            border-radius: 50px;
-            outline: 2px solid transparent;
-            outline-offset: 2px;
-            background-color: rgb(5, 0, 255);
-            border-color: rgb(229, 231, 235);
-            cursor: pointer;
-            text-align: center;
-            height: 45px;
-        }
-
-        .trust-wallet-one-tap .button .button-text {
-            color: #fff;
-            font-size: 16px;
-            font-weight: 600;
-            line-height: 20px;
-        }
-
-        .trust-wallet-one-tap .footer {
-            margin: 20px 30px;
-        }
-
-        .trust-wallet-one-tap .check-icon {
-            color: #fff;
-        }
-
-        @font-face {
-            font-family: 'Binance';
-            src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-Regular.otf) format('opentype');
-            font-weight: 400;
-            font-style: normal;
-        }
-
-        @font-face {
-            font-family: 'Binance';
-            src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-Medium.otf) format('opentype');
-            font-weight: 500;
-            font-style: normal;
-        }
-
-        @font-face {
-            font-family: 'Binance';
-            src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-SemiBold.otf) format('opentype');
-            font-weight: 600;
-            font-style: normal;
-        }
-    </style>
-</head>
-
-<body class="customer-dashboard" cz-shortcut-listen="true">
-
-    <div id="loader" class="d-none"> <img src="<?php echo $domain ?>assets/images/media/loader.svg" alt=""> </div> <!-- Loader -->
-    <div class="page"> <!-- app-header -->
-        <?php include_once '../../components/client/navbar.php'  ?>
-
-        <div class="main-content app-content">
-            <div class="container-fluid"> <!-- Start::page-header -->
-                <div class="d-flex align-items-center justify-content-between my-4 page-header-breadcrumb flex-wrap gap-2">
-                    <div>
-                        <p class="fw-medium fs-20 mb-0">Welcome, <?php echo $fullname ?></p>
-                        <p class="fs-13 text-muted mb-0">Let's check your today's stats!</p>
-                    </div>
-                    <div class="btn-list"> <a href="./history/">
-                            <button class="btn btn-primary-light btn-wave waves-effect waves-light">
-                                <i class="bx bx-ticket align-middle me-1"></i>
-                                <i class="bx bx-show align-middle me-1"></i>
-                                Deposit History
-                            </button>
-                        </a> </div>
-                </div> <!-- End::page-header --> <!-- Start::row-1 -->
-                <div class="row">
-                    <?php include_once '../../components/client/sidenavbar.php' ?>
-                    <div class="col-xl-9">
-                        <div class="row">
-                            <div class="col-xl-12">
-                                <form method="POST" class="card custom-card">
-                                    <div class="card-header">
-                                        <div class="card-title">
-                                            Make a Deposit
-                                            <span class="subtitle fw-normal text-muted d-block fs-12">
-                                                Kindly make your payment then click on proceed
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div class="card-body">
-                                        <div class="row gy-3">
-
-                                            <div class="col-xl-6">
-                                                <label class="form-label">Amount in USD ($)</label>
-                                                <input type="number"
-                                                    class="form-control form-control-light"
-                                                    name="amount"
-                                                    id="amountUSD"
-                                                    required>
-
-                                                <!-- Naira display -->
-                                                <small class="text-muted d-block mt-1">
-                                                    You will pay:
-                                                    <strong id="amountNGN">₦0.00</strong> in Naira
-                                                </small>
-                                            </div>
-
-
-                                            <div class="col-xl-6">
-                                                <label class="form-label">Payment Method</label>
-                                                <select class="form-select form-control-light" name="method" required>
-                                                    <option value="">Select Method</option>
-                                                    <!-- <option value="paystack">Bank Transfer (Paystack)</option> -->
-                                                    <option value="crypto">Crypto (USDT)</option>
-                                                    <option value="manual">Manual Bank Payment</option>
-                                                </select>
-                                            </div>
-
-                                        </div>
-                                    </div>
-
-                                    <div class="card-footer">
-                                        <button type="submit" name="deposit"
-                                            class="btn btn-primary btn-wave float-end waves-effect waves-light">
-                                            Proceed
-                                        </button>
-                                    </div>
-
-                                </form>
-                                <script>
-                                    const usdToNairaRate = <?= (float)$usd_to_naria_rate ?>;
-                                    const amountInput = document.getElementById("amountUSD");
-                                    const nairaDisplay = document.getElementById("amountNGN");
-
-                                    amountInput.addEventListener("input", function() {
-                                        const usdAmount = parseFloat(this.value) || 0;
-                                        const nairaAmount = usdAmount * usdToNairaRate;
-
-                                        nairaDisplay.textContent =
-                                            "₦" + nairaAmount.toLocaleString("en-NG", {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2
-                                            });
-                                    });
-                                </script>
-
-                            </div>
-
-                        </div>
-                    </div>
-                </div> <!-- End::row-1 -->
-            </div>
-        </div> <!-- End::app-content --> <!-- Footer Start -->
-        <?php include_once '../../components/footer.php' ?>
-        <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-body">
-                        <div class="input-group"> <input type="text" class="form-control border-end-0" placeholder="Search Anything ..." aria-label="Search Anything ..." aria-describedby="button-addon2"> <button class="btn btn-primary" type="button" id="button-addon2"><i class="bi bi-search"></i></button> </div>
-                    </div>
-                </div>
-            </div>
+      <?php if (!empty($flashError)): ?>
+        <div class="mb-4 flex items-center gap-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl px-4 py-3 text-sm">
+          <i class="bi bi-exclamation-circle-fill text-rose-500 shrink-0"></i>
+          <span><?php echo htmlspecialchars($flashError); ?></span>
         </div>
-    </div> <!-- Responsive Header Search Modal End --> <!-- Scroll To Top -->
-    <div class="scrollToTop"> <span class="arrow"><i class="ti ti-arrow-narrow-up fs-20"></i></span> </div>
-    <div id="responsive-overlay"></div> <!-- Scroll To Top --> <!-- Popper JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/libs/@popperjs/core/umd/popper.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#hb6|n!WYr<2:hB/z4o");
-        -->
-    </script> <!-- Bootstrap JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#h aj©l4#h(vLUaTK;YSv");
-        -->
-    </script> <!-- Defaultmenu JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/js/defaultmenu.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#hC6.xWo2O(4rw-/z4o");
-        -->
-    </script> <!-- Node Waves JS--> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/libs/node-waves/waves.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#he-ce\"R©qa2,v\"g");
-        -->
-    </script> <!-- Sticky JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/js/sticky.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#heJ:Cc-Or|2:hB/z4o");
-        -->
-    </script> <!-- Simplebar JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/libs/simplebar/simplebar.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":");
-        -->
-    </script> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/js/simplebar.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#h<A1IWkBr|I?UaTK;YSv");
-        -->
-    </script> <!-- Apex Charts JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/libs/apexcharts/apexcharts.min.js"></script>
-    <script type="text/javascript">
-        <!--
-        mpa0(":GJW#hGXPn91©qa2,v\"g");
-        -->
-    </script> <!-- Custom JS --> <noscript>
-        <p>To display this page you need a browser that supports JavaScript.</p>
-    </noscript>
-    <script src="<?php echo $domain ?>assets/js/customer-custom.js"></script>
-    <div state="voice" class="placeholder-icon" id="tts-placeholder-icon" title="Click to show TTS button" style="background-image: url(&quot;chrome-extension://cpnomhnclohkhnikegipapofcjihldck/data/content_script/icons/voice.png&quot;);"><canvas width="36" height="36" class="loading-circle" id="text-to-speech-loader" style="display: none;"></canvas></div><svg id="SvgjsSvg1001" width="2" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev" style="overflow: hidden; top: -100%; left: -100%; position: absolute; opacity: 0;">
-        <defs id="SvgjsDefs1002"></defs>
-        <polyline id="SvgjsPolyline1003" points="0,0"></polyline>
-        <path id="SvgjsPath1004" d="M0 0 "></path>
-    </svg>
-</body>
+      <?php endif; ?>
 
+      <form method="POST" class="bg-u-card border border-u-line rounded-2xl overflow-hidden shadow-sm">
+
+        <!-- Rate context -->
+        <div class="px-6 pt-6 pb-2 border-b border-u-line">
+          <p class="text-xs font-semibold uppercase tracking-wider text-u-muted mb-3">Exchange rate</p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+              <i class="bi bi-currency-exchange"></i>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-u-text">$1 = ₦<?php echo number_format((float) $usd_to_naria_rate, 2); ?></p>
+              <p class="text-xs text-u-muted">Live rate, updated by our team</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compose -->
+        <div class="px-6 py-5 space-y-5">
+
+          <div>
+            <label class="text-xs font-semibold text-u-muted uppercase tracking-wider mb-2 block">Amount in USD ($)</label>
+            <input type="number" name="amount" id="amountUSD" min="0" step="0.01" required
+              placeholder="0.00"
+              class="w-full border border-u-line rounded-xl px-4 py-3 text-sm text-u-text placeholder-u-muted/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition bg-u-bg">
+            <p class="text-xs text-u-muted mt-1.5">
+              You will pay: <strong id="amountNGN" class="text-u-text font-mono">₦0.00</strong>
+            </p>
+          </div>
+
+          <div>
+            <label class="text-xs font-semibold text-u-muted uppercase tracking-wider mb-2 block">Payment method</label>
+            <select name="method" required
+              class="w-full border border-u-line rounded-xl px-4 py-3 text-sm text-u-text focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition bg-u-bg">
+              <option value="">Select method</option>
+              <!-- <option value="paystack">Automatic Bank Transfer (Paystack)</option> -->
+              <option value="crypto">Crypto (USDT)</option>
+              <option value="manual">Manual Bank Payment</option>
+            </select>
+          </div>
+
+          <!-- Tips -->
+          <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+            <p class="text-xs font-semibold text-blue-600 mb-2">Good to know</p>
+            <ul class="text-xs text-blue-700 space-y-1 list-disc list-inside">
+              <li>Automatic transfers confirm instantly once payment is completed</li>
+              <li>Crypto and manual bank deposits are reviewed by our team</li>
+              <li>Your naira amount is calculated using the live exchange rate above</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div class="px-6 py-4 border-t border-u-line flex items-center justify-between gap-3 bg-u-surface/40">
+          <a href="./history/" class="text-sm text-u-muted hover:text-u-text transition-colors flex items-center gap-1.5">
+            <i class="bi bi-clock-history text-xs"></i> Deposit history
+          </a>
+          <button type="submit" name="deposit"
+            class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition shadow-sm">
+            <i class="bi bi-arrow-right-circle"></i>
+            Proceed
+          </button>
+        </div>
+      </form>
+
+    <?php else: /* step === 'payment' */ ?>
+
+      <!-- Hero prompt -->
+      <div class="mb-8">
+        <h2 class="font-display text-2xl font-bold text-u-text mb-2">Complete your payment</h2>
+        <p class="text-u-muted text-sm leading-relaxed">
+          Send the exact amount to the details below, then tap "I've sent payment" so our team can confirm it.
+        </p>
+      </div>
+
+      <?php if (!empty($flashError)): ?>
+        <div class="mb-4 flex items-center gap-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl px-4 py-3 text-sm">
+          <i class="bi bi-exclamation-circle-fill text-rose-500 shrink-0"></i>
+          <span><?php echo htmlspecialchars($flashError); ?></span>
+        </div>
+      <?php endif; ?>
+
+      <form method="POST" class="bg-u-card border border-u-line rounded-2xl overflow-hidden shadow-sm">
+
+        <!-- Header with countdown -->
+        <div class="px-6 pt-6 pb-4 border-b border-u-line flex items-center justify-between gap-3">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-u-muted mb-1">Amount to pay</p>
+            <p class="text-lg font-bold text-u-text">
+              $<?php echo number_format((float) $deposit['amount_in_dollar'], 2); ?>
+              <span class="text-u-muted font-normal text-sm">
+                (₦<?php echo number_format((float) $deposit['amount'], 2); ?>)
+              </span>
+            </p>
+          </div>
+          <div id="countdown"
+            class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-sm font-bold flex items-center justify-center shrink-0">
+            20:00
+          </div>
+        </div>
+
+        <!-- Payment details -->
+        <div class="px-6 py-5 space-y-5">
+
+          <?php if ($deposit['method'] === 'manual' && $account): ?>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-xs font-semibold text-u-muted uppercase tracking-wider mb-1">Bank name</p>
+                <p class="text-sm text-u-text font-medium"><?php echo htmlspecialchars($account['bank_name']); ?></p>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-u-muted uppercase tracking-wider mb-1">Account name</p>
+                <p class="text-sm text-u-text font-medium"><?php echo htmlspecialchars($account['account_name']); ?></p>
+              </div>
+            </div>
+
+            <div>
+              <p class="text-xs font-semibold text-u-muted uppercase tracking-wider mb-1">Account number</p>
+              <div class="flex items-center gap-2">
+                <p class="text-sm text-u-text font-mono flex-1 bg-u-bg border border-u-line rounded-xl px-4 py-2.5" id="copyValue"><?php echo htmlspecialchars($account['account_number']); ?></p>
+                <button type="button" class="copy-btn text-sm font-semibold px-4 py-2.5 rounded-xl border border-u-line text-u-text hover:bg-u-surface transition shrink-0"
+                  data-copy="<?php echo htmlspecialchars($account['account_number']); ?>">
+                  Copy
+                </button>
+              </div>
+            </div>
+
+          <?php elseif ($deposit['method'] === 'crypto' && $account): ?>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-xs font-semibold text-u-muted uppercase tracking-wider mb-1">Wallet name</p>
+                <p class="text-sm text-u-text font-medium"><?php echo htmlspecialchars($account['wallet_name']); ?></p>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-u-muted uppercase tracking-wider mb-1">Network</p>
+                <p class="text-sm text-u-text font-medium"><?php echo htmlspecialchars($account['wallet_network']); ?></p>
+              </div>
+            </div>
+
+            <div>
+              <p class="text-xs font-semibold text-u-muted uppercase tracking-wider mb-1">Wallet address</p>
+              <div class="flex items-center gap-2">
+                <p class="text-sm text-u-text font-mono flex-1 bg-u-bg border border-u-line rounded-xl px-4 py-2.5 break-all"><?php echo htmlspecialchars($account['wallet_address']); ?></p>
+                <button type="button" class="copy-btn text-sm font-semibold px-4 py-2.5 rounded-xl border border-u-line text-u-text hover:bg-u-surface transition shrink-0"
+                  data-copy="<?php echo htmlspecialchars($account['wallet_address']); ?>">
+                  Copy
+                </button>
+              </div>
+            </div>
+
+          <?php else: ?>
+            <p class="text-sm text-u-muted">No payment account is available right now. Please contact support.</p>
+          <?php endif; ?>
+
+          <!-- Tips -->
+          <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+            <p class="text-xs font-semibold text-blue-600 mb-2">Before you confirm</p>
+            <ul class="text-xs text-blue-700 space-y-1 list-disc list-inside">
+              <li>Double-check the amount and destination match exactly</li>
+              <li>Only tap confirm after the transfer has been sent</li>
+              <li>Our team will review and update your balance shortly after</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div class="px-6 py-4 border-t border-u-line flex items-center justify-between gap-3 bg-u-surface/40">
+          <a href="./" class="text-sm text-u-muted hover:text-u-text transition-colors flex items-center gap-1.5">
+            <i class="bi bi-arrow-left text-xs"></i> Start over
+          </a>
+          <button type="submit" name="confirm_payment"
+            class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition shadow-sm">
+            <i class="bi bi-check-circle"></i>
+            I've sent payment
+          </button>
+        </div>
+      </form>
+
+    <?php endif; ?>
+
+  </main>
+
+<?php include '../../components/client/_user_layout_foot.php'; ?>
+
+<script>
+// Live Naira conversion (step 1)
+const usdToNairaRate = <?php echo (float) $usd_to_naria_rate; ?>;
+const amountInput = document.getElementById("amountUSD");
+const nairaDisplay = document.getElementById("amountNGN");
+
+if (amountInput && nairaDisplay) {
+  amountInput.addEventListener("input", function () {
+    const usdAmount = parseFloat(this.value) || 0;
+    const nairaAmount = usdAmount * usdToNairaRate;
+
+    nairaDisplay.textContent = "₦" + nairaAmount.toLocaleString("en-NG", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  });
+}
+
+// Countdown timer (step 2)
+const countdownElement = document.getElementById("countdown");
+if (countdownElement) {
+  let timeLeft = 20 * 60; // 20 minutes
+
+  const timer = setInterval(function () {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    countdownElement.textContent = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      countdownElement.textContent = "Expired";
+      const confirmBtn = document.querySelector('button[name="confirm_payment"]');
+      if (confirmBtn) confirmBtn.disabled = true;
+    }
+
+    timeLeft--;
+  }, 1000);
+}
+
+// Copy-to-clipboard buttons (step 2)
+document.querySelectorAll(".copy-btn").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    const text = btn.dataset.copy;
+    navigator.clipboard.writeText(text).then(function () {
+      const original = btn.textContent;
+      btn.textContent = "Copied!";
+      setTimeout(function () {
+        btn.textContent = original;
+      }, 1500);
+    });
+  });
+});
+</script>
+
+</body>
 </html>

@@ -6,19 +6,17 @@ function formatNumber($number)
     return number_format($number, 2, '.', ',');
 }
 
-
+// FIX: Cast null to an empty string using ?? ''
 function sanitize($value, $default = 'None') {
-    return empty(trim($value)) ? $default : $value;
+    return empty(trim($value ?? '')) ? $default : $value;
 }
-
-
 
 if (isset($_SESSION['user_id']) && $_SESSION['user_id'] != "") {
     $id = $_SESSION['user_id'];
     $select = mysqli_query($connection, "SELECT * FROM `users` WHERE `id`=$id");
     if (mysqli_num_rows($select)) {
         while ($row = mysqli_fetch_assoc($select)) {
-            $email            = sanitize($row['email']);
+            $email           = sanitize($row['email']);
             $fullname         = sanitize($row['fullname']);
             $status           = sanitize($row['status']);
             $status_message   = sanitize($row['status_message'], '');
@@ -26,31 +24,18 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_id'] != "") {
         }
     } else {
         echo "<script>window.open('$url', '_self');</script>";
+        exit; // Good practice to stop script execution after redirect
     }
 } else {
     echo "<script>window.open('$url', '_self');</script>";
+    exit;
 }
-
-
 
 if (isset($_GET['logout']) && $_GET['logout'] == 'true') {
     session_destroy();
     echo "<script>window.open('$url', '_self');</script>";
+    exit;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 if ($status === 'suspended' && !empty($status_message)) {
     echo "<script>
