@@ -94,7 +94,7 @@ include '../../../components/client/_user_layout_head.php';
 
   <!-- ===================== SLIDE-OVER: ORDER DETAIL ===================== -->
   <div id="panelOverlay" class="hidden fixed inset-0 z-50">
-    <div class="absolute inset-0 bg-black/60" id="panelBackdrop"></div>
+    <div class="absolute inset-0 bg-black" id="panelBackdrop"></div>
 
     <aside id="orderPanel" class="absolute right-0 top-0 h-full w-full sm:w-[480px] bg-card border-l border-line flex flex-col"
            style="transform: translateX(100%); transition: transform .25s ease-out;">
@@ -227,9 +227,9 @@ function renderTable() {
     tr.addEventListener("click", () => openPanel(order));
     tr.innerHTML = `
       <td class="px-5 py-3 font-mono text-slate-500">#${index + 1}</td>
-      <td class="px-3 py-3 font-mono text-slate-300">${escapeHtml(order.order_id)}</td>
+      <td class="px-3 py-3 font-mono text-slate-500">${escapeHtml(order.order_id)}</td>
       <td class="px-3 py-3">
-        <div class="text-slate-200 max-w-xs truncate">${escapeHtml(order.social_url)}</div>
+        <div class="text-slate-500 max-w-xs truncate">${escapeHtml(order.social_url)}</div>
         <div class="text-xs text-slate-500">${escapeHtml(order.fullname)}</div>
       </td>
       <td class="px-3 py-3">
@@ -238,11 +238,11 @@ function renderTable() {
         </span>
       </td>
       <td class="px-3 py-3">
-        <div class="text-slate-200 font-mono">${fmtMoney(order.order_price)}</div>
+        <div class="text-slate-500 font-mono">${fmtMoney(order.order_price)}</div>
         <div class="text-xs text-slate-500 font-mono">${escapeHtml(order.created_at)}</div>
       </td>
       <td class="px-3 py-3 text-right">
-        <button class="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-line text-slate-300 hover:bg-surface hover:text-white transition">
+        <button class="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-line text-slate-500 hover:bg-surface hover:text-white transition">
           <i class="bi bi-eye"></i> View
         </button>
       </td>
