@@ -14,7 +14,6 @@
 header('Content-Type: application/json');
 
 include_once '../../server/connection.php';
-include_once '../../server/model.php';
 include_once '../../server/auth/admin.php';
 include_once './email_template.php';
 include_once '../../mailer/index.php'; 

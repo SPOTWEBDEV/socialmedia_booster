@@ -488,7 +488,7 @@ document.getElementById("reachoutForm").addEventListener("submit", function (e) 
   document.getElementById("sendBtnLabel").textContent = "Sending…";
 
   const formData = new FormData();
-  formData.append("subject", subjectInput.value.trim());
+  formData.append("subject", subjectInput.value);
   formData.append("message", messageInput.value.trim());
   formData.append("recipients", document.getElementById("recipientsField").value);
 
