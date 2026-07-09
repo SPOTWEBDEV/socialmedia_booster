@@ -1,371 +1,131 @@
 <?php
 
-
 include('../../server/connection.php');
 include_once '../../server/model.php';
 
+$flashMessage = '';
+$flashType    = 'success'; // success | error
 
+if (isset($_POST['login'])) {
+    $password = $_POST['password'] ?? '';
 
-if(isset($_POST['login'])){
-  $password = $_POST['password'];
+    if (empty($password)) {
+        $flashMessage = "Please enter the admin password.";
+        $flashType = 'error';
+    } else {
+        // NOTE: matches against the plaintext `password` column as the original
+        // code did, just via a prepared statement instead of string interpolation
+        // (the original built the query as WHERE password='$password', which was
+        // a direct SQL injection risk). If this column actually stores a hash,
+        // swap this for a password_verify() check against the stored hash instead.
+        $stmt = $connection->prepare("SELECT id FROM `admin` WHERE `password` = ? LIMIT 1");
+        $stmt->bind_param("s", $password);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-  $query = mysqli_query($connection, "SELECT id FROM `admin` WHERE `password`='$password'");
-
-  if(mysqli_num_rows($query)){
-     $admin = mysqli_fetch_assoc($query);
-     $id = $admin['id'];
-     $_SESSION['admin_'] = $id;
-     showToast("Login  successfully", 'success');
-        echo "<script>
-            setTimeout(function() {
-                window.location.href = '../dashboard/';
-            }, 1500);
-        </script>";
-  }else{
-     showToast("Incorrect login details", 'error'); 
-  }
-
+        if ($result->num_rows > 0) {
+            $admin = $result->fetch_assoc();
+            $_SESSION['admin_'] = $admin['id'];
+            header("Location: ../dashboard/");
+            exit;
+        } else {
+            $flashMessage = "Incorrect password.";
+            $flashType = 'error';
+        }
+    }
 }
-
-
-
 ?>
-
-
 <!DOCTYPE html>
-<html
-  lang="en"
-  dir="ltr"
-  data-nav-layout="vertical"
-  data-vertical-style="overlay"
-  data-theme-mode="light"
-  data-header-styles="light"
-  data-menu-styles="light"
-  data-toggled="close"
-  data-bybit-channel-name="ejDyBVopPZdH0IKXFPfCV"
-  data-bybit-is-default-wallet="true">
-<div
-  id="in-page-channel-node-id"
-  data-channel-name="in_page_channel_nT-vO_"></div>
-
+<html lang="en" dir="ltr" data-theme-mode="light">
 <head>
-  <!-- Meta Data -->
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>UDON - Bootstrap 5 Premium Admin &amp; Dashboard Template</title>
-  <meta
-    name="Description"
-    content="Bootstrap Responsive Admin Web Dashboard HTML5 Template" />
-  <meta name="Author" content="Spruko Technologies Private Limited" />
-  <meta
-    name="keywords"
-    content="admin,admin dashboard,admin panel,admin template,bootstrap,clean,dashboard,flat,jquery,modern,responsive,premium admin templates,responsive admin,ui,ui kit." />
-  <!-- Favicon -->
-  <link
-    rel="icon"
-    href="<?php echo $domain ?>assets/images/brand-logos/favicon.ico"
-    type="image/x-icon" />
-  <!-- Main Theme Js -->
-  <script src="<?php echo $domain ?>assets/js/authentication-main.js"></script>
-  <!-- Bootstrap Css -->
-  <link
-    id="style"
-    href="<?php echo $domain ?>assets/libs/bootstrap/css/bootstrap.min.css"
-    rel="stylesheet" />
-  <!-- Style Css -->
-  <link href="<?php echo $domain ?>assets/css/styles.css" rel="stylesheet" />
-  <!-- Icons Css -->
-  <link href="<?php echo $domain ?>assets/css/icons.css" rel="stylesheet" />
-
-  <meta http-equiv="imagetoolbar" content="no" />
-  <style type="text/css">
-    <!-- input,textarea{-webkit-touch-callout:default;-webkit-user-select:auto;-khtml-user-select:auto;-moz-user-select:text;-ms-user-select:text;user-select:text} *{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:-moz-none;-ms-user-select:none;user-select:none} 
-    -->
-  </style>
-  <style type="text/css" media="print">
-    <!-- body{display:none} 
-    -->
-  </style>
-  <!--[if gte IE 5]><frame></frame><![endif]-->
-  <style>
-    @keyframes slide-in-one-tap {
-      from {
-        transform: translateY(80px);
-      }
-
-      to {
-        transform: translateY(0px);
-      }
-    }
-
-    .trust-hide-gracefully {
-      opacity: 0;
-    }
-
-    .trust-wallet-one-tap .hidden {
-      display: none;
-    }
-
-    .trust-wallet-one-tap .semibold {
-      font-weight: 500;
-    }
-
-    .trust-wallet-one-tap .binance-plex {
-      font-family: "Binance";
-    }
-
-    .trust-wallet-one-tap .rounded-full {
-      border-radius: 50%;
-    }
-
-    .trust-wallet-one-tap .flex {
-      display: flex;
-    }
-
-    .trust-wallet-one-tap .flex-col {
-      flex-direction: column;
-    }
-
-    .trust-wallet-one-tap .items-center {
-      align-items: center;
-    }
-
-    .trust-wallet-one-tap .space-between {
-      justify-content: space-between;
-    }
-
-    .trust-wallet-one-tap .justify-center {
-      justify-content: center;
-    }
-
-    .trust-wallet-one-tap .w-full {
-      width: 100%;
-    }
-
-    .trust-wallet-one-tap .box {
-      transition: all 0.5s cubic-bezier(0, 0, 0, 1.43);
-      animation: slide-in-one-tap 0.5s cubic-bezier(0, 0, 0, 1.43);
-      width: 384px;
-      border-radius: 15px;
-      background: #fff;
-      box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.25);
-      position: fixed;
-      right: 30px;
-      bottom: 30px;
-      z-index: 1020;
-    }
-
-    .trust-wallet-one-tap .header {
-      gap: 15px;
-      border-bottom: 1px solid #e6e6e6;
-      padding: 10px 18px;
-    }
-
-    .trust-wallet-one-tap .header .left-items {
-      gap: 15px;
-    }
-
-    .trust-wallet-one-tap .header .title {
-      color: #1e2329;
-      font-size: 18px;
-      font-weight: 600;
-      line-height: 28px;
-    }
-
-    .trust-wallet-one-tap .header .subtitle {
-      color: #474d57;
-      font-size: 14px;
-      line-height: 20px;
-    }
-
-    .trust-wallet-one-tap .header .close {
-      color: #1e2329;
-      cursor: pointer;
-    }
-
-    .trust-wallet-one-tap .body {
-      padding: 9px 18px;
-      gap: 10px;
-    }
-
-    .trust-wallet-one-tap .body .right-items {
-      gap: 10px;
-      width: 100%;
-    }
-
-    .trust-wallet-one-tap .body .right-items .wallet-title {
-      color: #1e2329;
-      font-size: 16px;
-      font-weight: 600;
-      line-height: 20px;
-    }
-
-    .trust-wallet-one-tap .body .right-items .wallet-subtitle {
-      color: #474d57;
-      font-size: 14px;
-      line-height: 20px;
-    }
-
-    .trust-wallet-one-tap .connect-indicator {
-      gap: 15px;
-      padding: 8px 0;
-    }
-
-    .trust-wallet-one-tap .connect-indicator .flow-icon {
-      color: #474d57;
-    }
-
-    .trust-wallet-one-tap .loading-color {
-      color: #fff;
-    }
-
-    .trust-wallet-one-tap .button {
-      border-radius: 50px;
-      outline: 2px solid transparent;
-      outline-offset: 2px;
-      background-color: rgb(5, 0, 255);
-      border-color: rgb(229, 231, 235);
-      cursor: pointer;
-      text-align: center;
-      height: 45px;
-    }
-
-    .trust-wallet-one-tap .button .button-text {
-      color: #fff;
-      font-size: 16px;
-      font-weight: 600;
-      line-height: 20px;
-    }
-
-    .trust-wallet-one-tap .footer {
-      margin: 20px 30px;
-    }
-
-    .trust-wallet-one-tap .check-icon {
-      color: #fff;
-    }
-
-    @font-face {
-      font-family: "Binance";
-      src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-Regular.otf) format("opentype");
-      font-weight: 400;
-      font-style: normal;
-    }
-
-    @font-face {
-      font-family: "Binance";
-      src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-Medium.otf) format("opentype");
-      font-weight: 500;
-      font-style: normal;
-    }
-
-    @font-face {
-      font-family: "Binance";
-      src: url(chrome-extension://egjidjbpglichdcondbcbdnbeeppgdph/fonts/BinancePlex-SemiBold.otf) format("opentype");
-      font-weight: 600;
-      font-style: normal;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><?php echo htmlspecialchars($sitename ?? 'Admin'); ?> - Admin Login</title>
+  <link rel="icon" href="<?php echo $domain ?>assets/images/brand-logos/favicon.ico" type="image/x-icon">
+  <link href="<?php echo $domain ?>assets/css/icons.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="authentication-background" cz-shortcut-listen="true">
+<body class="bg-u-bg min-h-screen flex items-center justify-center px-4 py-10">
 
- 
-  <div class="container-lg">
-    <div
-      class="row justify-content-center authentication authentication-basic align-items-center h-100">
-      <div class="col-xxl-4 col-xl-5 col-lg-5 col-md-6 col-sm-8 col-12">
-        <div class="card custom-card">
-          <div class="card-body p-5">
-            <div class="mb-3 d-flex justify-content-center">
-              <a href="index.html">
-                <img
-                  src="<?php echo $domain ?>assets/images/logo.png"
-                  alt="logo"
-                  class="desktop-logo" />
-                <img
-                  src="<?php echo $domain ?>assets/images/logo.png"
-                  alt="logo"
-                  class="desktop-dark" />
-              </a>
+  <div class="w-full max-w-md">
+
+    <!-- Logo -->
+    <div class="flex justify-center mb-6">
+      <img src="<?php echo $domain ?>assets/images/logo.png" alt="<?php echo htmlspecialchars($sitename ?? ''); ?>" class="h-9">
+    </div>
+
+    <div class="bg-u-card border border-u-line rounded-2xl overflow-hidden shadow-sm">
+
+      <div class="px-6 pt-6">
+        <?php if (!empty($flashMessage)): ?>
+          <?php if ($flashType === 'error'): ?>
+            <div class="mb-4 flex items-center gap-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl px-4 py-3 text-sm">
+              <i class="bi bi-exclamation-circle-fill text-rose-500 shrink-0"></i>
+              <span><?php echo htmlspecialchars($flashMessage); ?></span>
             </div>
-            <p class="h5 mb-2 text-center">Lock Screens</p>
-            <p class="mb-3 text-muted op-7 fw-normal text-center">
-              Hello Admin!
-            </p>
-            <div class="d-flex align-items-center mb-3">
-              <div class="lh-1">
-                <span class="avatar avatar-rounded">
-                  <img src="<?php echo $domain ?>assets/images/avatar.svg" alt="" />
-                </span>
-              </div>
-              <div class="ms-3">
-                <p class="mb-0 text-dark">admin@admin.com</p>
-              </div>
+          <?php else: ?>
+            <div class="mb-4 flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl px-4 py-3 text-sm">
+              <i class="bi bi-check-circle-fill text-emerald-500 shrink-0"></i>
+              <span><?php echo htmlspecialchars($flashMessage); ?></span>
             </div>
-            <form method="POST" class="row gy-3">
-              <div class="col-xl-12 mb-2">
-                <label
-                  for="lockscreen-password"
-                  class="form-label text-default">Password</label>
-                <div class="position-relative">
-                  <input
-                    type="password"
-                    name="password"
-                    class="form-control form-control-lg"
-                    id="lockscreen-password"
-                    placeholder="password" />
-                  <a
-                    href="javascript:void(0);"
-                    class="show-password-button text-muted"
-                    onclick="createpassword('lockscreen-password',this)"
-                    id="button-addon2"><i class="ri-eye-off-line align-middle"></i></a>
-                </div>
-                <div class="mt-2">
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      value=""
-                      id="defaultCheck1" />
-                    <label
-                      class="form-check-label text-muted fw-normal"
-                      for="defaultCheck1">
-                      Remember password ?
-                    </label>
-                  </div>
-                </div>
-              </div>
-              <div class="col-xl-12 d-grid mt-2">
-                <button name="login" type="submit" class="btn btn-lg btn-primary">Unlock</button>
-              </div>
-            </form>
+          <?php endif; ?>
+        <?php endif; ?>
+      </div>
+
+      <div class="px-6 pb-6">
+        <h2 class="font-display text-xl font-bold text-u-text mb-1 text-center">Admin access</h2>
+        <p class="text-sm text-u-muted mb-5 text-center">Enter the admin password to continue.</p>
+
+        <div class="flex items-center gap-3 bg-u-surface/40 border border-u-line rounded-xl px-4 py-3 mb-5">
+          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+            <i class="bi bi-shield-lock"></i>
           </div>
+          <p class="text-sm text-u-text truncate">admin@admin.com</p>
         </div>
+
+        <form method="POST" class="space-y-4">
+          <div>
+            <label class="text-xs font-semibold text-u-muted uppercase tracking-wider mb-2 block">Password</label>
+            <div class="relative">
+              <input type="password" name="password" id="adminPassword" required
+                class="w-full border border-u-line rounded-xl px-4 py-3 pr-11 text-sm text-u-text focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition bg-u-bg">
+              <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-u-muted" data-target="adminPassword">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <label class="flex items-center gap-2 text-sm text-u-muted">
+            <input type="checkbox" class="rounded border-u-line">
+            Remember password
+          </label>
+
+          <button type="submit" name="login"
+            class="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white text-sm font-semibold px-5 py-3 rounded-xl transition shadow-sm">
+            <i class="bi bi-unlock"></i>
+            Unlock
+          </button>
+        </form>
       </div>
     </div>
   </div>
-  </div>
 
-  <script src="<?php echo $domain ?>assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>
+document.querySelectorAll(".toggle-password").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    const input = document.getElementById(btn.dataset.target);
+    const icon = btn.querySelector("i");
+    if (input.type === "password") {
+      input.type = "text";
+      icon.className = "bi bi-eye-slash";
+    } else {
+      input.type = "password";
+      icon.className = "bi bi-eye";
+    }
+  });
+});
+</script>
 
-  <script src="<?php echo $domain ?>assets/js/show-password.js"></script>
-  <div
-    state="voice"
-    class="placeholder-icon"
-    id="tts-placeholder-icon"
-    title="Click to show TTS button"
-    style="
-        background-image: url('chrome-extension://cpnomhnclohkhnikegipapofcjihldck/data/content_script/icons/voice.png');
-      ">
-    <canvas
-      width="36"
-      height="36"
-      class="loading-circle"
-      id="text-to-speech-loader"
-      style="display: none"></canvas>
-  </div>
 </body>
-
 </html>

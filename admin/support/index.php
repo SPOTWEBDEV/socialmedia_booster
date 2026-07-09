@@ -3,13 +3,15 @@ include_once '../../server/connection.php';
 include_once '../../server/model.php';
 include_once '../../server/auth/admin.php';
 
+$flashError = '';
+
 // =========================================================
 //  SAVE REPLY  (sets status to 'replied' automatically)
 // =========================================================
 if (isset($_POST['save_reply'])) {
     $reply  = $_POST['reply'];
     $status = 'replied';
-    $msg_id = $_POST['msg_id'];
+    $msg_id = (int) $_POST['msg_id'];
 
     $stmt = $connection->prepare("
         UPDATE support_messages
@@ -30,7 +32,7 @@ if (isset($_POST['save_reply'])) {
 //  DELETE REPLY
 // =========================================================
 if (isset($_POST['delete_reply'])) {
-    $msg_id = $_POST['msg_id'];
+    $msg_id = (int) $_POST['msg_id'];
 
     $stmt = $connection->prepare("UPDATE support_messages SET reply = '' WHERE id = ?");
     $stmt->bind_param("i", $msg_id);
@@ -58,7 +60,7 @@ include '../../components/admin/_layout_head.php';
 
     <!-- Page header row -->
     <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
-      <p class="text-sm text-slate-400">Customer support messages and your replies.</p>
+      <p class="text-sm text-slate-400">Customer support messages and your replies. Includes messages sent through the public contact form, shown as <span class="text-slate-300 font-medium">Website Guest</span>.</p>
     </div>
 
     <!-- Summary strip -->
@@ -97,6 +99,12 @@ include '../../components/admin/_layout_head.php';
           <option value="inprogress">In progress</option>
           <option value="replied">Replied</option>
           <option value="resolved">Resolved</option>
+        </select>
+
+        <select id="sourceFilter" class="bg-surface border border-line rounded-lg px-3 py-2 text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+          <option value="">All sources</option>
+          <option value="user">Registered users</option>
+          <option value="guest">Website contact form</option>
         </select>
       </div>
 
@@ -187,7 +195,7 @@ include '../../components/admin/_layout_head.php';
           <label class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2 block">Write a reply</label>
           <textarea name="reply" id="replyTextarea" rows="5" placeholder="Type your response to the customer…"
             class="w-full bg-surface border border-line rounded-lg px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition resize-none"></textarea>
-          <p class="text-xs text-slate-500 mt-1.5">Saving sets this ticket's status to <span class="text-amber-400 font-medium">Replied</span> automatically.</p>
+          <p class="text-xs text-slate-500 mt-1.5" id="replyHint">Saving sets this ticket's status to <span class="text-amber-400 font-medium">Replied</span> automatically.</p>
           <button type="submit" name="save_reply"
             class="mt-3 w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white font-semibold text-sm py-2.5 rounded-lg transition flex items-center justify-center gap-2">
             <i class="bi bi-send"></i> Save reply
@@ -208,18 +216,29 @@ const domain = "<?php echo $domain ?>";
 
 // Tickets are rendered server-side into JSON so we get one DB query,
 // then all filtering/search/panel logic runs client-side.
+//
+// LEFT JOIN (not the original inner join) so tickets with no matching user —
+// i.e. guest submissions from the public landing page contact form, where
+// `user` is NULL — still show up here instead of silently disappearing.
 let tickets = <?php
-    $query = mysqli_query($connection, "SELECT support_messages.*, users.fullname, users.email FROM support_messages, users WHERE users.id = support_messages.user ORDER BY support_messages.id DESC");
+    $query = mysqli_query($connection, "
+        SELECT support_messages.*, users.fullname, users.email
+        FROM support_messages
+        LEFT JOIN users ON users.id = support_messages.user
+        ORDER BY support_messages.id DESC
+    ");
     $rows = [];
     while ($row = mysqli_fetch_assoc($query)) {
+        $isGuest = empty($row['user']);
         $rows[] = [
             'id'        => (int) $row['id'],
-            'fullname'  => $row['fullname'],
-            'email'     => $row['email'],
+            'fullname'  => $isGuest ? 'Website Guest' : $row['fullname'],
+            'email'     => $isGuest ? '(via contact form)' : $row['email'],
             'message'   => $row['message'],
             'reply'     => $row['reply'],
             'status'    => $row['status'],
             'created_at'=> $row['created_at'],
+            'isGuest'   => $isGuest,
         ];
     }
     echo json_encode($rows, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
@@ -243,6 +262,27 @@ function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str ?? "";
   return div.innerHTML;
+}
+
+// ===================================================
+//  TOAST
+// ===================================================
+let toastTimer = null;
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('toast');
+  const bg = type === 'error' ? 'bg-rose-600' : 'bg-emerald-600';
+  const icon = type === 'error' ? 'bi-exclamation-circle-fill' : 'bi-check-circle-fill';
+
+  toast.innerHTML = `
+    <div class="${bg} text-white text-sm font-medium px-4 py-3 rounded-xl shadow-lg flex items-center gap-2">
+      <i class="bi ${icon}"></i>
+      <span>${escapeHtml(message)}</span>
+    </div>
+  `;
+  toast.classList.remove('hidden');
+
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.add('hidden'), 4000);
 }
 
 // ===================================================
@@ -282,7 +322,10 @@ function renderTable() {
     tr.innerHTML = `
       <td class="px-5 py-3 font-mono text-slate-500">#${t.id}</td>
       <td class="px-3 py-3">
-        <div class="font-medium text-slate-200">${escapeHtml(t.fullname)}</div>
+        <div class="flex items-center gap-2">
+          <div class="font-medium text-slate-200">${escapeHtml(t.fullname)}</div>
+          ${t.isGuest ? '<span class="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300">Guest</span>' : ''}
+        </div>
         <div class="text-xs text-slate-500">${escapeHtml(t.email)}</div>
       </td>
       <td class="px-3 py-3 text-slate-400 max-w-xs truncate">${escapeHtml(preview)}</td>
@@ -310,18 +353,21 @@ function renderTable() {
 function applyFilters() {
   const term = document.getElementById("searchInput").value.toLowerCase().trim();
   const status = document.getElementById("statusFilter").value;
+  const source = document.getElementById("sourceFilter").value;
 
   filteredTickets = tickets.filter(t => {
     const haystack = `${t.fullname} ${t.email} ${t.message}`.toLowerCase();
     const matchesTerm = !term || haystack.includes(term);
     const matchesStatus = !status || (t.status || '').toLowerCase() === status;
-    return matchesTerm && matchesStatus;
+    const matchesSource = !source || (source === 'guest' ? t.isGuest : !t.isGuest);
+    return matchesTerm && matchesStatus && matchesSource;
   });
   renderTable();
 }
 
 document.getElementById("searchInput").addEventListener("input", applyFilters);
 document.getElementById("statusFilter").addEventListener("change", applyFilters);
+document.getElementById("sourceFilter").addEventListener("change", applyFilters);
 
 // ===================================================
 //  SLIDE-OVER PANEL
@@ -357,6 +403,13 @@ function openPanel(id) {
   document.getElementById("replyMsgId").value = t.id;
   document.getElementById("replyTextarea").value = t.reply || '';
 
+  const replyHint = document.getElementById("replyHint");
+  if (t.isGuest) {
+    replyHint.innerHTML = 'This came from the public contact form — there\'s no account to notify, so replies here are for your own record-keeping unless you follow up manually.';
+  } else {
+    replyHint.innerHTML = 'Saving sets this ticket\'s status to <span class="text-amber-400 font-medium">Replied</span> automatically.';
+  }
+
   panelOverlay.classList.remove("hidden");
   requestAnimationFrame(() => { ticketPanel.style.transform = "translateX(0)"; });
 }
@@ -381,7 +434,7 @@ renderTable();
 <?php if (isset($_GET['deleted'])): ?>
   showToast("Reply deleted.", "success");
 <?php endif; ?>
-<?php if (isset($flashError)): ?>
+<?php if (!empty($flashError)): ?>
   showToast(<?php echo json_encode($flashError); ?>, "error");
 <?php endif; ?>
 </script>
