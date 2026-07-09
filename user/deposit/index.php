@@ -85,7 +85,8 @@ if (isset($_POST['deposit'])) {
         $res = json_decode($response);
 
         if ($res->status === true) {
-            header("Location: " . $res->data->authorization_url);
+            
+            echo "<script>window.location.href = '" . $res->data->authorization_url . "';</script>";
             exit;
         } else {
             $flashError = "Could not initialize Paystack payment. Please try again.";

@@ -26,7 +26,7 @@ if (isset($_POST['login'])) {
         if ($result->num_rows > 0) {
             $admin = $result->fetch_assoc();
             $_SESSION['admin_'] = $admin['id'];
-            header("Location: ../dashboard/");
+            echo "<script>window.location.href = '../dashboard/';</script>";
             exit;
         } else {
             $flashMessage = "Incorrect password.";

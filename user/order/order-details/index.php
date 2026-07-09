@@ -78,7 +78,7 @@ if (isset($_POST['send_message'])) {
                     $deduct->bind_param("ds", $order_price, $id);
                     $deduct->execute();
 
-                    header("Location: ../my-order/?placed=" . urlencode($orderId));
+                    echo "<script>window.location.href = '../my-order/?placed=" . urlencode($orderId) . "';</script>";
                     exit;
 
                 } else {

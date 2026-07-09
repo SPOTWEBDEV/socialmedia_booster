@@ -5,7 +5,7 @@ include_once '../../server/auth/user.php';
 
 if(isset($_SESSION['user_id'])) {
     session_destroy();
-    header('Location: ../../auth/login');
+    echo "<script>window.location.href = '../../auth/login';</script>";
 }
 
 

@@ -33,7 +33,7 @@ if (isset($_POST['login'])) {
 
             if (password_verify($password, $user['password'])) {
                 $_SESSION['user_id'] = $user['id'];
-                header("Location: ../user/dashboard");
+                echo "<script>window.location.href = '../user/dashboard/';</script>";
                 exit;
             } else {
                 $flashMessage = "Incorrect password.";
@@ -75,7 +75,7 @@ if (isset($_POST['create_account'])) {
             $insert->bind_param("sss", $fullname, $email, $hashed_password);
 
             if ($insert->execute()) {
-                header("Location: ./?registered=1");
+                echo "<script>window.location.href = './?registered=1';</script>";
                 exit;
             } else {
                 $flashMessage = "Something went wrong creating your account. Please try again.";

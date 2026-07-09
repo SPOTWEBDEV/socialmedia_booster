@@ -123,6 +123,14 @@ function showToast(message, type = "success") {
      <i class="bi bi-telegram"></i>
    </a>
 
+   <a href="https://www.facebook.com/share/1DJZ3Ppiwv/?mibextid=wwXIfr"
+     target="_blank"
+     class="support-btn telegram"
+     onmouseover="showTooltip('Join Facebook Group')"
+     onmouseout="hideTooltip()">
+     <i class="bi bi-facebook"></i>
+   </a>
+
  </div>
 
  <script>

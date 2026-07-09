@@ -21,7 +21,7 @@ if (isset($_POST['save_reply'])) {
     $stmt->bind_param("ssi", $reply, $status, $msg_id);
 
     if ($stmt->execute()) {
-        header("Location: ./?replied=$msg_id");
+        echo "<script>window.location.href = './?replied=$msg_id';</script>";
         exit;
     } else {
         $flashError = "Failed to save reply.";
@@ -38,7 +38,7 @@ if (isset($_POST['delete_reply'])) {
     $stmt->bind_param("i", $msg_id);
 
     if ($stmt->execute()) {
-        header("Location: ./?deleted=$msg_id");
+        echo "<script>window.location.href = './?deleted=$msg_id';</script>";
         exit;
     } else {
         $flashError = "Failed to delete reply.";

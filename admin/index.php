@@ -1,5 +1,5 @@
 <?php
 
-header('location: ./login/');
+echo "<script>window.location.href = '../dashboard/';</script>";
 
 ?>

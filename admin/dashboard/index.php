@@ -43,7 +43,7 @@ if (isset($_POST['update_price'])) {
         $stmt->bind_param("ss", $new_price, $new_usd_to_naria_rate);
 
         if ($stmt->execute()) {
-            header("Location: ./?updated=1");
+            echo "<script>window.location.href = '?updated=1';</script>";
             exit;
         } else {
             $flashError = 'Could not update site settings.';

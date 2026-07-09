@@ -43,7 +43,8 @@ if (isset($_POST['send_otp'])) {
             $otp_result = smtpmailer($email, $subject, $message);
 
             if ($otp_result) {
-                header("Location: ?step=2");
+
+                 echo "<script>window.location.href = '?step=2';</script>";
                 exit;
             } else {
                 $flashMessage = "Failed to send OTP. Please try again.";
@@ -90,7 +91,7 @@ if (isset($_POST['verify_otp'])) {
         if ($result) {
             if ($entered_otp == $result['otp']) {
                 if (strtotime($result['otp_expiry']) > time()) {
-                    header("Location: ?step=3");
+                    echo "<script>window.location.href = '?step=3';</script>";
                     exit;
                 } else {
                     $flashMessage = "OTP has expired.";
@@ -138,7 +139,7 @@ if (isset($_POST['change_password'])) {
 
         unset($_SESSION['reset_email']);
 
-        header("Location: ../login/?reset=1");
+        echo "<script>window.location.href = '../login/?reset=1';</script>";
         exit;
     }
 }
