@@ -61,8 +61,9 @@ $userNavItems = [
   <!-- ===================== USER SIDENAV ===================== -->
   <aside class="hidden lg:flex w-60 shrink-0 flex-col bg-u-card border-r border-u-line sticky top-0 h-screen">
     <div class="h-16 flex items-center gap-3 px-5 border-b border-u-line">
-      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-display font-bold text-white text-xs shrink-0">BY</div>
-      <span class="font-display font-semibold text-u-text text-sm truncate">Boost Yard</span>
+      <!-- <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-display font-bold text-white text-xs shrink-0">BY</div>
+      <span class="font-display font-semibold text-u-text text-sm truncate">Boost Yard</span> -->
+      <img src="<?php echo $domain ?>assets/images/logo.png" alt="Boost Yard Logo" class="h-16 w-auto">
     </div>
 
     <nav class="flex-1 overflow-y-auto scrollbar-thin py-4 px-3">
@@ -137,8 +138,7 @@ $userNavItems = [
       <aside class="absolute left-0 top-0 h-full w-60 bg-u-card border-r border-u-line flex flex-col shadow-xl">
         <div class="h-16 flex items-center justify-between gap-3 px-5 border-b border-u-line">
           <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-display font-bold text-white text-xs">BY</div>
-            <span class="font-display font-semibold text-u-text text-sm">Boost Yard</span>
+            <img src="<?php echo $domain ?>assets/images/logo.png" alt="Boost Yard Logo" class="h-16 w-auto">
           </div>
           <button id="mobileNavClose" class="text-u-muted hover:text-u-text"><i class="bi bi-x-lg"></i></button>
         </div>
