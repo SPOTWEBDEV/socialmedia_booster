@@ -101,8 +101,8 @@ if (isset($_POST['send_contact'])) {
       <a href="#faqs" class="block text-sm text-u-muted hover:text-u-text">FAQ's</a>
       <a href="#contact" class="block text-sm text-u-muted hover:text-u-text">Contact us</a>
       <div class="flex gap-3 pt-2">
-        <a href="<?php echo $domain . 'auth/register/'; ?>" class="flex-1 text-center text-sm font-semibold px-4 py-2 rounded-xl border border-u-line">Sign up</a>
-        <a href="<?php echo $domain . 'auth/login/'; ?>" class="flex-1 text-center text-sm font-semibold px-4 py-2 rounded-xl bg-blue-600 text-white">Login</a>
+        <a href="<?php echo $domain . 'auth/'; ?>" class="flex-1 text-center text-sm font-semibold px-4 py-2 rounded-xl border border-u-line">Sign up</a>
+        <a href="<?php echo $domain . 'auth/'; ?>" class="flex-1 text-center text-sm font-semibold px-4 py-2 rounded-xl bg-blue-600 text-white">Login</a>
       </div>
     </div>
   </header>
@@ -120,7 +120,7 @@ if (isset($_POST['send_contact'])) {
           across all major social media platforms — fast, reliable, and secure.
         </p>
         <div class="flex flex-wrap gap-3">
-          <a href="<?php echo $domain; ?>auth/login/"
+          <a href="<?php echo $domain; ?>auth/"
             class="inline-flex items-center gap-2 bg-white text-blue-700 text-sm font-semibold px-6 py-3 rounded-xl hover:bg-blue-50 transition shadow-sm">
             Explore services <i class="bi bi-arrow-right"></i>
           </a>
@@ -374,7 +374,7 @@ if (isset($_POST['send_contact'])) {
       <p class="text-blue-100 text-sm mb-6 max-w-xl mx-auto">
         Create a free account and place your first order in minutes.
       </p>
-      <a href="<?php echo $domain; ?>auth/register/"
+      <a href="<?php echo $domain; ?>auth/"
         class="inline-flex items-center gap-2 bg-white text-blue-700 text-sm font-semibold px-6 py-3 rounded-xl hover:bg-blue-50 transition shadow-sm">
         Get started <i class="bi bi-arrow-right"></i>
       </a>
