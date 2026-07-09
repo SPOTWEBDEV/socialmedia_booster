@@ -64,7 +64,7 @@ include '../../components/client/_user_layout_head.php';
     <!-- Recent orders -->
     <div class="mb-4 flex items-center justify-between flex-wrap gap-3">
       <h3 class="font-display text-lg font-bold text-u-text">Recent orders</h3>
-      <a href="../my-order/" class="text-sm text-blue-500 hover:underline font-medium">View all orders</a>
+      <a href="../order/my-order/" class="text-sm text-blue-500 hover:underline font-medium">View all orders</a>
     </div>
 
     <!-- Toolbar -->
