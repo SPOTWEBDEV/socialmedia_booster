@@ -1,5 +1,9 @@
 <?php
 
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
 include_once '../../server/connection.php';
 include_once '../../server/model.php';
 include_once '../../server/auth/user.php';
@@ -8,6 +12,12 @@ $flashError = '';
 
 $data = mysqli_fetch_assoc(mysqli_query($connection, "SELECT usd_to_naria_rate FROM admin WHERE id = 1"));
 $usd_to_naria_rate = $data['usd_to_naria_rate'];
+
+/* ---------------------------------------------------------
+   Etegram credentials come from ETEGRAM_PROJECT_ID /
+   ETEGRAM_PUBLIC_KEY, defined in connection.php from your
+   .env file.
+--------------------------------------------------------- */
 
 /* ---------------------------------------------------------
    Figure out which "step" of the flow we're on:
@@ -58,38 +68,60 @@ if (isset($_POST['deposit'])) {
     $stmt->bind_param("issss", $id, $method, $amount_in_naira, $amount_in_dollar, $reference);
     $stmt->execute();
 
-    if ($method === "paystack") {
+    if ($method === "etegram") {
+
+        // NOTE: Etegram's checkout expects firstname/lastname/phone for the
+        // customer. These likely already exist as session/user variables
+        // from auth/user.php (alongside $id and $email) — swap in the real
+        // variable names your app uses if they differ from the ones below.
+        $etegram_firstname = $firstname ?? ($_SESSION['firstname'] ?? '');
+        $etegram_lastname  = $lastname  ?? ($_SESSION['lastname']  ?? '');
+        $etegram_phone     = $phone     ?? ($_SESSION['phone']     ?? '');
 
         $curl = curl_init();
-        $callback_url = $domain . "user/deposit/status/";
 
         curl_setopt_array($curl, [
-            CURLOPT_URL => "https://api.paystack.co/transaction/initialize",
+            CURLOPT_URL => "https://api-checkout.etegram.com/api/transaction/initialize/" . ETEGRAM_PROJECT_ID,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CUSTOMREQUEST => "POST",
             CURLOPT_POSTFIELDS => json_encode([
-                "email" => $email,
-                "amount" => $amount * 100, // Convert to kobo
+                "amount"    => $amount_in_naira,
+                "email"     => $email,
+                "phone"     => $etegram_phone,
+                "firstname" => $etegram_firstname,
+                "lastname"  => $etegram_lastname,
                 "reference" => $reference,
-                "callback_url" => $callback_url
             ]),
             CURLOPT_HTTPHEADER => [
-                "authorization: Bearer PAYSTACK_PUBLIC_KEY",
-                "content-type: application/json",
+                "Authorization: Bearer " . ETEGRAM_PUBLIC_KEY,
+                "Content-Type: application/json",
                 "cache-control: no-cache"
             ],
         ]);
 
         $response = curl_exec($curl);
+        $curlError = curl_error($curl);
         curl_close($curl);
+
         $res = json_decode($response);
 
-        if ($res->status === true) {
-            
+        if ($res && $res->status === true) {
+
+            // Save the access_code — required later to verify this exact
+            // transaction via Etegram's Verify Transaction endpoint.
+            $access_code = $res->data->access_code ?? null;
+            $stmtAccess = mysqli_prepare($connection, "UPDATE deposits SET access_code = ? WHERE reference = ?");
+            mysqli_stmt_bind_param($stmtAccess, "ss", $access_code, $reference);
+            mysqli_stmt_execute($stmtAccess);
+
+            // Fallback in case Etegram's callback redirect doesn't include
+            // the reference in a query param we recognize.
+            $_SESSION['last_etegram_reference'] = $reference;
+
             echo "<script>window.location.href = '" . $res->data->authorization_url . "';</script>";
             exit;
         } else {
-            $flashError = "Could not initialize Paystack payment. Please try again.";
+            $flashError = "Could not initialize Etegram payment. Please try again.";
         }
     }
 
@@ -203,7 +235,7 @@ include '../../components/client/_user_layout_head.php';
             <select name="method" required
               class="w-full border border-u-line rounded-xl px-4 py-3 text-sm text-u-text focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition bg-u-bg">
               <option value="">Select method</option>
-              <!-- <option value="paystack">Automatic Bank Transfer (Paystack)</option> -->
+              <option value="etegram">Automatic Bank Transfer (Etegram)</option>
               <option value="crypto">Crypto (USDT)</option>
               <option value="manual">Manual Bank Payment</option>
             </select>

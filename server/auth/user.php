@@ -1,5 +1,5 @@
 <?php
-$url = $domain . 'auth/login/';
+$url = $domain . 'auth/';
 
 function formatNumber($number)
 {

@@ -32,7 +32,7 @@ define("USER", $_ENV['DB_USER'] ?? 'root');
 define("PASSWORD", $_ENV['DB_PASSWORD'] ?? '');
 define("DATABASE", $_ENV['DB_NAME'] ?? 'boosteryard1');
 define("ETEGRAM_PROJECT_ID", $_ENV['ETEGRAM_PROJECT_ID'] ?? '');
-define("ETEGRAM_API_KEY", $_ENV['ETEGRAM_API_KEY'] ?? '');
+define("ETEGRAM_PUBLIC_KEY", $_ENV['ETEGRAM_PUBLIC_KEY'] ?? '');
 define("ENVIRONMENT", $_ENV['ENVIRONMENT'] ?? 'development');
 define("PAYSTACK_PUBLIC_KEY", $_ENV['PAYSTACK_PUBLIC_KEY'] ?? '');
 

@@ -97,7 +97,7 @@ include '../../../components/client/_user_layout_head.php';
           </button>
         </div>
 
-        <div class="px-6 py-5 space-y-4">
+        <div class="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
           <div class="grid grid-cols-2 gap-4">
             <div>
               <p class="text-xs font-semibold text-u-muted uppercase tracking-wider mb-1">Amount</p>
@@ -108,9 +108,32 @@ include '../../../components/client/_user_layout_head.php';
               <p id="modalMethod" class="text-sm text-u-text font-medium"></p>
             </div>
           </div>
-          <div>
-            <p class="text-xs font-semibold text-u-muted uppercase tracking-wider mb-1">Date</p>
-            <p id="modalDate" class="text-sm text-u-text font-medium"></p>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-xs font-semibold text-u-muted uppercase tracking-wider mb-1">Deposit ID</p>
+              <p id="modalId" class="text-sm text-u-text font-medium font-mono"></p>
+            </div>
+            <div>
+              <p class="text-xs font-semibold text-u-muted uppercase tracking-wider mb-1">Date</p>
+              <p id="modalDate" class="text-sm text-u-text font-medium"></p>
+            </div>
+          </div>
+
+          <div id="modalAccessCodeWrap">
+            <p class="text-xs font-semibold text-u-muted uppercase tracking-wider mb-1">Access code</p>
+            <p id="modalAccessCode" class="text-sm text-u-text font-medium font-mono break-all"></p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div id="modalAccountWrap">
+              <p class="text-xs font-semibold text-u-muted uppercase tracking-wider mb-1">Account</p>
+              <p id="modalAccount" class="text-sm text-u-text font-medium"></p>
+            </div>
+            <div id="modalPaidToWrap">
+              <p class="text-xs font-semibold text-u-muted uppercase tracking-wider mb-1">Paid to</p>
+              <p id="modalPaidTo" class="text-sm text-u-text font-medium"></p>
+            </div>
           </div>
         </div>
 
@@ -128,6 +151,8 @@ include '../../../components/client/_user_layout_head.php';
 <?php include '../../../components/client/_user_layout_foot.php'; ?>
 
 <script>
+const domain = "<?php echo $domain ?>";
+
 let orders = [];
 let filteredOrders = [];
 
@@ -136,6 +161,7 @@ const STATUS_STYLES = {
   inprogress: { label: "In Progress", classes: "bg-sky-50 text-sky-600 border-sky-200" },
   processing: { label: "Processing", classes: "bg-sky-50 text-sky-600 border-sky-200" },
   completed:  { label: "Completed",  classes: "bg-emerald-50 text-emerald-600 border-emerald-200" },
+  approved:   { label: "Approved",   classes: "bg-emerald-50 text-emerald-600 border-emerald-200" },
   resolved:   { label: "Resolved",   classes: "bg-emerald-50 text-emerald-600 border-emerald-200" },
   canceled:   { label: "Canceled",   classes: "bg-amber-50 text-amber-600 border-amber-200" },
   declined:   { label: "Declined",   classes: "bg-amber-50 text-amber-600 border-amber-200" },
@@ -148,7 +174,8 @@ function statusStyle(status) {
 
 function methodLabel(method) {
   if (method === "manual") return "Manual Bank Transfer";
-  if (method === "paystack") return "Automatic Bank Transfer";
+  if (method === "paystack") return "Automatic Bank Transfer (Paystack)";
+  if (method === "etegram") return "Automatic Bank Transfer (Etegram)";
   if (method === "crypto") return "Crypto (USDT)";
   return method;
 }
@@ -220,24 +247,37 @@ function renderTable() {
   filteredOrders.forEach((deposit, index) => {
     const style = statusStyle(deposit.status);
 
-    const row = document.createElement("button");
-    row.type = "button";
-    row.className = "deposit-row w-full text-left px-6 py-4 flex items-center gap-4 hover:bg-u-surface/60 transition";
+    // Etegram deposits still pending haven't been confirmed one way or
+    // the other yet — instead of opening the read-only detail modal,
+    // send the user back to the live status/verification page.
+    const isPendingEtegram = deposit.method === 'etegram' && (deposit.status || '').toLowerCase() === 'pending';
+
+    const row = document.createElement(isPendingEtegram ? "div" : "button");
+    if (!isPendingEtegram) row.type = "button";
+    row.className = "deposit-row w-full text-left px-6 py-4 flex items-center gap-4 hover:bg-u-surface/60 transition" + (isPendingEtegram ? "" : " cursor-pointer");
+
+    const trailing = isPendingEtegram
+      ? `<a href="../status/?reference=${encodeURIComponent(deposit.reference)}"
+           class="shrink-0 inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition">
+           <i class="bi bi-arrow-repeat"></i> Verify payment
+         </a>`
+      : `<i class="bi bi-chevron-right text-u-muted text-xs shrink-0"></i>`;
 
     row.innerHTML = `
-
     <span class="text-xs font-mono text-u-muted shrink-0  truncate">${index + 1}</span>
       <span class="text-xs font-mono text-u-muted shrink-0 w-24 truncate">${deposit.reference}</span>
       <span class="flex-1 min-w-0">
         <span class="block text-sm text-u-text truncate">${methodLabel(deposit.method)}</span>
         <span class="block text-xs text-u-muted">${deposit.created_at}</span>
       </span>
-      <span class="shrink-0 text-sm text-u-text font-medium hidden sm:block">$${Number(deposit.amount_in_dollar).toFixed(2)}</span>
+      <span class="shrink-0 text-sm text-u-text font-medium hidden sm:block">$${Number(deposit.amount_in_dollar).toFixed(2)} => ₦${Number(deposit.amount).toFixed(2)}</span>
       <span class="shrink-0 text-xs text-capitalize font-semibold px-2.5 py-1 rounded-full border ${style.classes}">${style.label}</span>
-      <i class="bi bi-chevron-right text-u-muted text-xs shrink-0"></i>
+      ${trailing}
     `;
 
-    row.addEventListener("click", () => openDepositModal(deposit));
+    if (!isPendingEtegram) {
+      row.addEventListener("click", () => openDepositModal(deposit));
+    }
     rows.appendChild(row);
   });
 }
@@ -295,6 +335,17 @@ document.getElementById("categoryFilter").addEventListener("change", function ()
 // =============================
 const depositModal = document.getElementById("depositModal");
 
+function setOptionalField(wrapId, fieldId, value) {
+  const wrap = document.getElementById(wrapId);
+  const field = document.getElementById(fieldId);
+  if (value === null || value === undefined || value === "") {
+    wrap.classList.add("hidden");
+    return;
+  }
+  wrap.classList.remove("hidden");
+  field.textContent = value;
+}
+
 function openDepositModal(deposit) {
   const style = statusStyle(deposit.status);
 
@@ -302,7 +353,12 @@ function openDepositModal(deposit) {
   document.getElementById("modalAmount").textContent =
     `$${Number(deposit.amount_in_dollar).toFixed(2)} (₦${Number(deposit.amount).toLocaleString("en-NG", { minimumFractionDigits: 2 })})`;
   document.getElementById("modalMethod").textContent = methodLabel(deposit.method);
+  document.getElementById("modalId").textContent = "#" + deposit.id;
   document.getElementById("modalDate").textContent = deposit.created_at;
+
+  setOptionalField("modalAccessCodeWrap", "modalAccessCode", deposit.access_code);
+  setOptionalField("modalAccountWrap", "modalAccount", deposit.account);
+  setOptionalField("modalPaidToWrap", "modalPaidTo", deposit.paidto);
 
   const badge = document.getElementById("modalStatusBadge");
   badge.textContent = style.label;
