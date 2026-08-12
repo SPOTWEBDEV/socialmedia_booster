@@ -15,8 +15,8 @@ if (isset($_GET['registered'])) {
 
 // ===================== LOGIN =====================
 if (isset($_POST['login'])) {
-    $email    = trim($_POST['email'] ?? '');
-    $password = trim($_POST['password'] ?? '');
+    $email     = trim($_POST['email'] ?? '');
+    $password  = trim($_POST['password'] ?? '');
     $activeTab = 'login';
 
     if (empty($email) || empty($password)) {
@@ -32,9 +32,16 @@ if (isset($_POST['login'])) {
             $user = $result->fetch_assoc();
 
             if (password_verify($password, $user['password'])) {
-                $_SESSION['user_id'] = $user['id'];
-                echo "<script>window.location.href = '../user/dashboard/';</script>";
-                exit;
+                // Check if account is suspended
+                if (($user['status'] ?? '') === 'suspended') {
+                    $reason = !empty($user['status_message']) ? " Reason: " . htmlspecialchars($user['status_message']) : "";
+                    $flashMessage = "Your account has been suspended." . $reason;
+                    $flashType = 'error';
+                } else {
+                    $_SESSION['user_id'] = $user['id'];
+                    echo "<script>window.location.href = '../user/dashboard/';</script>";
+                    exit;
+                }
             } else {
                 $flashMessage = "Incorrect password.";
                 $flashType = 'error';
