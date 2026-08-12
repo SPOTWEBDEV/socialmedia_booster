@@ -237,7 +237,7 @@ include '../../components/client/_user_layout_head.php';
               <option value="">Select method</option>
               <option value="etegram">Automatic Bank Transfer (Etegram)</option>
               <option value="crypto">Crypto (USDT)</option>
-              <option value="manual">Manual Bank Payment</option>
+              <!-- <option value="manual">Manual Bank Payment</option> -->
             </select>
           </div>
 
