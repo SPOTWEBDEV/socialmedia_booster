@@ -5,38 +5,46 @@ include_once '../../server/model.php';
 
 $flashMessage = '';
 $flashType    = 'success'; // success | error
+$databaseEmail = 'admin@admin.com';
 
 if (isset($_POST['login'])) {
-    $password = $_POST['password'] ?? '';
+  $password = $_POST['password'] ?? '';
 
-    if (empty($password)) {
-        $flashMessage = "Please enter the admin password.";
+  if (empty($password)) {
+    $flashMessage = "Please enter the admin password.";
+    $flashType = 'error';
+  } else {
+    // NOTE: matches against the plaintext `password` column as the original
+    // code did, just via a prepared statement instead of string interpolation
+    // (the original built the query as WHERE password='$password', which was
+    // a direct SQL injection risk). If this column actually stores a hash,
+    // swap this for a password_verify() check against the stored hash instead.\
+
+    $stmt = $connection->prepare("SELECT id , password FROM `admin` WHERE `email` = ? LIMIT 1");
+    $stmt->bind_param("s", $databaseEmail);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+      $admin = $result->fetch_assoc();
+      if (password_verify($password, $admin['password'])) {
+        $_SESSION['admin_'] = $admin['id'];
+        echo "<script>window.location.href = '../dashboard/';</script>";
+        exit;
+      } else {
+        $flashMessage = "Incorrect password.";
         $flashType = 'error';
+      }
     } else {
-        // NOTE: matches against the plaintext `password` column as the original
-        // code did, just via a prepared statement instead of string interpolation
-        // (the original built the query as WHERE password='$password', which was
-        // a direct SQL injection risk). If this column actually stores a hash,
-        // swap this for a password_verify() check against the stored hash instead.
-        $stmt = $connection->prepare("SELECT id FROM `admin` WHERE `password` = ? LIMIT 1");
-        $stmt->bind_param("s", $password);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        if ($result->num_rows > 0) {
-            $admin = $result->fetch_assoc();
-            $_SESSION['admin_'] = $admin['id'];
-            echo "<script>window.location.href = '../dashboard/';</script>";
-            exit;
-        } else {
-            $flashMessage = "Incorrect password.";
-            $flashType = 'error';
-        }
+      $flashMessage = "Admin user not found.";
+      $flashType = 'error';
     }
+  }
 }
 ?>
 <!DOCTYPE html>
 <html lang="en" dir="ltr" data-theme-mode="light">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -111,21 +119,22 @@ if (isset($_POST['login'])) {
     </div>
   </div>
 
-<script>
-document.querySelectorAll(".toggle-password").forEach(function (btn) {
-  btn.addEventListener("click", function () {
-    const input = document.getElementById(btn.dataset.target);
-    const icon = btn.querySelector("i");
-    if (input.type === "password") {
-      input.type = "text";
-      icon.className = "bi bi-eye-slash";
-    } else {
-      input.type = "password";
-      icon.className = "bi bi-eye";
-    }
-  });
-});
-</script>
+  <script>
+    document.querySelectorAll(".toggle-password").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        const input = document.getElementById(btn.dataset.target);
+        const icon = btn.querySelector("i");
+        if (input.type === "password") {
+          input.type = "text";
+          icon.className = "bi bi-eye-slash";
+        } else {
+          input.type = "password";
+          icon.className = "bi bi-eye";
+        }
+      });
+    });
+  </script>
 
 </body>
+
 </html>
