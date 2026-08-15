@@ -18,6 +18,7 @@ $navItems = [
     ['label' => 'Payment Method',  'icon' => 'bi-bag',       'href' => $domain . 'admin/payment'],
     ['label' => 'Support',         'icon' => 'bi-headset',   'href' => $domain . 'admin/support'],
     ['label' => 'Email Campaign',  'icon' => 'bi-envelope',  'href' => $domain . 'admin/reach'],
+    ['label' => 'Settings',        'icon' => 'bi-gear',      'href' => $domain . 'admin/setting'],
 ];
 ?>
 <!DOCTYPE html>
