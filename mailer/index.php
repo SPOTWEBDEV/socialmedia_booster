@@ -11,16 +11,16 @@ function smtpmailer($to, $subject, $body)
          $mail->SMTPAuth = true;
 
          $mail->SMTPSecure = 'ssl'; // Using 'ssl' with port 465 as per your original configuration
-         $mail->Host = 'boostyard.com.yahhh44.com';
+         $mail->Host = 'mail.boostyard.top';
          $mail->Port = 465; // Or 587 if using 'tls'
-         $mail->Username = 'support@boostyard.com.yahhh44.com';
-         $mail->Password = 'support@boostyard.com.yahhh44.com'; // Use your actual email password
+         $mail->Username = 'support@boostyard.top';
+         $mail->Password = 'support@boostyard.top'; // Use your actual email password
 
          $mail->IsHTML(true);
-         $mail->From = 'support@boostyard.com.yahhh44.com';
+         $mail->From = 'support@boostyard.top';
          $mail->FromName = 'Boost Yard';
-         $mail->Sender = 'support@boostyard.com.yahhh44.com';
-         $mail->AddReplyTo('support@boostyard.com.yahhh44.com', 'Boost Yard');
+         $mail->Sender = 'support@boostyard.top';
+         $mail->AddReplyTo('support@boostyard.top', 'Boost Yard');
          $mail->Subject = $subject;
          $mail->Body = $body;
          $mail->AddAddress($to);
