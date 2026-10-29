@@ -37,11 +37,9 @@ define("ENVIRONMENT", $_ENV['ENVIRONMENT'] ?? 'development');
 define("PAYSTACK_PUBLIC_KEY", $_ENV['PAYSTACK_PUBLIC_KEY'] ?? '');
 
 
-if (ENVIRONMENT === 'production') {
-    $domain = "https://boostyard.top/";
-} else {
-    $domain = "http://localhost/booster/";
-}
+
+$domain = $_ENV['APP_URL'] ?? 'http://localhost/booster';
+
 
 
 $connection = mysqli_connect(HOST, USER, PASSWORD, DATABASE);
