@@ -1,44 +1,62 @@
 <?php
-
-include('../../server/connection.php');
+include_once '../../server/connection.php';
 include_once '../../server/model.php';
+require_once '../../server/auth/admin/otp.php';
+
+admin_session_start();
+admin_security_headers();
+
+// Already fully signed in (password + OTP)
+if (!empty($_SESSION['admin_']) && !empty($_SESSION['admin_otp_verified'])) {
+  admin_redirect('../dashboard/');
+}
 
 $flashMessage = '';
 $flashType    = 'success'; // success | error
-$databaseEmail = 'admin@admin.com';
 
-if (isset($_POST['login'])) {
-  $password = $_POST['password'] ?? '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
+  $ip       = $_SERVER['REMOTE_ADDR'] ?? '';
+  $password = (string) ($_POST['password'] ?? '');
 
-  if (empty($password)) {
+  if (!csrf_check($_POST['csrf'] ?? null)) {
+    $flashMessage = "Your session expired. Refresh the page and try again.";
+    $flashType = 'error';
+  } elseif (login_is_locked($connection, $ip)) {
+    $flashMessage = "Too many failed attempts. Try again in 15 minutes.";
+    $flashType = 'error';
+  } elseif ($password === '') {
     $flashMessage = "Please enter the admin password.";
     $flashType = 'error';
   } else {
-    // NOTE: matches against the plaintext `password` column as the original
-    // code did, just via a prepared statement instead of string interpolation
-    // (the original built the query as WHERE password='$password', which was
-    // a direct SQL injection risk). If this column actually stores a hash,
-    // swap this for a password_verify() check against the stored hash instead.\
+    // Single-admin site: use the first admin row
+    $result = $connection->query("SELECT id, password FROM `admin` ORDER BY id ASC LIMIT 1");
+    $admin  = $result ? $result->fetch_assoc() : null;
 
-    $stmt = $connection->prepare("SELECT id , password FROM `admin` WHERE `email` = ? LIMIT 1");
-    $stmt->bind_param("s", $databaseEmail);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    if ($admin && password_verify($password, $admin['password'])) {
+      login_clear_failures($connection, $ip);
 
-    if ($result->num_rows > 0) {
-      $admin = $result->fetch_assoc();
-      if (password_verify($password, $admin['password'])) {
-        $_SESSION['admin_'] = $admin['id'];
-        echo "<script>window.location.href = '../verify/';</script>";
-        exit;
-      } else {
-        $flashMessage = "Incorrect password.";
-        $flashType = 'error';
+      // Upgrade the hash if PHP's default algorithm/cost has moved on
+      if (password_needs_rehash($admin['password'], PASSWORD_DEFAULT)) {
+        $new = password_hash($password, PASSWORD_DEFAULT);
+        $up  = $connection->prepare("UPDATE `admin` SET password = ? WHERE id = ?");
+        $up->bind_param('si', $new, $admin['id']);
+        $up->execute();
+        $up->close();
       }
-    } else {
-      $flashMessage = "Admin user not found.";
-      $flashType = 'error';
+
+      session_regenerate_id(true);
+      $_SESSION = [];                                   // wipe stale state
+      $_SESSION['admin_pending_id'] = (int) $admin['id']; // password OK, NOT logged in yet
+
+      [$ok, $msg] = admin_otp_send($connection, (int) $admin['id']);
+      $_SESSION['flash'] = ['type' => $ok ? 'success' : 'error', 'msg' => $msg];
+
+      admin_redirect('../verify/');
     }
+
+    login_record_failure($connection, $ip);
+    $flashMessage = "Incorrect password."; // same message whatever the cause
+    $flashType = 'error';
   }
 }
 ?>
@@ -48,6 +66,7 @@ if (isset($_POST['login'])) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
   <title><?php echo htmlspecialchars($sitename ?? 'Admin'); ?> - Admin Login</title>
   <link rel="icon" href="<?php echo $domain ?>assets/images/brand-logos/favicon.ico" type="image/x-icon">
   <link href="<?php echo $domain ?>assets/css/icons.css" rel="stylesheet">
@@ -83,31 +102,26 @@ if (isset($_POST['login'])) {
 
       <div class="px-6 pb-6">
         <h2 class="font-display text-xl font-bold text-u-text mb-1 text-center">Admin access</h2>
-        <p class="text-sm text-u-muted mb-5 text-center">Enter the admin password to continue.</p>
+        <p class="text-sm text-u-muted mb-5 text-center">Enter the admin password. We'll then email you a verification code.</p>
 
-        <div class="flex items-center gap-3 bg-u-surface/40 border border-u-line rounded-xl px-4 py-3 mb-5">
-          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+        <div class="flex items-center justify-center mb-5">
+          <div class="w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-lg shrink-0">
             <i class="bi bi-shield-lock"></i>
           </div>
-          <p class="text-sm text-u-text truncate">admin@admin.com</p>
         </div>
 
-        <form method="POST" class="space-y-4">
+        <form method="POST" class="space-y-4" autocomplete="off">
+          <?php echo csrf_field(); ?>
           <div>
             <label class="text-xs font-semibold text-u-muted uppercase tracking-wider mb-2 block">Password</label>
             <div class="relative">
-              <input type="password" name="password" id="adminPassword" required
+              <input type="password" name="password" id="adminPassword" required autocomplete="current-password"
                 class="w-full border border-u-line rounded-xl px-4 py-3 pr-11 text-sm text-u-text focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition bg-u-bg">
               <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-u-muted" data-target="adminPassword">
                 <i class="bi bi-eye"></i>
               </button>
             </div>
           </div>
-
-          <label class="flex items-center gap-2 text-sm text-u-muted">
-            <input type="checkbox" class="rounded border-u-line">
-            Remember password
-          </label>
 
           <button type="submit" name="login"
             class="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white text-sm font-semibold px-5 py-3 rounded-xl transition shadow-sm">
