@@ -29,7 +29,7 @@ if (isset($_POST['login'])) {
       $admin = $result->fetch_assoc();
       if (password_verify($password, $admin['password'])) {
         $_SESSION['admin_'] = $admin['id'];
-        echo "<script>window.location.href = '../dashboard/';</script>";
+        echo "<script>window.location.href = '../verify/';</script>";
         exit;
       } else {
         $flashMessage = "Incorrect password.";

@@ -44,24 +44,43 @@ if (isset($_POST['send_otp'])) {
 //  VERIFY OTP
 // ===================================================
 if (isset($_POST['verify_otp'])) {
+
     $submitted = trim($_POST['code'] ?? '');
 
     if (empty($_SESSION['otp_hash'])) {
-        $error = "No code was sent yet. Click 'Send code' first.";
-        $step = 'send';
-    } elseif (time() > ($_SESSION['otp_expires'] ?? 0)) {
-        $error = "This code has expired. Please request a new one.";
-        unset($_SESSION['otp_hash'], $_SESSION['otp_expires']);
-        $step = 'send';
-    } elseif (!password_verify($submitted, $_SESSION['otp_hash'])) {
-        $error = "Incorrect code. Please try again.";
-        $step = 'verify';
-    } else {
-        unset($_SESSION['otp_hash'], $_SESSION['otp_expires'], $_SESSION['otp_email']);
-        $_SESSION['admin_otp_verified'] = time();
-        header("Location: ../../reach/"); // or wherever verified admins should go
+        echo json_encode([
+            'success' => false,
+            'message' => 'No code was sent yet. Click Send code first.'
+        ]);
         exit;
     }
+
+    if (time() > ($_SESSION['otp_expires'] ?? 0)) {
+        unset($_SESSION['otp_hash'], $_SESSION['otp_expires']);
+
+        echo json_encode([
+            'success' => false,
+            'message' => 'This code has expired. Please request a new one.'
+        ]);
+        exit;
+    }
+
+    if (!password_verify($submitted, $_SESSION['otp_hash'])) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Incorrect code. Please try again.'
+        ]);
+        exit;
+    }
+
+    unset($_SESSION['otp_hash'], $_SESSION['otp_expires'], $_SESSION['otp_email']);
+    $_SESSION['admin_otp_verified'] = time();
+
+    echo json_encode([
+        'success' => true,
+        'redirect' => '../../reach/'
+    ]);
+    exit;
 }
 
 // ===================================================
@@ -220,7 +239,36 @@ setInterval(tick, 1000);
 document.getElementById("codeInput")?.addEventListener("input", function () {
   if (this.value.replace(/\D/g,'').length === 6) {
     this.value = this.value.replace(/\D/g,'');
-    document.getElementById("verifyForm").submit();
+    document.getElementById("verifyForm")?.addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const form = this;
+    const button = form.querySelector("button[type='submit']");
+    const formData = new FormData(form);
+
+    button.disabled = true;
+    button.innerHTML = '<i class="bi bi-hourglass-split"></i> Verifying...';
+
+    try {
+        const response = await fetch("", {
+            method: "POST",
+            body: formData
+        });
+
+        const html = await response.text();
+
+        // Replace the current page with the PHP response
+        document.open();
+        document.write(html);
+        document.close();
+
+    } catch (error) {
+        alert("Something went wrong. Please try again.");
+        button.disabled = false;
+        button.innerHTML = '<i class="bi bi-unlock"></i> Verify code';
+    }
+});
+
   }
 });
 </script>

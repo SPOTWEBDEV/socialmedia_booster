@@ -38,7 +38,7 @@ define("PAYSTACK_PUBLIC_KEY", $_ENV['PAYSTACK_PUBLIC_KEY'] ?? '');
 
 
 if (ENVIRONMENT === 'production') {
-    $domain = "https://boostyard.com.yahhh44.com/";
+    $domain = "https://boostyard.top/";
 } else {
     $domain = "http://localhost/booster/";
 }

@@ -128,7 +128,7 @@ include '../../components/admin/_layout_head.php';
         </div>
 
         <div class="px-6 py-4 border-t border-line flex items-center justify-between gap-3">
-          <a href="./verify/" class="text-sm text-blue-400 hover:text-blue-300 transition flex items-center gap-1.5">
+          <a href="../verify/" class="text-sm text-blue-400 hover:text-blue-300 transition flex items-center gap-1.5">
             <i class="bi bi-send text-xs"></i> Send OTP now
           </a>
           <button id="saveEmailBtn"
