@@ -74,7 +74,7 @@ function buildEmailHtml(string $subject, string $messageText, string $recipientN
               </p>
               <p style="margin:0; font-size:13px; color:#94A3B8;">
                 Need help? Reply to this email or reach us at
-                <a href="mailto:support@boostyard.com.yahhh44.com" style="color:#3B82F6; text-decoration:none;">support@boostyard.com.yahhh44.com</a>
+                <a href="mailto:support@boostyard.top" style="color:#3B82F6; text-decoration:none;">support@boostyard.top</a>
               </p>
             </td>
           </tr>

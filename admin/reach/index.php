@@ -184,7 +184,7 @@ include_once '../../server/auth/admin.php';
             <span class="w-2.5 h-2.5 rounded-full bg-green-400/70"></span>
           </div>
           <div class="px-4 py-3 border-b border-line text-xs space-y-1 font-mono text-slate-400">
-            <div><span class="text-slate-600">From:</span> Boost Yard &lt;support@boostyard.com.yahhh44.com&gt;</div>
+            <div><span class="text-slate-600">From:</span> Boost Yard &lt;support@boostyard.top&gt;</div>
             <div><span class="text-slate-600">To:</span> <span id="previewToLine">—</span></div>
             <div><span class="text-slate-600">Subject:</span> <span id="previewSubjectLine" class="text-slate-300">—</span></div>
           </div>
